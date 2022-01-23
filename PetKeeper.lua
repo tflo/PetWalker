@@ -12,12 +12,12 @@ BINDING_NAME_PETKEEPEROFF = "Dismiss Pet and Disable Auto-summoning"
 
 local thisChar = UnitName("player")
 
-local lastCall
+local lastCall = GetTime() - 20
 local petPool = {}
 local initialized = false
-local lastSummonTime = GetTime() - 100
-local lastAutoRestoreRunTime = GetTime() - 100
-local lastSavePetTime = GetTime() - 100
+local lastSummonTime = GetTime() - 20
+local lastAutoRestoreRunTime = GetTime() - 20
+local lastSavePetTime = GetTime() - 20
 
 function PetKeeper.ADDON_LOADED(self,event,arg1)
 	if arg1 == "PetKeeper" then
@@ -53,7 +53,6 @@ function PetKeeper.ADDON_LOADED(self,event,arg1)
 
 		self:RegisterEvent("COMPANION_UPDATE")
 		self.COMPANION_UPDATE = PetKeeper.SavePet
--- 		self.COMPANION_UPDATE = C_Timer.After(1, function() PetKeeper.SavePet() end)
 
 	elseif arg1 == "Blizzard_Collections" then
 		for i, btn in ipairs(PetJournal.listScroll.buttons) do
