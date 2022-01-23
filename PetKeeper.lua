@@ -57,7 +57,11 @@ function PetKeeper.ADDON_LOADED(self,event,arg1)
 		end
 
 		self:RegisterEvent("COMPANION_UPDATE")
-		self.COMPANION_UPDATE = PetKeeper.SavePet
+		function PetKeeper.COMPANION_UPDATE(self,event,arg1)
+			if arg1 == "CRITTER" then
+			C_Timer.After(3, function() PetKeeper.SavePet() end)
+			end
+		end
 
 	elseif arg1 == "Blizzard_Collections" then
 		for i, btn in ipairs(PetJournal.listScroll.buttons) do
