@@ -166,10 +166,10 @@ function PetKeeper.AutoNew()
 	end
 	if not actualPet or timerDue then
 		PetKeeper:dbp("AutoNew function has run")
-		if not initialized then PetKeeper:Initialize() end
 		if not timerDue then
 			PetKeeper.AutoRestore()
 		else
+			if not initialized then PetKeeper:Initialize() end
 			local newPet = PetKeeper:Shuffle()
 			if newPet == actualPet then return end
 			if newPet and (lastCall+1.5 < GetTime()) then
@@ -241,9 +241,9 @@ function PetKeeper:SafeSummon(desiredPet)
 		and not InArena()
 	then
 		C_PetJournal.SummonPetByGUID(desiredPet)
-		PetKeeper:dbp("SafeSummon function has run")
+		PetKeeper:dbp("SafeSummon function has summoned a pet")
 		lastSummonTime = GetTime()
--- 		PetKeeper:SavePet() -- already with the event
+-- 		PetKeeper:SavePet() -- already done with the event directly
 	end
 end
 
