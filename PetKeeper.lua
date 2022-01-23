@@ -30,8 +30,13 @@ function PetKeeper.ADDON_LOADED(self,event,arg1)
 		PetKeeperDB.enable = (PetKeeperDB.enable == nil) and true or PetKeeperDB.enable
 
 		lastCall = GetTime()
+
 		-- Is this needed?
-		C_Timer.After(6, function() PetKeeper.LoginCheck() end)
+		-- Seems we also get - sometimes - a COMPANION_UPDATE event after login (which triggers a SavePet()). Also it doesn't find the variables from the DB, if run too early. So, this is difficult to time, and also depends on the load time of the char.
+		-- So, let's try with PLAYER_ENTERING_WORLD:
+		self:RegisterEvent("PLAYER_ENTERING_WORLD")
+		self.PLAYER_ENTERING_WORLD = PetKeeper.LoginCheck
+-- 		C_Timer.After(4, function() PetKeeper.LoginCheck() end)
 
 		self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 		self.PET_JOURNAL_LIST_UPDATE = self.Initialize
