@@ -15,7 +15,9 @@ local thisChar = UnitName("player")
 local lastCall
 local petPool = {}
 local initialized = false
-local lastSummonTime = GetTime() - 10
+local lastSummonTime = GetTime() - 100
+local lastAutoRestoreRunTime = GetTime() - 100
+local lastSavePetTime = GetTime() - 100
 
 function PetKeeper.ADDON_LOADED(self,event,arg1)
 	if arg1 == "PetKeeper" then
@@ -100,7 +102,8 @@ function PetKeeper.AutoRestore()
 -- 	PetKeeper:dbp("AutoRestore function was called")
 -- 	if not initialized then PetKeeper:Initialize() end
 	if not PetKeeperDB.enable then return end
-	if GetTime() - lastSummonTime < 0.5 then return end
+	if GetTime() - lastSummonTime < 2 then return end
+	if GetTime() - lastAutoRestoreRunTime < 2 then return end
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
 	if not actualPet then
 		if PetKeeperCharDB.cfavs_enabled then
@@ -110,7 +113,7 @@ function PetKeeper.AutoRestore()
 		end
 	end
 	PetKeeper:dbp("AutoRestore function has run")
-	lastSummonTime = GetTime()
+	lastAutoRestoreRunTime = GetTime()
 end
 
 --[=[
@@ -180,7 +183,7 @@ end
 
 function PetKeeper:SavePet()
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
-	if not actualPet then return end
+	if not actualPet or (GetTime() - lastSavePetTime < 1) then return end
 	if PetKeeperCharDB.cfavs_enabled then
 		if PetKeeperCharDB.currentPet == actualPet then return end
 		PetKeeperCharDB.previousPet = PetKeeperCharDB.currentPet
@@ -191,6 +194,7 @@ function PetKeeper:SavePet()
 		PetKeeperDB.currentPet = actualPet
 	end
 	PetKeeper:dbp("SavePet function has run")
+	lastSavePetTime = GetTime()
 end
 
 
