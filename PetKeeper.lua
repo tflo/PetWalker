@@ -100,7 +100,7 @@ end
 
 -- pet is lost --> restore prev one
 function PetKeeper.AutoRestore()
--- 	PetKeeper:dbp("AutoRestore function was called")
+-- 	PetKeeper:dbp("AutoRestore() was called")
 -- 	if not initialized then PetKeeper:Initialize() end
 	if not PetKeeperDB.enable then return end
 	if GetTime() - lastSummonTime < 2 then return end
@@ -113,7 +113,7 @@ function PetKeeper.AutoRestore()
 			PetKeeper:SafeSummon(PetKeeperDB.currentPet)
 		end
 	end
-	PetKeeper:dbp("AutoRestore function has run")
+	PetKeeper:dbp("AutoRestore() has run")
 	lastAutoRestoreRunTime = GetTime()
 end
 
@@ -132,7 +132,7 @@ function PetKeeper.AutoRestore() -- extended version
 			PetKeeper:SafeSummon(PetKeeperDB.currentPet)
 		end
 	end
-	PetKeeper:dbp("AutoRestore function has run")
+	PetKeeper:dbp("AutoRestore() has run")
 	lastSummonTime = GetTime()
 end
 --]=]
@@ -151,12 +151,12 @@ function PetKeeper.LoginCheck()
 			PetKeeper:SafeSummon(PetKeeperDB.currentPet)
 		end
 	end
-	PetKeeper:dbp("LoginCheck function has run")
+	PetKeeper:dbp("LoginCheck() has run")
 end
 
 -- timed summoning of a new pet from the pool
 function PetKeeper.AutoAction()
--- 	PetKeeper:dbp("AutoAction function was called")
+-- 	PetKeeper:dbp("AutoAction() was called")
 	if not PetKeeperDB.enable then return end
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
 	local timerDue
@@ -166,7 +166,7 @@ function PetKeeper.AutoAction()
 		end
 	end
 	if not actualPet or timerDue then
-		PetKeeper:dbp("AutoAction function has run")
+		PetKeeper:dbp("AutoAction() has run")
 		if not timerDue then
 			PetKeeper.AutoRestore()
 		else
@@ -197,7 +197,7 @@ function PetKeeper:SavePet()
 		PetKeeperDB.previousPet = PetKeeperDB.currentPet
 		PetKeeperDB.currentPet = actualPet
 	end
-	PetKeeper:dbp("SavePet function has run")
+	PetKeeper:dbp("SavePet() has run")
 	lastSavePetTime = GetTime()
 end
 
@@ -227,8 +227,8 @@ local function InArena()
 end
 
 
-function PetKeeper:SafeSummon(desiredPet)
--- 	PetKeeper:dbp("SafeSummon function was called")
+function PetKeeper:SafeSummon(pet)
+-- 	PetKeeper:dbp("SafeSummon() was called")
 	-- Probably not covered: casting a longish pre-pull spell, still out of combat and aggro. Pet-summoning could interrupt this(?). Acc. to wowpedia it is not covered by "UnitAffectingCombat"
 	if not UnitAffectingCombat("player")
 -- 		and not IsMounted() -- testing if this is needed
@@ -244,8 +244,8 @@ function PetKeeper:SafeSummon(desiredPet)
 		and not InMythicKeystone()
 		and not InArena()
 	then
-		C_PetJournal.SummonPetByGUID(desiredPet)
-		PetKeeper:dbp("SafeSummon function has summoned a pet")
+		C_PetJournal.SummonPetByGUID(pet)
+		PetKeeper:dbp("SafeSummon() has summoned \"" .. PetKeeper.PetGUIDtoName(pet) .. "\" ")
 		lastSummonTime = GetTime()
 -- 		PetKeeper:SavePet() -- already done with the event directly
 	end
@@ -267,7 +267,7 @@ function PetKeeper.ManualSummonNew()
 	lastCall = GetTime()
 	C_PetJournal.SummonPetByGUID(newPet)
 	lastSummonTime = lastCall
-	--PetKeeper:SavePet() -- already with the event
+	PetKeeper:dbp("ManualSummonNew() has summoned \"" .. PetKeeper.PetGUIDtoName(newPet) .. "\" ")
 end
 
 function PetKeeper.ManualSummonPrevious()
@@ -564,7 +564,7 @@ end
 -- Debugging
 --------------------------------------------------------------------------------
 
-local function PetGUIDtoName(guid)
+function PetKeeper.PetGUIDtoName(guid)
     local index = 1
     while true do
         local petGUID, _, _, _, _, _, _, name = C_PetJournal.GetPetInfoByIndex(index)
@@ -577,13 +577,13 @@ local function PetGUIDtoName(guid)
 end
 
 function PetKeeper:DebugDisplay()
-	DEFAULT_CHAT_FRAME:AddMessage("\nDebug:\n  Current pet: " .. (PetGUIDtoName(PetKeeperDB.currentPet) or "-none-") .. "\n  Previous pet: " .. (PetGUIDtoName(PetKeeperDB.previousPet) or "-none-") .. "\n  Current char pet: " .. (PetGUIDtoName(PetKeeperCharDB.currentPet) or "-none-") .. "\n  Previous char pet: " .. (PetGUIDtoName(PetKeeperCharDB.previousPet) or "-none-") .. "\n" .. PetKeeper.Status(),0,1,0.7)
+	DEFAULT_CHAT_FRAME:AddMessage("\nDebug:\n  Current pet: " .. (PetKeeper.PetGUIDtoName(PetKeeperDB.currentPet) or "-none-") .. "\n  Previous pet: " .. (PetKeeper.PetGUIDtoName(PetKeeperDB.previousPet) or "-none-") .. "\n  Current char pet: " .. (PetKeeper.PetGUIDtoName(PetKeeperCharDB.currentPet) or "-none-") .. "\n  Previous char pet: " .. (PetKeeper.PetGUIDtoName(PetKeeperCharDB.previousPet) or "-none-") .. "\n" .. PetKeeper.Status(),0,1,0.7)
 end
 
 -- with pet info
 ---[=[
 function PetKeeper:dbp(msg)
-	print("\n|cffFFA500--- PETKEEPER DEBUG: " .. msg .. ": " .. (PetGUIDtoName(PetKeeperDB.currentPet) or "-none-"))
+	print("\n|cffFFA500--- PETKEEPER DEBUG: " .. msg .. " - Current DB pet: " .. (PetKeeper.PetGUIDtoName(PetKeeperDB.currentPet) or "-none-"))
 end
 --]=]
 
