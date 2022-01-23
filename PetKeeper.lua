@@ -55,8 +55,9 @@ function PetKeeper.ADDON_LOADED(self,event,arg1)
 		self:RegisterEvent("COMPANION_UPDATE") -- new
 		function PetKeeper.COMPANION_UPDATE(self,event,arg1)
 			if arg1 == "CRITTER" then
-			C_Timer.After(1.0, function() PetKeeper.AutoRestore() end)
-			C_Timer.After(4.0, function() PetKeeper:SavePet() end)
+			-- We should not need this here. It is sufficient to check/summon when the player starts moving. This way we can also safely summon a pet from the journal without having it replaced immediately.
+-- 			C_Timer.After(1.0, function() PetKeeper.AutoRestore() end)
+			C_Timer.After(1, function() PetKeeper:SavePet() end)
 			end
 		end
 
