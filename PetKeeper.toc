@@ -1,0 +1,12 @@
+## Interface: 90105
+## Title: PetKeeper
+## Notes: Automatically re-summons your lost companion pet, or auto-summons a random or a favorite one.
+## Author: Tom
+## SavedVariables: PetKeeperDB
+## SavedVariablesPerCharacter: PetKeeperCharDB
+## Version: 0.0.1
+
+# X-WoWI-ID: 
+# X-Curse-Project-ID: 
+
+PetKeeper.lua

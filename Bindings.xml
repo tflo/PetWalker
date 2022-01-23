@@ -1,0 +1,11 @@
+<Bindings>
+	<Binding name="PETKEEPERAUTOTOGGLE" header="PETKEEPER" category="ADDONS">
+        PetKeeper:AutoToggle()
+    </Binding>
+    <Binding name="PETKEEPERMANUALSUMMON" category="ADDONS">
+        PetKeeper.ManualSummonNew()
+    </Binding>
+    <Binding name="PETKEEPEROFF" category="ADDONS">
+        PetKeeper:DismissAndDisable()
+    </Binding>
+</Bindings>
