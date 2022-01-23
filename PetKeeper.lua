@@ -51,15 +51,9 @@ function PetKeeper.ADDON_LOADED(self,event,arg1)
 			end
 		end
 
-		-- question is if this comes up also when pet is lost
-		self:RegisterEvent("COMPANION_UPDATE") -- new
-		function PetKeeper.COMPANION_UPDATE(self,event,arg1)
-			if arg1 == "CRITTER" then
-			-- We should not need this here. It is sufficient to check/summon when the player starts moving. This way we can also safely summon a pet from the journal without having it replaced immediately.
--- 			C_Timer.After(1.0, function() PetKeeper.AutoRestore() end)
-			C_Timer.After(1, function() PetKeeper:SavePet() end)
-			end
-		end
+		self:RegisterEvent("COMPANION_UPDATE")
+		self.COMPANION_UPDATE = PetKeeper.SavePet
+-- 		self.COMPANION_UPDATE = C_Timer.After(1, function() PetKeeper.SavePet() end)
 
 	elseif arg1 == "Blizzard_Collections" then
 		for i, btn in ipairs(PetJournal.listScroll.buttons) do
@@ -185,7 +179,7 @@ function PetKeeper.AutoNew()
 	end
 end
 
-function PetKeeper:SavePet()
+function PetKeeper.SavePet()
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
 	if not actualPet or (GetTime() - lastSavePetTime < 1) then return end
 	if PetKeeperCharDB.cfavs_enabled then
@@ -247,7 +241,7 @@ function PetKeeper:SafeSummon(pet)
 		C_PetJournal.SummonPetByGUID(pet)
 		PetKeeper:dbp("SafeSummon() has summoned \"" .. PetKeeper.PetGUIDtoName(pet) .. "\" ")
 		lastSummonTime = GetTime()
--- 		PetKeeper:SavePet() -- already done with the event directly
+-- 		PetKeeper.SavePet() -- already done with the event directly
 	end
 end
 
@@ -278,7 +272,7 @@ function PetKeeper.ManualSummonPrevious()
 		C_PetJournal.SummonPetByGUID(PetKeeperDB.previousPet)
 	end
 	lastCall = GetTime()
-	--PetKeeper:SavePet() -- already with the event
+	--PetKeeper.SavePet() -- already with the event
 	lastSummonTime = lastCall
 end
 
