@@ -40,6 +40,15 @@ function PetKeeper.ADDON_LOADED(self,event,arg1)
 		self:RegisterEvent("PLAYER_STARTED_MOVING")
 		self.PLAYER_STARTED_MOVING = PetKeeper.AutoNew
 
+		-- experimental: for not-much-moving chars at the auction house
+		self:RegisterEvent("PLAYER_STARTED_LOOKING")
+		function PetKeeper.PLAYER_STARTED_LOOKING(self,event)
+			local zone = GetMinimapZoneText()
+			if zone == 'Booty Bay' then
+				PetKeeper.AutoNew()
+			end
+		end
+
 		-- question is if this comes up also when pet is lost
 		self:RegisterEvent("COMPANION_UPDATE") -- new
 		function PetKeeper.COMPANION_UPDATE(self,event,arg1)
