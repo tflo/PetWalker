@@ -169,17 +169,20 @@ function PetKeeper.AutoAction()
 		if not timerDue then
 			PetKeeper.AutoRestore()
 		else
-			if not initialized then PetKeeper:Initialize() end
-			local newPet = PetKeeper:Shuffle()
-			if newPet == actualPet then return end
-			if newPet and (lastCall+1.5 < GetTime()) then
-				lastCall = GetTime()
-				PetKeeper:SafeSummon(newPet)
-			end
+			PetKeeper.AutoNew()
 		end
 	end
 end
 
+function PetKeeper.AutoNew()
+	if not initialized then PetKeeper:Initialize() end
+	local newPet = PetKeeper:Shuffle()
+	if newPet == actualPet then return end
+	if newPet and (lastCall+1.5 < GetTime()) then
+		lastCall = GetTime()
+		PetKeeper:SafeSummon(newPet)
+	end
+end
 
 function PetKeeper:SavePet()
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
