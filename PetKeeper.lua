@@ -40,14 +40,14 @@ function PetKeeper.ADDON_LOADED(self,event,arg1)
 
 		-- this event basically is only needed for the timed summon
 		self:RegisterEvent("PLAYER_STARTED_MOVING")
-		self.PLAYER_STARTED_MOVING = PetKeeper.AutoNew
+		self.PLAYER_STARTED_MOVING = PetKeeper.AutoAction
 
 		-- experimental: for not-much-moving chars at the auction house
 		self:RegisterEvent("PLAYER_STARTED_LOOKING")
 		function PetKeeper.PLAYER_STARTED_LOOKING(self,event)
 			local zone = GetMinimapZoneText()
 			if zone == 'Booty Bay' then
-				PetKeeper.AutoNew()
+				PetKeeper.AutoAction()
 			end
 		end
 
@@ -154,8 +154,8 @@ function PetKeeper.LoginCheck()
 end
 
 -- timed summoning of a new pet from the pool
-function PetKeeper.AutoNew()
--- 	PetKeeper:dbp("AutoNew function was called")
+function PetKeeper.AutoAction()
+-- 	PetKeeper:dbp("AutoAction function was called")
 	if not PetKeeperDB.enable then return end
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
 	local timerDue
@@ -165,7 +165,7 @@ function PetKeeper.AutoNew()
 		end
 	end
 	if not actualPet or timerDue then
-		PetKeeper:dbp("AutoNew function has run")
+		PetKeeper:dbp("AutoAction function has run")
 		if not timerDue then
 			PetKeeper.AutoRestore()
 		else
