@@ -14,14 +14,14 @@ local thisChar = UnitName("player")
 
 local lastCall
 local petPool = {}
-local initialized = false
+local isInitialized = false
 local petVerified = false
 local lastSummonTime = GetTime() - 20
 local lastAutoRestoreRunTime = GetTime() - 20
 local lastSavePetTime = GetTime() - 20
-local safePetDelay
-local safePetLoginDelay = 10
-local safePetNormalDelay = 3
+local savePetDelay
+local savePetLoginDelay = 10
+local savePetNormalDelay = 3
 
 function PetKeeper.ADDON_LOADED(self,event,arg1)
 	if arg1 == "PetKeeper" then
@@ -34,7 +34,7 @@ function PetKeeper.ADDON_LOADED(self,event,arg1)
 		PetKeeperDB.enable = (PetKeeperDB.enable == nil) and true or PetKeeperDB.enable
 
 		lastCall = GetTime() + 20
-		safePetDelay = safePetLoginDelay
+		savePetDelay = savePetLoginDelay
 
 		-- Is this needed?
 		-- Seems we also get - sometimes - a COMPANION_UPDATE event after login (which triggers a SavePet()). Also it doesn't find the variables from the DB, if run too early. So, this is difficult to time, and also depends on the load time of the char.
@@ -64,7 +64,7 @@ function PetKeeper.ADDON_LOADED(self,event,arg1)
 		self:RegisterEvent("COMPANION_UPDATE")
 		function PetKeeper.COMPANION_UPDATE(self,event,arg1)
 			if arg1 == "CRITTER" then
-			C_Timer.After(safePetDelay, function() PetKeeper.SavePet() end)
+			C_Timer.After(savePetDelay, function() PetKeeper.SavePet() end)
 			end
 		end
 
@@ -108,7 +108,7 @@ end
 -- pet is lost --> restore prev one
 function PetKeeper.AutoRestore()
 -- 	PetKeeper:dbp("AutoRestore() was called")
--- 	if not initialized then PetKeeper:Initialize() end
+-- 	if not isInitialized then PetKeeper:Initialize() end
 	if not PetKeeperDB.enable then return end
 	if GetTime() - lastSummonTime < 2 then return end
 	if GetTime() - lastAutoRestoreRunTime < 2 then return end
@@ -126,7 +126,7 @@ end
 
 --[=[
 function PetKeeper.AutoRestore() -- extended version
--- 	if not initialized then PetKeeper:Initialize() end
+-- 	if not isInitialized then PetKeeper:Initialize() end
 	if not PetKeeperDB.enable then return end
 	if GetTime() - lastSummonTime < 0.5 then return end
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
@@ -185,7 +185,7 @@ function PetKeeper.AutoAction()
 end
 
 function PetKeeper.AutoNew()
-	if not initialized then PetKeeper:Initialize() end
+	if not isInitialized then PetKeeper:Initialize() end
 	local newPet = PetKeeper:Shuffle()
 	if newPet == actualPet then return end
 	if newPet and (lastCall+1.5 < GetTime()) then
@@ -195,7 +195,7 @@ function PetKeeper.AutoNew()
 end
 
 function PetKeeper.SavePet()
-	safePetDelay = safePetNormalDelay
+	savePetDelay = savePetNormalDelay
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
 	if not actualPet or (GetTime() - lastSavePetTime < 1) or not petVerified then return end
 	if PetKeeperCharDB.cfavs_enabled then
@@ -267,7 +267,7 @@ end
 --------------------------------------------------------------------------------
 
 function PetKeeper.ManualSummonNew()
-	if not initialized then PetKeeper:Initialize() end
+	if not isInitialized then PetKeeper:Initialize() end
 	local newPet, maxFavs
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
 	repeat
@@ -281,7 +281,7 @@ function PetKeeper.ManualSummonNew()
 end
 
 function PetKeeper.ManualSummonPrevious()
--- 	if not initialized then PetKeeper:Initialize() end
+-- 	if not isInitialized then PetKeeper:Initialize() end
 	if PetKeeperCharDB.cfavs_enabled then
 		C_PetJournal.SummonPetByGUID(PetKeeperCharDB.previousPet)
 	else
@@ -314,7 +314,7 @@ function PetKeeper.Initialize(self)
 		end
 		index = index + 1
 	end
-	initialized = true  -- added this bc otherwise the query makes no sense
+	isInitialized = true  -- added this bc otherwise the query makes no sense
 end
 
 
