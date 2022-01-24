@@ -255,7 +255,7 @@ function PetKeeper:SafeSummon(pet)
 		and not InArena()
 	then
 		C_PetJournal.SummonPetByGUID(pet)
-		PetKeeper:dbp("SafeSummon() has summoned \"" .. PetKeeper.PetGUIDtoName(pet) .. "\" ")
+		PetKeeper:dbp("SafeSummon() has summoned \"" .. (PetKeeper.PetGUIDtoName(pet) or "-NONE-") .. "\" ")
 		lastSummonTime = GetTime()
 -- 		PetKeeper.SavePet() -- already done with the event directly
 	end
