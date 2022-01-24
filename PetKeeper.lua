@@ -14,7 +14,7 @@ local thisChar = UnitName("player")
 
 local lastCall
 local petPool = {}
-local isInitialized = false
+local poolInitialized = false
 local petVerified = false
 local lastSummonTime = GetTime() - 20
 local lastAutoRestoreRunTime = GetTime() - 20
@@ -44,7 +44,7 @@ function PetKeeper.ADDON_LOADED(self,event,arg1)
 		C_Timer.After(16, function() PetKeeper.LoginCheck() end)
 
 		self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
-		self.PET_JOURNAL_LIST_UPDATE = self.Initialize
+		self.PET_JOURNAL_LIST_UPDATE = self.InitializePool
 
 		PetKeeper:CFavsUpdate()
 
@@ -108,7 +108,7 @@ end
 -- pet is lost --> restore prev one
 function PetKeeper.AutoRestore()
 -- 	PetKeeper:dbp("AutoRestore() was called")
--- 	if not isInitialized then PetKeeper:Initialize() end
+-- 	if not poolInitialized then PetKeeper:InitializePool() end
 	if not PetKeeperDB.enable then return end
 	if GetTime() - lastSummonTime < 2 then return end
 	if GetTime() - lastAutoRestoreRunTime < 2 then return end
@@ -126,7 +126,7 @@ end
 
 --[=[
 function PetKeeper.AutoRestore() -- extended version
--- 	if not isInitialized then PetKeeper:Initialize() end
+-- 	if not poolInitialized then PetKeeper:InitializePool() end
 	if not PetKeeperDB.enable then return end
 	if GetTime() - lastSummonTime < 0.5 then return end
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
@@ -146,7 +146,7 @@ end
 
 -- After login, try to restore the same pat as the last logged-in char had active
 function PetKeeper.LoginCheck()
--- 	if not isInitialized then PetKeeper:Initialize() end
+-- 	if not poolInitialized then PetKeeper:InitializePool() end
 	if not PetKeeperDB.enable then return end
 	petVerified = true
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
@@ -185,7 +185,7 @@ function PetKeeper.AutoAction()
 end
 
 function PetKeeper.AutoNew()
-	if not isInitialized then PetKeeper:Initialize() end
+	if not poolInitialized then PetKeeper:InitializePool() end
 	local newPet = PetKeeper:Shuffle()
 	if newPet == actualPet then return end
 	if newPet and (lastCall+1.5 < GetTime()) then
@@ -267,7 +267,7 @@ end
 --------------------------------------------------------------------------------
 
 function PetKeeper.ManualSummonNew()
-	if not isInitialized then PetKeeper:Initialize() end
+	if not poolInitialized then PetKeeper:InitializePool() end
 	local newPet, maxFavs
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
 	repeat
@@ -281,7 +281,7 @@ function PetKeeper.ManualSummonNew()
 end
 
 function PetKeeper.ManualSummonPrevious()
--- 	if not isInitialized then PetKeeper:Initialize() end
+-- 	if not poolInitialized then PetKeeper:InitializePool() end
 	if PetKeeperCharDB.cfavs_enabled then
 		C_PetJournal.SummonPetByGUID(PetKeeperCharDB.previousPet)
 	else
@@ -297,7 +297,7 @@ end
 -- Pool
 --------------------------------------------------------------------------------
 
-function PetKeeper.Initialize(self)
+function PetKeeper.InitializePool(self)
 	table.wipe(petPool)
 	local index = 1
 	while true do
@@ -314,7 +314,7 @@ function PetKeeper.Initialize(self)
 		end
 		index = index + 1
 	end
-	isInitialized = true  -- added this bc otherwise the query makes no sense
+	poolInitialized = true  -- added this bc otherwise the query makes no sense
 end
 
 
@@ -388,7 +388,7 @@ end
 
 function PetKeeper:FavsToggle()
 	PetKeeperDB.favsOnly = not PetKeeperDB.favsOnly
-	isInitialized = false
+	poolInitialized = false
 	DEFAULT_CHAT_FRAME:AddMessage("Selection pool: "..(PetKeeperDB.favsOnly and "favorites only" or "all pets"),0,1,0.7)
 end
 
