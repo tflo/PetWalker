@@ -12,12 +12,16 @@ BINDING_NAME_PETKEEPEROFF = "Dismiss Pet and Disable Auto-summoning"
 
 local thisChar = UnitName("player")
 
-local lastCall = GetTime() - 20
+local lastCall
 local petPool = {}
 local initialized = false
+local petVerified = false
 local lastSummonTime = GetTime() - 20
 local lastAutoRestoreRunTime = GetTime() - 20
 local lastSavePetTime = GetTime() - 20
+local safePetDelay
+local safePetLoginDelay = 10
+local safePetNormalDelay = 3
 
 function PetKeeper.ADDON_LOADED(self,event,arg1)
 	if arg1 == "PetKeeper" then
@@ -29,14 +33,15 @@ function PetKeeper.ADDON_LOADED(self,event,arg1)
 		PetKeeperDB.favsOnly = (PetKeeperDB.favsOnly == nil) and true or PetKeeperDB.favsOnly
 		PetKeeperDB.enable = (PetKeeperDB.enable == nil) and true or PetKeeperDB.enable
 
-		lastCall = GetTime()
+		lastCall = GetTime() + 20
+		safePetDelay = safePetLoginDelay
 
 		-- Is this needed?
 		-- Seems we also get - sometimes - a COMPANION_UPDATE event after login (which triggers a SavePet()). Also it doesn't find the variables from the DB, if run too early. So, this is difficult to time, and also depends on the load time of the char.
 		-- So, let's try with PLAYER_ENTERING_WORLD:
-		self:RegisterEvent("PLAYER_ENTERING_WORLD")
-		self.PLAYER_ENTERING_WORLD = PetKeeper.LoginCheck
--- 		C_Timer.After(4, function() PetKeeper.LoginCheck() end)
+-- 		self:RegisterEvent("PLAYER_ENTERING_WORLD")
+-- 		self.PLAYER_ENTERING_WORLD = PetKeeper.LoginCheck
+		C_Timer.After(12, function() PetKeeper.LoginCheck() end)
 
 		self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 		self.PET_JOURNAL_LIST_UPDATE = self.Initialize
@@ -59,7 +64,7 @@ function PetKeeper.ADDON_LOADED(self,event,arg1)
 		self:RegisterEvent("COMPANION_UPDATE")
 		function PetKeeper.COMPANION_UPDATE(self,event,arg1)
 			if arg1 == "CRITTER" then
-			C_Timer.After(3, function() PetKeeper.SavePet() end)
+			C_Timer.After(safePetDelay, function() PetKeeper.SavePet() end)
 			end
 		end
 
@@ -142,6 +147,7 @@ end
 -- After login, try to restore the same pat as the last logged-in char had active
 function PetKeeper.LoginCheck()
 -- 	if not initialized then PetKeeper:Initialize() end
+	petVerified = true
 	if not PetKeeperDB.enable then return end
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
 	if PetKeeperCharDB.cfavs_enabled then
@@ -159,6 +165,7 @@ end
 -- timed summoning of a new pet from the pool
 function PetKeeper.AutoAction()
 -- 	PetKeeper:dbp("AutoAction() was called")
+	petVerified = true
 	if not PetKeeperDB.enable then return end
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
 	local timerDue
@@ -188,8 +195,9 @@ function PetKeeper.AutoNew()
 end
 
 function PetKeeper.SavePet()
+	safePetDelay = safePetNormalDelay
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
-	if not actualPet or (GetTime() - lastSavePetTime < 1) then return end
+	if not actualPet or (GetTime() - lastSavePetTime < 1) or not petVerified then return end
 	if PetKeeperCharDB.cfavs_enabled then
 		if PetKeeperCharDB.currentPet == actualPet then return end
 		PetKeeperCharDB.previousPet = PetKeeperCharDB.currentPet
