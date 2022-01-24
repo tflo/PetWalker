@@ -41,7 +41,7 @@ function PetKeeper.ADDON_LOADED(self,event,arg1)
 		-- So, let's try with PLAYER_ENTERING_WORLD:
 -- 		self:RegisterEvent("PLAYER_ENTERING_WORLD")
 -- 		self.PLAYER_ENTERING_WORLD = PetKeeper.LoginCheck
-		C_Timer.After(12, function() PetKeeper.LoginCheck() end)
+		C_Timer.After(16, function() PetKeeper.LoginCheck() end)
 
 		self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 		self.PET_JOURNAL_LIST_UPDATE = self.Initialize
@@ -146,16 +146,16 @@ end
 
 -- After login, try to restore the same pat as the last logged-in char had active
 function PetKeeper.LoginCheck()
--- 	if not initialized then PetKeeper:Initialize() end
-	petVerified = true
+-- 	if not isInitialized then PetKeeper:Initialize() end
 	if not PetKeeperDB.enable then return end
+	petVerified = true
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
 	if PetKeeperCharDB.cfavs_enabled then
-		if not actualPet or actualPet ~=  PetKeeperCharDB.currentPet then
+		if not actualPet or actualPet ~= PetKeeperCharDB.currentPet then
 			PetKeeper:SafeSummon(PetKeeperCharDB.currentPet)
 		end
 	else
-		if not actualPet or actualPet ~=  PetKeeperDB.currentPet then
+		if not actualPet or actualPet ~= PetKeeperDB.currentPet then
 			PetKeeper:SafeSummon(PetKeeperDB.currentPet)
 		end
 	end
@@ -165,8 +165,8 @@ end
 -- timed summoning of a new pet from the pool
 function PetKeeper.AutoAction()
 -- 	PetKeeper:dbp("AutoAction() was called")
-	petVerified = true
 	if not PetKeeperDB.enable then return end
+	petVerified = true
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
 	local timerDue
 	if PetKeeperDB.timer ~= 0 then
@@ -238,8 +238,8 @@ end
 
 
 function PetKeeper:SafeSummon(pet)
--- 	PetKeeper:dbp("SafeSummon() was called")
-	-- Probably not covered: casting a longish pre-pull spell, still out of combat and aggro. Pet-summoning could interrupt this(?). Acc. to wowpedia it is not covered by "UnitAffectingCombat"
+	if not pet then return end
+-- Probably not covered: casting a longish pre-pull spell, still out of combat and aggro. Pet-summoning could interrupt this(?). Acc. to wowpedia it is not covered by "UnitAffectingCombat"
 	if not UnitAffectingCombat("player")
 -- 		and not IsMounted() -- testing if this is needed
 		and not IsFlying()
@@ -388,6 +388,7 @@ end
 
 function PetKeeper:FavsToggle()
 	PetKeeperDB.favsOnly = not PetKeeperDB.favsOnly
+	isInitialized = false
 	DEFAULT_CHAT_FRAME:AddMessage("Selection pool: "..(PetKeeperDB.favsOnly and "favorites only" or "all pets"),0,1,0.7)
 end
 
