@@ -22,6 +22,15 @@ local lastSavePetTime = GetTime() - 20
 local savePetDelay
 local savePetLoginDelay = 10
 local savePetNormalDelay = 3
+-- Guild Page and Herald don't have fix IDs, so we have to go by speciesID
+-- TODO: We must also make sure that we do not unsummon these pets via AutoRestore or AutoNew. The Guild pets despawn automatically, so we can simply check if they are there, but the Argent Tourny pet should be treated differently: CD activates only if we access the bank, and it is also a valid pet for random favorite summons. Difficult. But maybe we should just give him a fix live time of 20 min or so? Or just hope that the user disables PetKeeper when he accesses the bank? Or maybe check for the pony bridle achiev and not autosummon /autounsummon him then? (GetAchievementInfo)
+-- --> make two categories of petspeciesIDs: 'doNotSummon' and 'doNotUnsummon'.
+-- TODO: check the Hordies speciesID
+local excludedSpecies = {
+	280, -- Guild Page
+	282, -- Guild Herald
+}
+-- TODO: What about Feign Death?!
 local excludedAuras = {
 	32612, -- Mage: Invisibility
 	110960, -- Mage: Greater Invisibility
@@ -276,7 +285,8 @@ function PetKeeper.ManualSummonNew()
 	until not actualPet or newPet ~= actualPet or maxFavs < 2
 	if actualPet == newPet then return end
 	lastCall = GetTime()
-	C_PetJournal.SummonPetByGUID(newPet)
+	PetKeeper:SafeSummon(newPet)
+-- 	C_PetJournal.SummonPetByGUID(newPet)
 	lastSummonTime = lastCall
 	PetKeeper:dbpp("ManualSummonNew() has summoned \"" .. PetKeeper.PetGUIDtoName(newPet) .. "\" ")
 end
@@ -298,20 +308,30 @@ end
 -- Pool
 --------------------------------------------------------------------------------
 
+local function IsExcluded(species)
+	for _, s in pairs(excludedSpecies) do
+		if s == species then
+			PetKeeper:dbp("Excluded pet found!")
+			return true
+		end
+	end
+	return false
+end
+
 function PetKeeper.InitializePool(self)
 	table.wipe(petPool)
 	local index = 1
 	while true do
-		local petGUID, speciesID, isOwned, customName, level, favorite,
-			 isRevoked, name, icon, petType, creatureID, sourceText,
-			 description, isWildPet, canBattle = C_PetJournal.GetPetInfoByIndex(index);
-		if not petGUID then break end
+		local petID, speciesID, _, _, _, favorite = C_PetJournal.GetPetInfoByIndex(index)
+		if not petID then break end
 		if PetKeeperDB.favsOnly then
-			if favorite then
-				table.insert(petPool, petGUID)
+			if favorite and not IsExcluded(speciesID) then
+				table.insert(petPool, petID)
 			end
 		else
-			table.insert(petPool, petGUID)
+			if not IsExcluded(speciesID) then
+				table.insert(petPool, petID)
+			end
 		end
 		index = index + 1
 	end
