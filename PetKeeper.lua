@@ -139,25 +139,6 @@ function ns.AutoRestore()
 	lastAutoRestoreRunTime = GetTime()
 end
 
---[=[
-function ns.AutoRestore() -- extended version
---	if not poolInitialized then ns:InitializePool() end
-	if not ns.db.enable then return end
-	if GetTime() - lastSummonTime < 0.5 then return end
-	local actualPet = C_PetJournal.GetSummonedPetGUID()
-	if ns.dbc.cfavs_enabled then
-		if not actualPet or actualPet ~=  ns.dbc.currentPet then
-			ns:SafeSummon(ns.dbc.currentPet)
-		end
-	else
-		if not actualPet or actualPet ~=  ns.db.currentPet then
-			ns:SafeSummon(ns.db.currentPet)
-		end
-	end
-	ns:dbpp("AutoRestore() has run")
-	lastSummonTime = GetTime()
-end
---]=]
 
 -- After login, try to restore the same pat as the last logged-in char had active
 function ns.LoginCheck()
