@@ -22,6 +22,12 @@ local lastSavePetTime = GetTime() - 20
 local savePetDelay
 local savePetLoginDelay = 10
 local savePetNormalDelay = 3
+local excludedAuras = {
+	32612, -- Mage: Invisibility
+	110960, -- Mage: Greater Invisibility
+	131347, -- DH: Gliding
+	311796, -- Pet: Daisy as backpack (/beckon)
+}
 
 function PetKeeper.ADDON_LOADED(self,event,arg1)
 	if arg1 == "PetKeeper" then
@@ -215,43 +221,37 @@ end
 
 --- SafeSummon -----------------------------------------------------------------
 
-local function FindAura(unit, spellID, filter)
-	for i=1, 100 do
-		-- rank will be removed in bfa
-		local name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, auraSpellID = UnitAura(unit, i, filter)
-		if not name then return nil end
-		if spellID == auraSpellID then
-			return name, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, auraSpellID
-		end
-	end
-end
-
-
 local function InMythicKeystone()
-	local name, instanceType, difficultyID = GetInstanceInfo()
+	local _, instanceType, difficultyID = GetInstanceInfo()
+	-- TODO: instanceType redundant if we query for difficultyID?
 	return instanceType == "party" and difficultyID == 8
 end
 
 local function InArena()
-	local name, instanceType, difficultyID = GetInstanceInfo()
+	local _, instanceType = IsInInstance()
 	return instanceType == "arena"
 end
 
+local function OfflimitsAura(auras)
+	for _, a in pairs(auras) do
+		if GetPlayerAuraBySpellID(aura) then
+			PetKeeper.dbp("Excluded Aura found!")
+			return true
+		end
+	end
+	return false
+end
 
 function PetKeeper:SafeSummon(pet)
-	if not pet then return end
--- Probably not covered: casting a longish pre-pull spell, still out of combat and aggro. Pet-summoning could interrupt this(?). Acc. to wowpedia it is not covered by "UnitAffectingCombat"
+	if not pet then return end -- needed?
 	if not UnitAffectingCombat("player")
--- 		and not IsMounted() -- testing if this is needed
+--		and not IsMounted() -- TODO: test if this is needed
 		and not IsFlying()
-		and not UnitHasVehicleUI("player")
-		and not (UnitIsControlling("player") and UnitChannelInfo("player")) -- If player is mind-controlling
+		and not OfflimitsAura(excludedAuras)
 		and not IsStealthed()
+		and not (UnitIsControlling("player") and UnitChannelInfo("player"))
+		and not UnitHasVehicleUI("player")
 		and not UnitIsGhost("player")
-		and not FindAura("player",199483,"HELPFUL") -- Camouflage
-		and not FindAura("player",32612,"HELPFUL") -- Invisibility
-		and not FindAura("player",110960,"HELPFUL") -- Geater Invisibility
-		and not FindAura("player",311796,"HELPFUL") -- Daisy
 		and not InMythicKeystone()
 		and not InArena()
 	then
