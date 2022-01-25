@@ -1,14 +1,19 @@
-PetKeeper = CreateFrame("Frame","PetKeeper")
+local addonName, ns = ...
 
-PetKeeper:SetScript("OnEvent", function(self, event, ...)
+ns.db = PetWalkerDB
+ns.dbc = PetWalkerPerCharDB
+
+ns = CreateFrame("Frame","PetKeeper")
+
+ns:SetScript("OnEvent", function(self, event, ...)
 	return self[event](self, event, ...)
 end)
-PetKeeper:RegisterEvent("ADDON_LOADED")
+ns:RegisterEvent("ADDON_LOADED")
 
-BINDING_HEADER_PETKEEPER = "PetKeeper"
-BINDING_NAME_PETKEEPERAUTOTOGGLE = "Toggle Auto-summoning"
-BINDING_NAME_PETKEEPERMANUALSUMMON = "Summon New Pet"
-BINDING_NAME_PETKEEPEROFF = "Dismiss Pet and Disable Auto-summoning"
+BINDING_HEADER_ThisAddon = addonName
+BINDING_NAME_Auto = "Toggle Auto-summon"
+BINDING_NAME_Manual = "Summon New Pet"
+BINDING_NAME_Dismiss = "Dismiss Pet & Disable Auto-summon"
 
 local thisChar = UnitName("player")
 
@@ -22,6 +27,7 @@ local lastSavePetTime = GetTime() - 20
 local savePetDelay
 local savePetLoginDelay = 10
 local savePetNormalDelay = 3
+
 -- Guild Page and Herald don't have fix IDs, so we have to go by speciesID
 -- TODO: We must also make sure that we do not unsummon these pets via AutoRestore or AutoNew. The Guild pets despawn automatically, so we can simply check if they are there, but the Argent Tourny pet should be treated differently: CD activates only if we access the bank, and it is also a valid pet for random favorite summons. Difficult. But maybe we should just give him a fix live time of 20 min or so? Or just hope that the user disables PetKeeper when he accesses the bank? Or maybe check for the pony bridle achiev and not autosummon /autounsummon him then? (GetAchievementInfo)
 -- --> make two categories of petspeciesIDs: 'doNotSummon' and 'doNotUnsummon'.
@@ -36,50 +42,50 @@ local excludedAuras = {
 	110960, -- Mage: Greater Invisibility
 	131347, -- DH: Gliding
 	311796, -- Pet: Daisy as backpack (/beckon)
-}
+} -- More exclusions in the Summon function itself
 
-function PetKeeper.ADDON_LOADED(self,event,arg1)
-	if arg1 == "PetKeeper" then
-		PetKeeperCharDB = PetKeeperCharDB or {}
-		PetKeeperDB = PetKeeperDB  or {}
-		PetKeeperCharDB.cfavs = PetKeeperCharDB.cfavs or {}
-		if PetKeeperCharDB.cfavs_enabled == nil then PetKeeperCharDB.cfavs_enabled = false end
-		PetKeeperDB.timer = PetKeeperDB.timer or 0
-		PetKeeperDB.favsOnly = (PetKeeperDB.favsOnly == nil) and true or PetKeeperDB.favsOnly
-		PetKeeperDB.enable = (PetKeeperDB.enable == nil) and true or PetKeeperDB.enable
+function ns.ADDON_LOADED(self,event,arg1)
+	if arg1 == addonName then
+		ns.dbc = ns.dbc or {}
+		ns.db = ns.db  or {}
+		ns.dbc.cfavs = ns.dbc.cfavs or {}
+		if ns.dbc.cfavs_enabled == nil then ns.dbc.cfavs_enabled = false end
+		ns.db.timer = ns.db.timer or 0
+		ns.db.favsOnly = (ns.db.favsOnly == nil) and true or ns.db.favsOnly
+		ns.db.enable = (ns.db.enable == nil) and true or ns.db.enable
 
 		lastCall = GetTime() + 20
 		savePetDelay = savePetLoginDelay
 
 		-- Is this needed?
-		-- Seems we also get - sometimes - a COMPANION_UPDATE event after login (which triggers a SavePet()). Also it doesn't find the variables from the DB, if run too early. So, this is difficult to time, and also depends on the load time of the char.
+		-- Seems we also get - sometimes - a COMPANION_UPDATE event after login (which triggers a SavePet()). Also it doesn't find the variables from the ns.db, if run too early. So, this is difficult to time, and also depends on the load time of the char.
 		-- So, let's try with PLAYER_ENTERING_WORLD:
 --		self:RegisterEvent("PLAYER_ENTERING_WORLD")
---		self.PLAYER_ENTERING_WORLD = PetKeeper.LoginCheck
-		C_Timer.After(16, function() PetKeeper.LoginCheck() end)
+--		self.PLAYER_ENTERING_WORLD = ns.LoginCheck
+		C_Timer.After(16, function() ns.LoginCheck() end)
 
 		self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 		self.PET_JOURNAL_LIST_UPDATE = self.InitializePool
 
-		PetKeeper:CFavsUpdate()
+		ns:CFavsUpdate()
 
 		-- this event basically is only needed for the timed summon
 		self:RegisterEvent("PLAYER_STARTED_MOVING")
-		self.PLAYER_STARTED_MOVING = PetKeeper.AutoAction
+		self.PLAYER_STARTED_MOVING = ns.AutoAction
 
 		-- experimental: for not-much-moving chars at the auction house
 		self:RegisterEvent("PLAYER_STARTED_LOOKING")
-		function PetKeeper.PLAYER_STARTED_LOOKING(self,event)
+		function ns.PLAYER_STARTED_LOOKING(self,event)
 			local zone = GetMinimapZoneText()
 			if zone == 'Booty Bay' then
-				PetKeeper.AutoAction()
+				ns.AutoAction()
 			end
 		end
 
 		self:RegisterEvent("COMPANION_UPDATE")
-		function PetKeeper.COMPANION_UPDATE(self,event,arg1)
+		function ns.COMPANION_UPDATE(self,event,arg1)
 			if arg1 == "CRITTER" then
-			C_Timer.After(savePetDelay, function() PetKeeper.SavePet() end)
+			C_Timer.After(savePetDelay, function() ns.SavePet() end)
 			end
 		end
 
@@ -95,21 +101,21 @@ function PetKeeper.ADDON_LOADED(self,event,arg1)
 			end)
 		end
 
---		PetKeeper.Auto_Button = self:CreateAutoCheckBox()
-		PetKeeper.CFavs_Button = self:CreateCfavsCheckBox()
---		PetKeeper.Timer_EditBox = self:CreateTimerEditBox()
+--		ns.Auto_Button = self:CreateAutoCheckBox()
+		ns.CFavs_Button = self:CreateCfavsCheckBox()
+--		ns.Timer_EditBox = self:CreateTimerEditBox()
 		hooksecurefunc("CollectionsJournal_UpdateSelectedTab", function(self)
 			local selected = PanelTemplates_GetSelectedTab(self);
 			if selected == 2 then
---				PetKeeper.Auto_Button:Show()
-				PetKeeper.CFavs_Button:SetChecked(PetKeeperCharDB.cfavs_enabled)
-				PetKeeper.CFavs_Button:Show()
---				PetKeeper.Timer_EditBox:Show()
+--				ns.Auto_Button:Show()
+				ns.CFavs_Button:SetChecked(ns.dbc.cfavs_enabled)
+				ns.CFavs_Button:Show()
+--				ns.Timer_EditBox:Show()
 			else
---				PetKeeper.Auto_Button:Hide()
-				PetKeeper.CFavs_Button:Hide()
---				PetKeeper.Timer_EditBox:ClearFocus()
---				PetKeeper.Timer_EditBox:Hide()
+--				ns.Auto_Button:Hide()
+				ns.CFavs_Button:Hide()
+--				ns.Timer_EditBox:ClearFocus()
+--				ns.Timer_EditBox:Hide()
 			end
 		end)
 	end
@@ -122,108 +128,108 @@ end
 
 
 -- pet is lost --> restore prev one
-function PetKeeper.AutoRestore()
---	PetKeeper:dbpp("AutoRestore() was called")
---	if not poolInitialized then PetKeeper:InitializePool() end
-	if not PetKeeperDB.enable then return end
+function ns.AutoRestore()
+--	ns:dbpp("AutoRestore() was called")
+--	if not poolInitialized then ns:InitializePool() end
+	if not ns.db.enable then return end
 	if GetTime() - lastSummonTime < 2 then return end
 	if GetTime() - lastAutoRestoreRunTime < 2 then return end
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
 	if not actualPet then
-		if PetKeeperCharDB.cfavs_enabled then
-			PetKeeper:SafeSummon(PetKeeperCharDB.currentPet)
+		if ns.dbc.cfavs_enabled then
+			ns:SafeSummon(ns.dbc.currentPet)
 		else
-			PetKeeper:SafeSummon(PetKeeperDB.currentPet)
+			ns:SafeSummon(ns.db.currentPet)
 		end
 	end
-	PetKeeper:dbpp("AutoRestore() has run")
+	ns:dbpp("AutoRestore() has run")
 	lastAutoRestoreRunTime = GetTime()
 end
 
 --[=[
-function PetKeeper.AutoRestore() -- extended version
---	if not poolInitialized then PetKeeper:InitializePool() end
-	if not PetKeeperDB.enable then return end
+function ns.AutoRestore() -- extended version
+--	if not poolInitialized then ns:InitializePool() end
+	if not ns.db.enable then return end
 	if GetTime() - lastSummonTime < 0.5 then return end
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
-	if PetKeeperCharDB.cfavs_enabled then
-		if not actualPet or actualPet ~=  PetKeeperCharDB.currentPet then
-			PetKeeper:SafeSummon(PetKeeperCharDB.currentPet)
+	if ns.dbc.cfavs_enabled then
+		if not actualPet or actualPet ~=  ns.dbc.currentPet then
+			ns:SafeSummon(ns.dbc.currentPet)
 		end
 	else
-		if not actualPet or actualPet ~=  PetKeeperDB.currentPet then
-			PetKeeper:SafeSummon(PetKeeperDB.currentPet)
+		if not actualPet or actualPet ~=  ns.db.currentPet then
+			ns:SafeSummon(ns.db.currentPet)
 		end
 	end
-	PetKeeper:dbpp("AutoRestore() has run")
+	ns:dbpp("AutoRestore() has run")
 	lastSummonTime = GetTime()
 end
 --]=]
 
 -- After login, try to restore the same pat as the last logged-in char had active
-function PetKeeper.LoginCheck()
---	if not poolInitialized then PetKeeper:InitializePool() end
-	if not PetKeeperDB.enable then return end
+function ns.LoginCheck()
+--	if not poolInitialized then ns:InitializePool() end
+	if not ns.db.enable then return end
 	petVerified = true
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
-	if PetKeeperCharDB.cfavs_enabled then
-		if not actualPet or actualPet ~= PetKeeperCharDB.currentPet then
-			PetKeeper:SafeSummon(PetKeeperCharDB.currentPet)
+	if ns.dbc.cfavs_enabled then
+		if not actualPet or actualPet ~= ns.dbc.currentPet then
+			ns:SafeSummon(ns.dbc.currentPet)
 		end
 	else
-		if not actualPet or actualPet ~= PetKeeperDB.currentPet then
-			PetKeeper:SafeSummon(PetKeeperDB.currentPet)
+		if not actualPet or actualPet ~= ns.db.currentPet then
+			ns:SafeSummon(ns.db.currentPet)
 		end
 	end
-	PetKeeper:dbpp("LoginCheck() has run")
+	ns:dbpp("LoginCheck() has run")
 end
 
 -- timed summoning of a new pet from the pool
-function PetKeeper.AutoAction()
---	PetKeeper:dbpp("AutoAction() was called")
-	if not PetKeeperDB.enable then return end
+function ns.AutoAction()
+--	ns:dbpp("AutoAction() was called")
+	if not ns.db.enable then return end
 	petVerified = true
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
 	local timerDue
-	if PetKeeperDB.timer ~= 0 then
-		if lastCall + PetKeeperDB.timer * 60 < GetTime() then
+	if ns.db.timer ~= 0 then
+		if lastCall + ns.db.timer * 60 < GetTime() then
 			timerDue = true
 		end
 	end
 	if not actualPet or timerDue then
-		PetKeeper:dbpp("AutoAction() has run")
+		ns:dbpp("AutoAction() has run")
 		if not timerDue then
-			PetKeeper.AutoRestore()
+			ns.AutoRestore()
 		else
-			PetKeeper.AutoNew()
+			ns.AutoNew()
 		end
 	end
 end
 
-function PetKeeper.AutoNew()
-	if not poolInitialized then PetKeeper:InitializePool() end
-	local newPet = PetKeeper:Shuffle()
+function ns.AutoNew()
+	if not poolInitialized then ns:InitializePool() end
+	local newPet = ns:Shuffle()
 	if newPet == actualPet then return end
 	if newPet and (lastCall+1.5 < GetTime()) then
 		lastCall = GetTime()
-		PetKeeper:SafeSummon(newPet)
+		ns:SafeSummon(newPet)
 	end
 end
 
-function PetKeeper.SavePet()
+function ns.SavePet()
 	savePetDelay = savePetNormalDelay
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
 	if not actualPet or (GetTime() - lastSavePetTime < 1) or not petVerified then return end
-	if PetKeeperCharDB.cfavs_enabled then
-		if PetKeeperCharDB.currentPet == actualPet then return end
-		PetKeeperCharDB.previousPet = PetKeeperCharDB.currentPet
-		PetKeeperCharDB.currentPet = actualPet
+	if ns.dbc.cfavs_enabled then
+		if ns.dbc.currentPet == actualPet then return end
+		ns.dbc.previousPet = ns.dbc.currentPet
+		ns.dbc.currentPet = actualPet
 	else
-		if PetKeeperDB.currentPet == actualPet then return end
-		PetKeeperDB.previousPet = PetKeeperDB.currentPet
-		PetKeeperDB.currentPet = actualPet
+		if ns.db.currentPet == actualPet then return end
+		ns.db.previousPet = ns.db.currentPet
+		ns.db.currentPet = actualPet
 	end
-	PetKeeper:dbpp("SavePet() has run")
+	ns:dbpp("SavePet() has run")
 	lastSavePetTime = GetTime()
 end
 
@@ -244,14 +250,14 @@ end
 local function OfflimitsAura(auras)
 	for _, a in pairs(auras) do
 		if GetPlayerAuraBySpellID(a) then
-			PetKeeper.dbp("Excluded Aura found!")
+			ns.dbp("Excluded Aura found!")
 			return true
 		end
 	end
 	return false
 end
 
-function PetKeeper:SafeSummon(pet)
+function ns:SafeSummon(pet)
 	if not pet then return end -- needed?
 	if not UnitAffectingCombat("player")
 --		and not IsMounted() -- TODO: test if this is needed
@@ -265,9 +271,9 @@ function PetKeeper:SafeSummon(pet)
 		and not InArena()
 	then
 		C_PetJournal.SummonPetByGUID(pet)
-		PetKeeper:dbpp("SafeSummon() has summoned \"" .. (PetKeeper.PetGUIDtoName(pet) or "-NONE-") .. "\" ")
+		ns:dbpp("SafeSummon() has summoned \"" .. (ns.PetGUIDtoName(pet) or "-NONE-") .. "\" ")
 		lastSummonTime = GetTime()
---		PetKeeper.SavePet() -- already done with the event directly
+--		ns.SavePet() -- already done with the event directly
 	end
 end
 
@@ -276,30 +282,30 @@ end
 -- Manual Summon
 --------------------------------------------------------------------------------
 
-function PetKeeper.ManualSummonNew()
-	if not poolInitialized then PetKeeper:InitializePool() end
+function ns.ManualSummonNew()
+	if not poolInitialized then ns:InitializePool() end
 	local newPet, maxFavs
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
 	repeat
-		newPet, maxFavs = PetKeeper:Shuffle()
+		newPet, maxFavs = ns:Shuffle()
 	until not actualPet or newPet ~= actualPet or maxFavs < 2
 	if actualPet == newPet then return end
 	lastCall = GetTime()
-	PetKeeper:SafeSummon(newPet)
+	ns:SafeSummon(newPet)
 -- 	C_PetJournal.SummonPetByGUID(newPet)
 	lastSummonTime = lastCall
-	PetKeeper:dbpp("ManualSummonNew() has summoned \"" .. PetKeeper.PetGUIDtoName(newPet) .. "\" ")
+	ns:dbpp("ManualSummonNew() has summoned \"" .. ns.PetGUIDtoName(newPet) .. "\" ")
 end
 
-function PetKeeper.ManualSummonPrevious()
---	if not poolInitialized then PetKeeper:InitializePool() end
-	if PetKeeperCharDB.cfavs_enabled then
-		C_PetJournal.SummonPetByGUID(PetKeeperCharDB.previousPet)
+function ns.ManualSummonPrevious()
+--	if not poolInitialized then ns:InitializePool() end
+	if ns.dbc.cfavs_enabled then
+		C_PetJournal.SummonPetByGUID(ns.dbc.previousPet)
 	else
-		C_PetJournal.SummonPetByGUID(PetKeeperDB.previousPet)
+		C_PetJournal.SummonPetByGUID(ns.db.previousPet)
 	end
 	lastCall = GetTime()
-	--PetKeeper.SavePet() -- already with the event
+	--ns.SavePet() -- already with the event
 	lastSummonTime = lastCall
 end
 
@@ -311,20 +317,20 @@ end
 local function IsExcluded(species)
 	for _, s in pairs(excludedSpecies) do
 		if s == species then
-			PetKeeper:dbp("Excluded pet found!")
+			ns:dbp("Excluded pet found!")
 			return true
 		end
 	end
 	return false
 end
 
-function PetKeeper.InitializePool(self)
+function ns.InitializePool(self)
 	table.wipe(petPool)
 	local index = 1
 	while true do
 		local petID, speciesID, _, _, _, favorite = C_PetJournal.GetPetInfoByIndex(index)
 		if not petID then break end
-		if PetKeeperDB.favsOnly then
+		if ns.db.favsOnly then
 			if favorite and not IsExcluded(speciesID) then
 				table.insert(petPool, petID)
 			end
@@ -339,23 +345,23 @@ function PetKeeper.InitializePool(self)
 end
 
 
-function PetKeeper.CFavsUpdate()
-	local enable = PetKeeperCharDB.cfavs_enabled
+function ns.CFavsUpdate()
+	local enable = ns.dbc.cfavs_enabled
 	if enable then
 		C_PetJournal.PetIsFavorite1 = C_PetJournal.PetIsFavorite1 or C_PetJournal.PetIsFavorite
 		C_PetJournal.SetFavorite1 = C_PetJournal.SetFavorite1 or C_PetJournal.SetFavorite
 		C_PetJournal.GetPetInfoByIndex1 = C_PetJournal.GetPetInfoByIndex1 or C_PetJournal.GetPetInfoByIndex
 		C_PetJournal.PetIsFavorite = function(petGUID)
-			return PetKeeperCharDB.cfavs[petGUID] or false
+			return ns.dbc.cfavs[petGUID] or false
 		end
 		C_PetJournal.SetFavorite = function(petGUID, new)
 			if new == 1 then
-				PetKeeperCharDB.cfavs[petGUID] = true
+				ns.dbc.cfavs[petGUID] = true
 			else
-				PetKeeperCharDB.cfavs[petGUID] = nil
+				ns.dbc.cfavs[petGUID] = nil
 			end
 			if PetJournal then PetJournal_OnEvent(PetJournal, "PET_JOURNAL_LIST_UPDATE") end
-			PetKeeper:PET_JOURNAL_LIST_UPDATE()
+			ns:PET_JOURNAL_LIST_UPDATE()
 		end
 		local gpi = C_PetJournal.GetPetInfoByIndex1
 		C_PetJournal.GetPetInfoByIndex = function(...)
@@ -369,11 +375,11 @@ function PetKeeper.CFavsUpdate()
 		if C_PetJournal.GetPetInfoByIndex1 then C_PetJournal.GetPetInfoByIndex = C_PetJournal.GetPetInfoByIndex1 end
 	end
 	if PetJournal then PetJournal_OnEvent(PetJournal, "PET_JOURNAL_LIST_UPDATE") end
-	PetKeeper:PET_JOURNAL_LIST_UPDATE()
+	ns:PET_JOURNAL_LIST_UPDATE()
 end
 
 
-function PetKeeper.Shuffle(self)
+function ns.Shuffle(self)
 	local maxn = #petPool
 	local random
 	if maxn == 1 then
@@ -391,48 +397,48 @@ end
 -- Toggles, Commands
 --------------------------------------------------------------------------------
 
-function PetKeeper:DismissAndDisable()
+function ns:DismissAndDisable()
 	local activePetGUID = C_PetJournal.GetSummonedPetGUID()
 	if activePetGUID then
 		C_PetJournal.SummonPetByGUID(activePetGUID);
 	end
-	PetKeeperDB.enable = false
-	if PetKeeper.Auto_Button then PetKeeper.Auto_Button:SetChecked(PetKeeperDB.enable) end
-	DEFAULT_CHAT_FRAME:AddMessage("Pet dismissed and auto-summon "..(PetKeeperDB.enable and "enabled" or "disabled"),0,1,0.7)
+	ns.db.enable = false
+	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.enable) end
+	DEFAULT_CHAT_FRAME:AddMessage("Pet dismissed and auto-summon "..(ns.db.enable and "enabled" or "disabled"),0,1,0.7)
 end
 
-function PetKeeper:AutoToggle()
-	PetKeeperDB.enable = not PetKeeperDB.enable
-	if PetKeeper.Auto_Button then PetKeeper.Auto_Button:SetChecked(PetKeeperDB.enable) end
-	DEFAULT_CHAT_FRAME:AddMessage("Pet auto-summon "..(PetKeeperDB.enable and "enabled" or "disabled"),0,1,0.7)
+function ns:AutoToggle()
+	ns.db.enable = not ns.db.enable
+	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.enable) end
+	DEFAULT_CHAT_FRAME:AddMessage("Pet auto-summon "..(ns.db.enable and "enabled" or "disabled"),0,1,0.7)
 end
 
-function PetKeeper:FavsToggle()
-	PetKeeperDB.favsOnly = not PetKeeperDB.favsOnly
+function ns:FavsToggle()
+	ns.db.favsOnly = not ns.db.favsOnly
 	poolInitialized = false
-	DEFAULT_CHAT_FRAME:AddMessage("Selection pool: "..(PetKeeperDB.favsOnly and "favorites only" or "all pets"),0,1,0.7)
+	DEFAULT_CHAT_FRAME:AddMessage("Selection pool: "..(ns.db.favsOnly and "favorites only" or "all pets"),0,1,0.7)
 end
 
-function PetKeeper.CharFavsSlashToggle() -- for slash command only
-	PetKeeperCharDB.cfavs_enabled = not PetKeeperCharDB.cfavs_enabled
-	PetKeeper:CFavsUpdate()
-	DEFAULT_CHAT_FRAME:AddMessage("Character-specific favorites "..(PetKeeperCharDB.cfavs_enabled and "enabled" or "disabled"),0,1,0.7)
+function ns.CharFavsSlashToggle() -- for slash command only
+	ns.dbc.cfavs_enabled = not ns.dbc.cfavs_enabled
+	ns:CFavsUpdate()
+	DEFAULT_CHAT_FRAME:AddMessage("Character-specific favorites "..(ns.dbc.cfavs_enabled and "enabled" or "disabled"),0,1,0.7)
 end
 
-function PetKeeper:TimerSlashCmd(value)
+function ns:TimerSlashCmd(value)
 	value = tonumber(value)
 	if value >= 0 and value < 1000 then
-		PetKeeperDB.timer = value
-	--			PetKeeper.TimerEditBox:SetText(PetKeeperDB.timer) -- only needed for GUI edit box, which is currently disabled
-	DEFAULT_CHAT_FRAME:AddMessage(PetKeeperDB.timer == 0 and "Summon timer disabled" or "Summoning a new pet every " .. PetKeeperDB.timer .. " minutes",0,1,0.7)
+		ns.db.timer = value
+	--			ns.TimerEditBox:SetText(ns.db.timer) -- only needed for GUI edit box, which is currently disabled
+	DEFAULT_CHAT_FRAME:AddMessage(ns.db.timer == 0 and "Summon timer disabled" or "Summoning a new pet every " .. ns.db.timer .. " minutes",0,1,0.7)
 	end
 end
 
 -- Used for info print
-function PetKeeper:ListCharFavs()
+function ns:ListCharFavs()
 	local charFavsNames = {}
 	local count = 0
-	for id, _ in pairs(PetKeeperCharDB.cfavs) do
+	for id, _ in pairs(ns.dbc.cfavs) do
 	count = count + 1
 	local index = 1
 		while true do
@@ -454,39 +460,39 @@ end
 -- UI
 --------------------------------------------------------------------------------
 
-local helpText = "\nPetKeeper Help: '/pk' or '/petk' supports these commands:\n	 d: Dismiss current pet and disable auto-summoning\n  a: Toggle auto-summoning\n  n: Summon new pet from pool\n	 f: Toggle selection pool: favorites only, or all pets\n  c: Toggle character-specific favorites, or global\n  <number>: Summon timer in minutes (1 to 999, 0 to disable)\n	 p: Summon previous pet\n  s: Display current status/settings\n	 h: This help text\nIn Key Bindigs > AddOns you can directly bind some commands."
+local helpText = "\nPetKeeper Help: '/pk' or '/petk' supports these commands:\n  d: Dismiss current pet and disable auto-summoning\n  a: Toggle auto-summoning\n  n: Summon new pet from pool\n  f: Toggle selection pool: favorites only, or all pets\n  c: Toggle character-specific favorites, or global\n  <number>: Summon timer in minutes (1 to 999, 0 to disable)\n  p: Summon previous pet\n  s: Display current status/settings\n  h: This help text\nIn Key Bindigs > AddOns you can directly bind some commands."
 
-function PetKeeper.Status()
-	local text = "\nPetKeeper Status:\n	 Auto-summoning is " .. (PetKeeperDB.enable and "enabled" or "disabled") .. "\n	 Summon timer is " .. (PetKeeperDB.timer > 0 and PetKeeperDB.timer .. " minutes" or "disbled") .. "\n  Selection pool is set to " .. (PetKeeperDB.favsOnly and "favorites only" or "all pets") .. "\n  Character-specific favorites are " .. (PetKeeperCharDB.cfavs_enabled and "enabled" or "disabled") .. " for " .. thisChar .. "\n	" .. PetKeeper:ListCharFavs()
+function ns.Status()
+	local text = "\nPetKeeper Status:\n  Auto-summoning is " .. (ns.db.enable and "enabled" or "disabled") .. "\n  Summon timer is " .. (ns.db.timer > 0 and ns.db.timer .. " minutes" or "disbled") .. "\n  Selection pool is set to " .. (ns.db.favsOnly and "favorites only" or "all pets") .. "\n  Character-specific favorites are " .. (ns.dbc.cfavs_enabled and "enabled" or "disabled") .. " for " .. thisChar .. "\n " .. ns:ListCharFavs()
 	return text
 end
 
 SLASH_PetKeeper1, SLASH_PetKeeper2 = '/pk', '/petk'
 function SlashCmdList.PetKeeper(cmd)
 	if cmd == 'd' or cmd == 'dis' then
-		PetKeeper:DismissAndDisable()
-	elseif cmd == 'db' or cmd == 'debug' then
-		PetKeeper:DebugDisplay()
+		ns:DismissAndDisable()
+	elseif cmd == 'db' or cmd == 'deb' then
+		ns:DebugDisplay()
 	elseif cmd == 'a' or cmd == 'auto' then
-		PetKeeper:AutoToggle()
+		ns:AutoToggle()
 	elseif cmd == 'n' or cmd == 'new' then
-		PetKeeper:ManualSummon()
+		ns:ManualSummonNew()
 	elseif cmd == 'f' or cmd == 'fav' then
-		PetKeeper:FavsToggle()
+		ns:FavsToggle()
 	elseif cmd == 'c' or cmd == 'char' then
-		PetKeeper.CharFavsSlashToggle()
+		ns.CharFavsSlashToggle()
 	elseif cmd == 'p' or cmd == 'prev' then
-		PetKeeper.ManualSummonPrevious()
+		ns.ManualSummonPrevious()
 	elseif cmd == 's' or cmd == 'status' then
-		DEFAULT_CHAT_FRAME:AddMessage(PetKeeper.Status(),0,1,0.7)
+		DEFAULT_CHAT_FRAME:AddMessage(ns.Status(),0,1,0.7)
 	elseif tonumber(cmd) then
-		PetKeeper:TimerSlashCmd(cmd)
+		ns:TimerSlashCmd(cmd)
 	elseif cmd == 'h' or cmd == 'help' then
 		DEFAULT_CHAT_FRAME:AddMessage(helpText,0,1,0.7)
 	elseif cmd == '' then
-		DEFAULT_CHAT_FRAME:AddMessage(PetKeeper.Status() .. helpText,0,1,0.7)
+		DEFAULT_CHAT_FRAME:AddMessage(ns.Status() .. helpText,0,1,0.7)
 	else
-		DEFAULT_CHAT_FRAME:AddMessage("PetKeeper: Invalid command or/and arguments. Enter '/pk help' for a list of commands.", 0,1,0.7)
+		DEFAULT_CHAT_FRAME:AddMessage("ns: Invalid command or/and arguments. Enter '/pk help' for a list of commands.", 0,1,0.7)
 	end
 end
 
@@ -497,7 +503,7 @@ end
 
 -- We disabled most of the GUI stuff, since now we have more settings than we can fit there. We leave the CharFavorites checkbox, because it makes sense to see at a glance (in the opened Pet Journal) which type of favs are enabled.
 
-function PetKeeper.CreateCheckBoxBase(self)
+function ns.CreateCheckBoxBase(self)
 	local f = CreateFrame("CheckButton", "PetKeeperAutoCheckbox",PetJournal,"UICheckButtonTemplate")
 	f:SetWidth(25)
 	f:SetHeight(25)
@@ -514,13 +520,13 @@ function PetKeeper.CreateCheckBoxBase(self)
 end
 
 --[=[
-function PetKeeper.CreateAutoCheckBox(self)
+function ns.CreateAutoCheckBox(self)
 	local f, label = self:CreateCheckBoxBase()
 
 	f:SetPoint("BOTTOMLEFT",PetJournal,"BOTTOMLEFT",290,1)
-	f:SetChecked(PetKeeperDB.enable)
+	f:SetChecked(ns.db.enable)
 	f:SetScript("OnClick",function(self,button)
-		PetKeeperDB.enable = not PetKeeperDB.enable
+		ns.db.enable = not ns.db.enable
 	end)
 	f:SetScript("OnEnter",function(self)
 		GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
@@ -532,13 +538,13 @@ function PetKeeper.CreateAutoCheckBox(self)
 end
 --]=]
 
-function PetKeeper.CreateCfavsCheckBox(self)
+function ns.CreateCfavsCheckBox(self)
 	local f, label = self:CreateCheckBoxBase()
 	f:SetPoint("BOTTOMLEFT",PetJournal,"BOTTOMLEFT",400,1)
-	f:SetChecked(PetKeeperCharDB.cfavs_enabled)
+	f:SetChecked(ns.dbc.cfavs_enabled)
 	f:SetScript("OnClick",function(self,button)
-		PetKeeperCharDB.cfavs_enabled = not PetKeeperCharDB.cfavs_enabled
-		PetKeeper:CFavsUpdate()
+		ns.dbc.cfavs_enabled = not ns.dbc.cfavs_enabled
+		ns:CFavsUpdate()
 	end)
 	f:SetScript("OnEnter",function(self)
 		GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
@@ -551,23 +557,23 @@ end
 
 
 --[=[
-function PetKeeper.CreateTimerEditBox()
+function ns.CreateTimerEditBox()
 	local f = CreateFrame("EditBox",nil, PetJournal,"InputBoxTemplate")
-	PetKeeper.TimerEditBox = f -- Need this for the slash command
+	ns.TimerEditBox = f -- Need this for the slash command
 	f:SetWidth(30)
 	f:SetHeight(15)
 	f:SetAutoFocus(false)
 	f:SetMaxLetters(3)
-	f:SetText(PetKeeperDB.timer)
+	f:SetText(ns.db.timer)
 	f:SetPoint("BOTTOMLEFT",PetJournal,"BOTTOMLEFT",355,6)
 	f:SetScript("OnEnterPressed", function(self)
 		if tonumber(self:GetText()) then
-			PetKeeperDB.timer = tonumber(self:GetText())
+			ns.db.timer = tonumber(self:GetText())
 		end
 		self:ClearFocus()
 	end)
 	f:SetScript("OnEscapePressed", function(self)
-		self:SetText(PetKeeperDB.timer)
+		self:SetText(ns.db.timer)
 		self:ClearFocus()
 	end)
 
@@ -594,7 +600,7 @@ end
 -- Debugging
 --------------------------------------------------------------------------------
 
-function PetKeeper.PetGUIDtoName(guid)
+function ns.PetGUIDtoName(guid)
 	local index = 1
 	while true do
 		local petGUID, _, _, _, _, _, _, name = C_PetJournal.GetPetInfoByIndex(index)
@@ -606,24 +612,24 @@ function PetKeeper.PetGUIDtoName(guid)
 	end
 end
 
-function PetKeeper:DebugDisplay()
-	DEFAULT_CHAT_FRAME:AddMessage("\nDebug:\n  Current pet: " .. (PetKeeper.PetGUIDtoName(PetKeeperDB.currentPet) or "-none-") .. "\n  Previous pet: " .. (PetKeeper.PetGUIDtoName(PetKeeperDB.previousPet) or "-none-") .. "\n	 Current char pet: " .. (PetKeeper.PetGUIDtoName(PetKeeperCharDB.currentPet) or "-none-") .. "\n  Previous char pet: " .. (PetKeeper.PetGUIDtoName(PetKeeperCharDB.previousPet) or "-none-") .. "\n" .. PetKeeper.Status(),0,1,0.7)
+function ns:DebugDisplay()
+	DEFAULT_CHAT_FRAME:AddMessage("\nDebug:\n  Current pet: " .. (ns.PetGUIDtoName(ns.db.currentPet) or "-none-") .. "\n  Previous pet: " .. (ns.PetGUIDtoName(ns.db.previousPet) or "-none-") .. "\n	 Current char pet: " .. (ns.PetGUIDtoName(ns.dbc.currentPet) or "-none-") .. "\n  Previous char pet: " .. (ns.PetGUIDtoName(ns.dbc.previousPet) or "-none-") .. "\n" .. ns.Status(),0,1,0.7)
 end
 
 -- with pet info
 ---[=[
-function PetKeeper:dbpp(msg)
-	print("\n|cffFFA500--- PETKEEPER DEBUG: " .. msg .. " - Current DB pet: " .. (PetKeeper.PetGUIDtoName(PetKeeperDB.currentPet) or "-none-"))
+function ns:dbpp(msg)
+	print("\n|cffFFA500--- PETKEEPER DEBUG: " .. msg .. " - Current ns.db pet: " .. (ns.PetGUIDtoName(ns.db.currentPet) or "-none-"))
 end
 --]=]
 
 -- without pet info
-function PetKeeper:dbp(msg)
+function ns:dbp(msg)
 	print("\n|cffFFA500--- PETKEEPER DEBUG: " .. msg)
 end
 
 -- Table dump
-function PetKeeper.dump(o)
+function ns.dump(o)
 	if type(o) == 'table' then
 		local s = '{ '
 		for k,v in pairs(o) do
