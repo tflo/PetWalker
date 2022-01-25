@@ -234,7 +234,7 @@ end
 
 local function OfflimitsAura(auras)
 	for _, a in pairs(auras) do
-		if GetPlayerAuraBySpellID(aura) then
+		if GetPlayerAuraBySpellID(a) then
 			PetKeeper.dbp("Excluded Aura found!")
 			return true
 		end
