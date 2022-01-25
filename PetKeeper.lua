@@ -87,6 +87,7 @@ function PetKeeper.ADDON_LOADED(self,event,arg1)
 			local selected = PanelTemplates_GetSelectedTab(self);
 			if selected == 2 then
 -- 				PetKeeper.Auto_Button:Show()
+				PetKeeper.CFavs_Button:SetChecked(PetKeeperCharDB.cfavs_enabled)
 				PetKeeper.CFavs_Button:Show()
 -- 				PetKeeper.Timer_EditBox:Show()
 			else
@@ -395,7 +396,6 @@ end
 function PetKeeper:CharFavsSlashToggle() -- for slash command only
 	PetKeeperCharDB.cfavs_enabled = not PetKeeperCharDB.cfavs_enabled
 	PetKeeper:CFavsUpdate()
-	PetKeeper.CharFavsCheckBox:SetChecked(PetKeeperCharDB.cfavs_enabled)
 	DEFAULT_CHAT_FRAME:AddMessage("Character-specific favorites "..(PetKeeperCharDB.cfavs_enabled and "enabled" or "disabled"),0,1,0.7)
 end
 
@@ -514,7 +514,6 @@ end
 
 function PetKeeper.CreateCfavsCheckBox(self)
 	local f, label = self:CreateCheckBoxBase()
-	PetKeeper.CharFavsCheckBox = f -- Need this for the slash command
 	f:SetPoint("BOTTOMLEFT",PetJournal,"BOTTOMLEFT",400,1)
 	f:SetChecked(PetKeeperCharDB.cfavs_enabled)
 	f:SetScript("OnClick",function(self,button)
