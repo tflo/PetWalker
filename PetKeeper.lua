@@ -115,52 +115,16 @@ function ns.ADDON_LOADED(self,event,arg1)
 end
 
 
---------------------------------------------------------------------------------
--- Main Functions
---------------------------------------------------------------------------------
+--[[===========================================================================
+MAIN ACTIONS
+===========================================================================]]--
 
+--[[---------------------------------------------------------------------------
+The main function that runs when player started moving.
+It DECIDES whether to restore a (lost) pet, or summoning a new one (if the timer is set and due).
+---------------------------------------------------------------------------]]--
 
--- pet is lost --> restore prev one
-function ns.AutoRestore()
---	ns:dbpp("AutoRestore() was called")
---	if not poolInitialized then ns:InitializePool() end
-	if not ns.db.enable then return end
-	if GetTime() - lastSummonTime < 2 then return end
-	if GetTime() - lastAutoRestoreRunTime < 2 then return end
-	local actualPet = C_PetJournal.GetSummonedPetGUID()
-	if not actualPet then
-		if ns.dbc.cfavs_enabled then
-			ns:SafeSummon(ns.dbc.currentPet)
-		else
-			ns:SafeSummon(ns.db.currentPet)
-		end
-	end
-	ns:dbpp("AutoRestore() has run")
-	lastAutoRestoreRunTime = GetTime()
-end
-
-
--- After login, try to restore the same pat as the last logged-in char had active
-function ns.LoginCheck()
---	if not poolInitialized then ns:InitializePool() end
-	if not ns.db.enable then return end
-	petVerified = true
-	local actualPet = C_PetJournal.GetSummonedPetGUID()
-	if ns.dbc.cfavs_enabled then
-		if not actualPet or actualPet ~= ns.dbc.currentPet then
-			ns:SafeSummon(ns.dbc.currentPet)
-		end
-	else
-		if not actualPet or actualPet ~= ns.db.currentPet then
-			ns:SafeSummon(ns.db.currentPet)
-		end
-	end
-	ns:dbpp("LoginCheck() has run")
-end
-
--- timed summoning of a new pet from the pool
 function ns.AutoAction()
---	ns:dbpp("AutoAction() was called")
 	if not ns.db.enable then return end
 	petVerified = true
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
@@ -180,6 +144,30 @@ function ns.AutoAction()
 	end
 end
 
+--[[---------------------------------------------------------------------------
+AUTO RESTORE: Pet is lost --> restore it
+---------------------------------------------------------------------------]]--
+
+function ns.AutoRestore()
+	if not ns.db.enable then return end
+	if GetTime() - lastSummonTime < 2 then return end
+	if GetTime() - lastAutoRestoreRunTime < 2 then return end
+	local actualPet = C_PetJournal.GetSummonedPetGUID()
+	if not actualPet then
+		if ns.dbc.cfavs_enabled then
+			ns:SafeSummon(ns.dbc.currentPet)
+		else
+			ns:SafeSummon(ns.db.currentPet)
+		end
+	end
+	ns:dbpp("AutoRestore() has run")
+	lastAutoRestoreRunTime = GetTime()
+end
+
+
+--[[---------------------------------------------------------------------------
+NEW PET AUTOMATIC SUMMON: Runs when timer is due
+---------------------------------------------------------------------------]]--
 function ns.AutoNew()
 	if not poolInitialized then ns:InitializePool() end
 	local newPet = ns:Shuffle()
@@ -189,6 +177,69 @@ function ns.AutoNew()
 		ns:SafeSummon(newPet)
 	end
 end
+
+
+--[[---------------------------------------------------------------------------
+MANUAL SUMMON, via command
+---------------------------------------------------------------------------]]--
+
+function ns.ManualSummonNew()
+	if not poolInitialized then ns:InitializePool() end
+	local newPet, maxFavs
+	local actualPet = C_PetJournal.GetSummonedPetGUID()
+	repeat
+		newPet, maxFavs = ns:Shuffle()
+	until not actualPet or newPet ~= actualPet or maxFavs < 2
+	if actualPet == newPet then return end
+	lastCall = GetTime()
+	-- Temporarily using the SafeSummon function, to test the exclusions; but maybe it is a good idea to keep it like that?
+	ns:SafeSummon(newPet)
+-- 	C_PetJournal.SummonPetByGUID(newPet)
+	lastSummonTime = lastCall
+	ns:dbpp("ManualSummonNew() has summoned \"" .. ns.PetGUIDtoName(newPet) .. "\" ")
+end
+
+
+--[[---------------------------------------------------------------------------
+MANUAL SUMMON of the previously summoned pet
+---------------------------------------------------------------------------]]--
+
+function ns.ManualSummonPrevious()
+	if ns.dbc.cfavs_enabled then
+		C_PetJournal.SummonPetByGUID(ns.dbc.previousPet)
+	else
+		C_PetJournal.SummonPetByGUID(ns.db.previousPet)
+	end
+	lastCall = GetTime()
+	lastSummonTime = lastCall
+end
+
+
+--[[---------------------------------------------------------------------------
+One time action,  somewhere AFTER LOGIN. Try to restore the same pat as the last logged-in char had active.
+---------------------------------------------------------------------------]]--
+
+function ns.LoginCheck()
+--	if not poolInitialized then ns:InitializePool() end
+	if not ns.db.enable then return end
+	petVerified = true
+	local actualPet = C_PetJournal.GetSummonedPetGUID()
+	if ns.dbc.cfavs_enabled then
+		if not actualPet or actualPet ~= ns.dbc.currentPet then
+			ns:SafeSummon(ns.dbc.currentPet)
+		end
+	else
+		if not actualPet or actualPet ~= ns.db.currentPet then
+			ns:SafeSummon(ns.db.currentPet)
+		end
+	end
+	ns:dbpp("LoginCheck() has run")
+end
+
+
+--[[---------------------------------------------------------------------------
+SAVING: Save a newly summoned pet, no matter how it was summoned. Should run with the COMPANION_UPDATE event.
+---------------------------------------------------------------------------]]--
 
 function ns.SavePet()
 	savePetDelay = savePetNormalDelay
@@ -208,18 +259,17 @@ function ns.SavePet()
 end
 
 
---- SafeSummon -----------------------------------------------------------------
+--[[---------------------------------------------------------------------------
+SAFE-SUMMON: Used in the AutoSummon function, and currently also in the Manual Summon function
+---------------------------------------------------------------------------]]--
 
-local function InMythicKeystone()
-	local _, instanceType, difficultyID = GetInstanceInfo()
-	-- TODO: instanceType redundant if we query for difficultyID?
-	return instanceType == "party" and difficultyID == 8
-end
-
-local function InArena()
-	local _, instanceType = IsInInstance()
-	return instanceType == "arena"
-end
+-- TODO: What about Feign Death?!
+local excludedAuras = {
+	32612, -- Mage: Invisibility
+	110960, -- Mage: Greater Invisibility
+	131347, -- DH: Gliding
+	311796, -- Pet: Daisy as backpack (/beckon)
+} -- More exclusions in the Summon function itself
 
 local function OfflimitsAura(auras)
 	for _, a in pairs(auras) do
@@ -229,6 +279,16 @@ local function OfflimitsAura(auras)
 		end
 	end
 	return false
+end
+
+local function InMythicKeystone()
+	local _, instanceType, difficultyID = GetInstanceInfo()
+	return instanceType == "party" and difficultyID == 8
+end
+
+local function InArena()
+	local _, instanceType = IsInInstance()
+	return instanceType == "arena"
 end
 
 function ns:SafeSummon(pet)
@@ -247,46 +307,10 @@ function ns:SafeSummon(pet)
 		C_PetJournal.SummonPetByGUID(pet)
 		ns:dbpp("SafeSummon() has summoned \"" .. (ns.PetGUIDtoName(pet) or "-NONE-") .. "\" ")
 		lastSummonTime = GetTime()
---		ns.SavePet() -- already done with the event directly
 	end
 end
 
 
---------------------------------------------------------------------------------
--- Manual Summon
---------------------------------------------------------------------------------
-
-function ns.ManualSummonNew()
-	if not poolInitialized then ns:InitializePool() end
-	local newPet, maxFavs
-	local actualPet = C_PetJournal.GetSummonedPetGUID()
-	repeat
-		newPet, maxFavs = ns:Shuffle()
-	until not actualPet or newPet ~= actualPet or maxFavs < 2
-	if actualPet == newPet then return end
-	lastCall = GetTime()
-	ns:SafeSummon(newPet)
--- 	C_PetJournal.SummonPetByGUID(newPet)
-	lastSummonTime = lastCall
-	ns:dbpp("ManualSummonNew() has summoned \"" .. ns.PetGUIDtoName(newPet) .. "\" ")
-end
-
-function ns.ManualSummonPrevious()
---	if not poolInitialized then ns:InitializePool() end
-	if ns.dbc.cfavs_enabled then
-		C_PetJournal.SummonPetByGUID(ns.dbc.previousPet)
-	else
-		C_PetJournal.SummonPetByGUID(ns.db.previousPet)
-	end
-	lastCall = GetTime()
-	--ns.SavePet() -- already with the event
-	lastSummonTime = lastCall
-end
-
-
---------------------------------------------------------------------------------
--- Pool
---------------------------------------------------------------------------------
 
 local function IsExcluded(species)
 	for _, s in pairs(excludedSpecies) do
@@ -297,6 +321,13 @@ local function IsExcluded(species)
 	end
 	return false
 end
+--[[===========================================================================
+Creating the POOL, from where the random pet is summoned.
+This can be, depending on user setting:
+— Global favorites
+— Per-character favorites
+— All available pets (except the exclusions)
+===========================================================================]]--
 
 function ns.InitializePool(self)
 	table.wipe(petPool)
@@ -319,6 +350,7 @@ function ns.InitializePool(self)
 end
 
 
+-- Largely unaltered code from NugMiniPet
 function ns.CFavsUpdate()
 	local enable = ns.dbc.cfavs_enabled
 	if enable then
@@ -367,9 +399,13 @@ function ns.Shuffle(self)
 end
 
 
---------------------------------------------------------------------------------
+--[[===========================================================================
+UI STUFF (Slash and Pet journal checkbox)
+===========================================================================]]--
+
+--[[---------------------------------------------------------------------------
 -- Toggles, Commands
---------------------------------------------------------------------------------
+---------------------------------------------------------------------------]]--
 
 function ns:DismissAndDisable()
 	local activePetGUID = C_PetJournal.GetSummonedPetGUID()
@@ -431,7 +467,7 @@ end
 
 
 --------------------------------------------------------------------------------
--- UI
+-- Slash UI
 --------------------------------------------------------------------------------
 
 local helpText = "\nPetKeeper Help: '/pk' or '/petk' supports these commands:\n  d: Dismiss current pet and disable auto-summoning\n  a: Toggle auto-summoning\n  n: Summon new pet from pool\n  f: Toggle selection pool: favorites only, or all pets\n  c: Toggle character-specific favorites, or global\n  <number>: Summon timer in minutes (1 to 999, 0 to disable)\n  p: Summon previous pet\n  s: Display current status/settings\n  h: This help text\nIn Key Bindigs > AddOns you can directly bind some commands."
@@ -471,9 +507,9 @@ function SlashCmdList.PetKeeper(cmd)
 end
 
 
---------------------------------------------------------------------------------
+--[[---------------------------------------------------------------------------
 -- GUI stuff for Pet Journal
---------------------------------------------------------------------------------
+---------------------------------------------------------------------------]]--
 
 -- We disabled most of the GUI stuff, since now we have more settings than we can fit there. We leave the CharFavorites checkbox, because it makes sense to see at a glance (in the opened Pet Journal) which type of favs are enabled.
 
@@ -512,9 +548,9 @@ function ns.CreateCfavsCheckBox(self)
 end
 
 
---------------------------------------------------------------------------------
+--[[===========================================================================
 -- Debugging
---------------------------------------------------------------------------------
+===========================================================================]]--
 
 function ns.PetGUIDtoName(guid)
 	local index = 1
