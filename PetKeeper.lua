@@ -101,21 +101,14 @@ function ns.ADDON_LOADED(self,event,arg1)
 			end)
 		end
 
---		ns.Auto_Button = self:CreateAutoCheckBox()
 		ns.CFavs_Button = self:CreateCfavsCheckBox()
---		ns.Timer_EditBox = self:CreateTimerEditBox()
 		hooksecurefunc("CollectionsJournal_UpdateSelectedTab", function(self)
 			local selected = PanelTemplates_GetSelectedTab(self);
 			if selected == 2 then
---				ns.Auto_Button:Show()
 				ns.CFavs_Button:SetChecked(ns.dbc.cfavs_enabled)
 				ns.CFavs_Button:Show()
---				ns.Timer_EditBox:Show()
 			else
---				ns.Auto_Button:Hide()
 				ns.CFavs_Button:Hide()
---				ns.Timer_EditBox:ClearFocus()
---				ns.Timer_EditBox:Hide()
 			end
 		end)
 	end
@@ -498,7 +491,7 @@ end
 
 
 --------------------------------------------------------------------------------
--- Disabled GUI stuff for Pet Journal
+-- GUI stuff for Pet Journal
 --------------------------------------------------------------------------------
 
 -- We disabled most of the GUI stuff, since now we have more settings than we can fit there. We leave the CharFavorites checkbox, because it makes sense to see at a glance (in the opened Pet Journal) which type of favs are enabled.
@@ -519,24 +512,6 @@ function ns.CreateCheckBoxBase(self)
 	return f, label
 end
 
---[=[
-function ns.CreateAutoCheckBox(self)
-	local f, label = self:CreateCheckBoxBase()
-
-	f:SetPoint("BOTTOMLEFT",PetJournal,"BOTTOMLEFT",290,1)
-	f:SetChecked(ns.db.enable)
-	f:SetScript("OnClick",function(self,button)
-		ns.db.enable = not ns.db.enable
-	end)
-	f:SetScript("OnEnter",function(self)
-		GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
-		GameTooltip:SetText("PetKeeper\nEnable/Disable Autosummon\n\nCtrlClick : Mark as favorite", nil, nil, nil, nil, 1);
-		GameTooltip:Show();
-	end)
-	label:SetText("Auto")
-	return f
-end
---]=]
 
 function ns.CreateCfavsCheckBox(self)
 	local f, label = self:CreateCheckBoxBase()
@@ -554,46 +529,6 @@ function ns.CreateCfavsCheckBox(self)
 	label:SetText("Character favorites")
 	return f
 end
-
-
---[=[
-function ns.CreateTimerEditBox()
-	local f = CreateFrame("EditBox",nil, PetJournal,"InputBoxTemplate")
-	ns.TimerEditBox = f -- Need this for the slash command
-	f:SetWidth(30)
-	f:SetHeight(15)
-	f:SetAutoFocus(false)
-	f:SetMaxLetters(3)
-	f:SetText(ns.db.timer)
-	f:SetPoint("BOTTOMLEFT",PetJournal,"BOTTOMLEFT",355,6)
-	f:SetScript("OnEnterPressed", function(self)
-		if tonumber(self:GetText()) then
-			ns.db.timer = tonumber(self:GetText())
-		end
-		self:ClearFocus()
-	end)
-	f:SetScript("OnEscapePressed", function(self)
-		self:SetText(ns.db.timer)
-		self:ClearFocus()
-	end)
-
-	f:SetScript("OnEnter",function(self)
-		GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
-		GameTooltip:SetText("Summon new pet every X minutes\n0 = Disabled", nil, nil, nil, nil, 1);
-		GameTooltip:Show();
-	end)
-	f:SetScript("OnLeave",function(self)
-		GameTooltip:Hide();
-	end)
-
-	local label	 =	f:CreateFontString(nil, "OVERLAY")
-	label:SetFontObject("GameFontNormal")
-	label:SetPoint("LEFT",f,"RIGHT",1,0)
-	label:SetText("m")
-
-	return f
-end
---]=]
 
 
 --------------------------------------------------------------------------------
