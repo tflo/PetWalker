@@ -349,7 +349,7 @@ function ns.InitializePool(self)
 		else
 			ns.MsgLowPetPoolAll(n)
 		end
-		poolMsgLockout = GetTime() + 10
+		poolMsgLockout = GetTime() + 15
 	end
 end
 
