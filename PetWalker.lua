@@ -393,13 +393,19 @@ end
 function ns.Shuffle(self)
 	local n = #petPool
 	local newpet
-	if n == 1 then
-		newpet = petPool[1]
-	elseif n > 1 then
+	if n > 1 then
 		local activepet = C_PetJournal.GetSummonedPetGUID()
 		repeat
 			newpet = petPool[math.random(n)]
 		until activepet ~= newpet
+	elseif n == 1 then
+		newpet = petPool[1]
+	else
+		if ns.db.favsOnly then
+			ns.MsgLowPetPoolFavs(n)
+		else
+			ns.MsgLowPetPoolAll(n)
+		end
 	end
 	return newpet
 end
