@@ -39,7 +39,7 @@ local excludedSpecies = {
 local function IsExcluded(species)
 	for _, s in pairs(excludedSpecies) do
 		if s == species then
-			ns:dbp("Excluded pet found!")
+			ns:debugprintL1("Excluded pet found!")
 			return true
 		end
 	end
@@ -161,10 +161,10 @@ function ns.AutoAction()
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	if IsExcluded(actpet) then return end
 	if ns.db.timer ~= 0 and lastCall + ns.db.timer * 60 < GetTime() then
-		ns:dbpp("AutoAction() has run and decided for New Pet.")
+		ns:debugprintL2("AutoAction() has run and decided for New Pet.")
 		ns:NewPet(actpet)
 	elseif not actpet then
-		ns:dbpp("AutoAction() has run and decided to Restore Pet.")
+		ns:debugprintL2("AutoAction() has run and decided to Restore Pet.")
 		ns:RestorePet(actpet)
 	end
 end
@@ -189,7 +189,7 @@ function ns:RestorePet()
 	else
 		MsgNoSavedPet()
 	end
-	ns:dbp("AutoRestore() has run")
+	ns:debugprintL1("AutoRestore() has run")
 	lastAutoRestoreRunTime = GetTime()
 end
 
@@ -256,7 +256,7 @@ function ns.LoginCheck()
 			ns:SafeSummon(ns.db.currentPet)
 		end
 	end
-	ns:dbpp("LoginCheck() has run")
+	ns:debugprintL2("LoginCheck() has run")
 end
 
 
@@ -279,7 +279,7 @@ function ns.SavePet()
 		ns.db.previousPet = ns.db.currentPet
 		ns.db.currentPet = actualPet
 	end
-	ns:dbpp("SavePet() has run")
+	ns:debugprintL2("SavePet() has run")
 	lastSavePetTime = GetTime()
 end
 
@@ -331,7 +331,7 @@ function ns:SafeSummon(pet)
 		and not InArena()
 	then
 		C_PetJournal.SummonPetByGUID(pet)
-		ns:dbpp("SafeSummon() has summoned \"" .. (ns.PetIDtoName(pet) or "-NONE-") .. "\" ")
+		ns:debugprintL2("SafeSummon() has summoned \"" .. (ns.PetIDtoName(pet) or "-NONE-") .. "\" ")
 		lastSummonTime = GetTime()
 	end
 end
@@ -347,7 +347,7 @@ This can be, depending on user setting:
 
 -- Called by 3: PET_JOURNAL_LIST_UPDATE; conditionally by ns:NewPet, ns.ManualSummonNew
 function ns.InitializePool(self)
-	ns:dbp("Running ns.InitializePool()")
+	ns:debugprintL1("Running ns.InitializePool()")
 	table.wipe(petPool)
 	local index = 1
 	while true do
@@ -572,20 +572,21 @@ function ns.PetIDtoName(id)
 	end
 end
 
+
 function ns:DebugDisplay()
 	DEFAULT_CHAT_FRAME:AddMessage("\nDebug:\n  Current pet: " .. (ns.PetIDtoName(ns.db.currentPet) or "-none-") .. "\n  Previous pet: " .. (ns.PetIDtoName(ns.db.previousPet) or "-none-") .. "\n	 Current char pet: " .. (ns.PetIDtoName(ns.dbc.currentPet) or "-none-") .. "\n  Previous char pet: " .. (ns.PetIDtoName(ns.dbc.previousPet) or "-none-") .. "\n" .. ns.Status(),0,1,0.7)
 end
 
--- with pet info
----[=[
-function ns:dbpp(msg)
-	print("\n|cffFFA500--- PETWALKER DEBUG: " .. msg .. " -- Current DB pet: " .. tostring(ns.PetIDtoName(ns.dbc.cfavs and ns.dbc.currentPet or ns.dbc.currentPet)))
-end
---]=]
-
 -- without pet info
-function ns:dbp(msg)
-	print("\n|cffFFA500--- PETWALKER DEBUG: " .. msg)
+function ns:debugprintL1(msg)
+if not ns.db.debugmode then return end
+	print("\n|cffFFA500### PETWALKER DEBUG: " .. msg .. " ###")
+end
+
+-- with pet info
+function ns:debugprintL2(msg)
+if not ns.db.debugmode then return end
+	print("\n|cffFFA500### PETWALKER DEBUG: " .. msg .. " ### Current DB pet: " .. tostring(ns.PetIDtoName(ns.dbc.cfavs and ns.dbc.currentPet or ns.dbc.currentPet)) .. " ###")
 end
 
 -- Table dump
@@ -600,4 +601,16 @@ function ns.dump(o)
 	else
 		return tostring(o)
 	end
+end
+
+-- Seconds to minutes
+local function SecToMin(seconds)
+	local min, sec = tostring(math.floor(seconds / 60)), tostring(seconds % 60)
+	return string.format('%.0f:%02.0f', min, sec)
+end
+
+function ns.RemainingTimer()
+	local rem = lastCall + ns.db.timer * 60 - GetTime()
+	rem = rem > 0 and rem or 0
+	return SecToMin(rem)
 end
