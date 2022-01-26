@@ -13,6 +13,7 @@ BINDING_NAME_Auto = "Toggle Auto-summon"
 BINDING_NAME_Manual = "Summon New Pet"
 BINDING_NAME_Dismiss = "Dismiss Pet & Disable Auto-summon"
 
+local _
 local thisChar = UnitName("player")
 local lastCall
 local petPool = {}
@@ -81,8 +82,8 @@ function ns.ADDON_LOADED(self,event,arg1)
 		ns.dbc.cfavs = ns.dbc.cfavs or {}
 		ns.dbc.cfavs_enabled = ns.dbc.cfavs_enabled or false
 		ns.db.timer = ns.db.timer or 12
-		ns.db.favsOnly = ns.db.favsOnly or true
-		ns.db.enable = ns.db.enable or true
+		ns.db.favsOnly = ns.db.favsOnly == nil and true or ns.db.favsOnly
+		ns.db.enable = ns.db.enable == nil and true or ns.db.enable
 		ns.db.debugmode = ns.db.debugmode or false
 
 		lastCall = GetTime() + 20
