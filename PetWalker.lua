@@ -78,10 +78,6 @@ function ns.ADDON_LOADED(self,event,arg1)
 		self:RegisterEvent("PLAYER_STARTED_MOVING")
 		self.PLAYER_STARTED_MOVING = ns.AutoAction
 
-		-- TODO: Test this!
--- 		self:RegisterEvent("PLAYER_STARTED_MOVING")
--- 		self.PLAYER_STARTED_MOVING = ns.AutoAction
-
 		-- experimental: for not-much-moving chars at the auction house
 		self:RegisterEvent("PLAYER_STARTED_LOOKING")
 		function ns.PLAYER_STARTED_LOOKING(self,event)
@@ -157,17 +153,17 @@ AUTO RESTORE: Pet is lost --> restore it
 function ns.AutoRestore(pet)
 	if GetTime() - lastSummonTime < 2 then return end
 	if GetTime() - lastAutoRestoreRunTime < 2 then return end
-		if ns.dbc.cfavs_enabled then
+	if ns.dbc.cfavs_enabled then
 		if ns.dbc.currentPet then
 			ns:SafeSummon(ns.dbc.currentPet)
 		else
 			DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": No char-specific current pet has been saved yet. Could not restore pet.", 0,1,0.7)
 		end
 	elseif ns.db.currentPet then
-			ns:SafeSummon(ns.db.currentPet)
+		ns:SafeSummon(ns.db.currentPet)
 	else
 		DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": No current pet has been saved yet. Could not restore pet.", 0,1,0.7)
-		end
+	end
 	ns:dbp("AutoRestore() has run")
 	lastAutoRestoreRunTime = GetTime()
 end
@@ -337,11 +333,11 @@ function ns.InitializePool(self)
 		local petID, speciesID, _, _, _, favorite = C_PetJournal.GetPetInfoByIndex(index)
 		if not petID then break end
 		if not IsExcluded(speciesID) then
-		if ns.db.favsOnly then
+			if ns.db.favsOnly then
 				if favorite then
-				table.insert(petPool, petID)
-			end
-		else
+					table.insert(petPool, petID)
+				end
+			else
 				table.insert(petPool, petID)
 			end
 		end
