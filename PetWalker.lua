@@ -3,7 +3,7 @@ local addonName, ns = ...
 ns.db = PetWalkerDB
 ns.dbc = PetWalkerPerCharDB
 
-ns = CreateFrame("Frame","PetKeeper")
+ns = CreateFrame("Frame","PetWalker")
 
 ns:SetScript("OnEvent", function(self, event, ...)
 	return self[event](self, event, ...)
@@ -29,7 +29,7 @@ local savePetLoginDelay = 10
 local savePetNormalDelay = 3
 
 -- Guild Page and Herald don't have fix IDs, so we have to go by speciesID
--- TODO: We must also make sure that we do not unsummon these pets via AutoRestore or AutoNew. The Guild pets despawn automatically, so we can simply check if they are there, but the Argent Tourny pet should be treated differently: CD activates only if we access the bank, and it is also a valid pet for random favorite summons. Difficult. But maybe we should just give him a fix live time of 20 min or so? Or just hope that the user disables PetKeeper when he accesses the bank? Or maybe check for the pony bridle achiev and not autosummon /autounsummon him then? (GetAchievementInfo)
+-- TODO: We must also make sure that we do not unsummon these pets via AutoRestore or AutoNew. The Guild pets despawn automatically, so we can simply check if they are there, but the Argent Tourny pet should be treated differently: CD activates only if we access the bank, and it is also a valid pet for random favorite summons. Difficult. But maybe we should just give him a fix live time of 20 min or so? Or just hope that the user disables PetWalker when he accesses the bank? Or maybe check for the pony bridle achiev and not autosummon /autounsummon him then? (GetAchievementInfo)
 -- --> make two categories of petspeciesIDs: 'doNotSummon' and 'doNotUnsummon'.
 -- TODO: check the Hordies speciesID
 local excludedSpecies = {
@@ -193,7 +193,9 @@ MANUAL SUMMON, via command
 ---------------------------------------------------------------------------]]--
 
 function ns.ManualSummonNew()
-	if not poolInitialized then ns:InitializePool() end
+	if not poolInitialized then
+		ns:InitializePool()
+	end
 	local newPet, maxFavs
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
 	repeat
@@ -471,15 +473,15 @@ end
 -- Slash UI
 --------------------------------------------------------------------------------
 
-local helpText = "\nPetKeeper Help: '/pk' or '/petk' supports these commands:\n  d: Dismiss current pet and disable auto-summoning\n  a: Toggle auto-summoning\n  n: Summon new pet from pool\n  f: Toggle selection pool: favorites only, or all pets\n  c: Toggle character-specific favorites, or global\n  <number>: Summon timer in minutes (1 to 999, 0 to disable)\n  p: Summon previous pet\n  s: Display current status/settings\n  h: This help text\nIn Key Bindigs > AddOns you can directly bind some commands."
+local helpText = "\nPetWalker Help: '/pk' or '/petk' supports these commands:\n  d: Dismiss current pet and disable auto-summoning\n  a: Toggle auto-summoning\n  n: Summon new pet from pool\n  f: Toggle selection pool: favorites only, or all pets\n  c: Toggle character-specific favorites, or global\n  <number>: Summon timer in minutes (1 to 999, 0 to disable)\n  p: Summon previous pet\n  s: Display current status/settings\n  h: This help text\nIn Key Bindigs > AddOns you can directly bind some commands."
 
 function ns.Status()
-	local text = "\nPetKeeper Status:\n  Auto-summoning is " .. (ns.db.enable and "enabled" or "disabled") .. "\n  Summon timer is " .. (ns.db.timer > 0 and ns.db.timer .. " minutes" or "disbled") .. "\n  Selection pool is set to " .. (ns.db.favsOnly and "favorites only" or "all pets") .. "\n  Character-specific favorites are " .. (ns.dbc.cfavs_enabled and "enabled" or "disabled") .. " for " .. thisChar .. "\n " .. ns:ListCharFavs()
+	local text = "\nPetWalker Status:\n  Auto-summoning is " .. (ns.db.enable and "enabled" or "disabled") .. "\n  Summon timer is " .. (ns.db.timer > 0 and ns.db.timer .. " minutes" or "disbled") .. "\n  Selection pool is set to " .. (ns.db.favsOnly and "favorites only" or "all pets") .. "\n  Character-specific favorites are " .. (ns.dbc.cfavs_enabled and "enabled" or "disabled") .. " for " .. thisChar .. "\n  " .. ns:ListCharFavs()
 	return text
 end
 
-SLASH_PetKeeper1, SLASH_PetKeeper2 = '/pk', '/petk'
-function SlashCmdList.PetKeeper(cmd)
+SLASH_PetWalker1, SLASH_PetWalker2 = '/pk', '/petk'
+function SlashCmdList.PetWalker(cmd)
 	if cmd == 'd' or cmd == 'dis' then
 		ns:DismissAndDisable()
 	elseif cmd == 'db' or cmd == 'deb' then
@@ -515,7 +517,7 @@ end
 -- We disabled most of the GUI stuff, since now we have more settings than we can fit there. We leave the CharFavorites checkbox, because it makes sense to see at a glance (in the opened Pet Journal) which type of favs are enabled.
 
 function ns.CreateCheckBoxBase(self)
-	local f = CreateFrame("CheckButton", "PetKeeperAutoCheckbox",PetJournal,"UICheckButtonTemplate")
+	local f = CreateFrame("CheckButton", "PetWalkerAutoCheckbox",PetJournal,"UICheckButtonTemplate")
 	f:SetWidth(25)
 	f:SetHeight(25)
 
@@ -572,13 +574,13 @@ end
 -- with pet info
 ---[=[
 function ns:dbpp(msg)
-	print("\n|cffFFA500--- PETKEEPER DEBUG: " .. msg .. " - Current ns.db pet: " .. (ns.PetGUIDtoName(ns.db.currentPet) or "-none-"))
+	print("\n|cffFFA500--- PETWALKER DEBUG: " .. msg .. " - Current ns.db pet: " .. (ns.PetGUIDtoName(ns.db.currentPet) or "-none-"))
 end
 --]=]
 
 -- without pet info
 function ns:dbp(msg)
-	print("\n|cffFFA500--- PETKEEPER DEBUG: " .. msg)
+	print("\n|cffFFA500--- PETWALKER DEBUG: " .. msg)
 end
 
 -- Table dump
