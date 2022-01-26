@@ -138,19 +138,14 @@ function ns.AutoAction()
 	petVerified = true
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
 	if IsExcluded(actualPet) then return end
-	local timerDue
 	if ns.db.timer ~= 0 then
 		if lastCall + ns.db.timer * 60 < GetTime() then
-			timerDue = true
-		end
-	end
-	if not actualPet or timerDue then -- TODO: we can write this simpler
-		ns:dbpp("AutoAction() has run")
-		if not timerDue then
-			ns.AutoRestore(actualPet)
-		else
+			ns:dbpp("AutoAction() has run and decided for New Pet.")
 			ns.AutoNew(actualPet)
 		end
+	elseif not actualPet then
+		ns:dbpp("AutoAction() has run and decided to Restore Pet.")
+		ns.AutoRestore(actualPet)
 	end
 end
 
@@ -159,19 +154,20 @@ AUTO RESTORE: Pet is lost --> restore it
 ---------------------------------------------------------------------------]]--
 
 function ns.AutoRestore(pet)
--- 	print("AutoRestore actualPet variable = " .. (ns.PetGUIDtoName(pet) or "NOTHING!!")) -- debug
-	if not ns.db.enable then return end
 	if GetTime() - lastSummonTime < 2 then return end
 	if GetTime() - lastAutoRestoreRunTime < 2 then return end
--- 	local actualPet = C_PetJournal.GetSummonedPetGUID() -- should get passed from the parent function
-	if not pet then -- TODO: this is redundant in the context of the parent function!
 		if ns.dbc.cfavs_enabled then
+		if ns.dbc.currentPet then
 			ns:SafeSummon(ns.dbc.currentPet)
 		else
-			ns:SafeSummon(ns.db.currentPet)
+			DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": No char-specific current pet has been saved yet. Could not restore pet.", 0,1,0.7)
 		end
-	end
-	ns:dbpp("AutoRestore() has run")
+	elseif ns.db.currentPet then
+			ns:SafeSummon(ns.db.currentPet)
+	else
+		DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": No current pet has been saved yet. Could not restore pet.", 0,1,0.7)
+		end
+	ns:dbp("AutoRestore() has run")
 	lastAutoRestoreRunTime = GetTime()
 end
 
