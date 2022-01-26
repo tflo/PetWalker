@@ -54,10 +54,10 @@ function ns.ADDON_LOADED(self,event,arg1)
 		PetWalkerPerCharDB = PetWalkerPerCharDB or {}
 		ns.db, ns.dbc = PetWalkerDB, PetWalkerPerCharDB
 		ns.dbc.cfavs = ns.dbc.cfavs or {}
-		if ns.dbc.cfavs_enabled == nil then ns.dbc.cfavs_enabled = false end
-		ns.db.timer = ns.db.timer or 0
-		ns.db.favsOnly = (ns.db.favsOnly == nil) and true or ns.db.favsOnly
-		ns.db.enable = (ns.db.enable == nil) and true or ns.db.enable
+		ns.dbc.cfavs_enabled = ns.dbc.cfavs_enabled or false
+		ns.db.timer = ns.db.timer or 12
+		ns.db.favsOnly = ns.db.favsOnly or true
+		ns.db.enable = ns.db.enable or true
 
 		lastCall = GetTime() + 20
 		savePetDelay = savePetLoginDelay
