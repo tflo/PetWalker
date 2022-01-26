@@ -331,7 +331,7 @@ function ns:SafeSummon(pet)
 		and not InArena()
 	then
 		C_PetJournal.SummonPetByGUID(pet)
-		ns:dbpp("SafeSummon() has summoned \"" .. (ns.PetGUIDtoName(pet) or "-NONE-") .. "\" ")
+		ns:dbpp("SafeSummon() has summoned \"" .. (ns.PetIDtoName(pet) or "-NONE-") .. "\" ")
 		lastSummonTime = GetTime()
 	end
 end
@@ -560,12 +560,12 @@ end
 -- Debugging and Utils
 ===========================================================================]]--
 
-function ns.PetGUIDtoName(guid)
+function ns.PetIDtoName(id)
 	local index = 1
 	while true do
-		local petGUID, _, _, _, _, _, _, name = C_PetJournal.GetPetInfoByIndex(index)
-		if not petGUID then break end
-		if petGUID == guid then
+		local petID, _, _, _, _, _, _, name = C_PetJournal.GetPetInfoByIndex(index)
+		if not petID then break end
+		if petID == id then
 			return name
 		end
 		index = index + 1
@@ -573,13 +573,13 @@ function ns.PetGUIDtoName(guid)
 end
 
 function ns:DebugDisplay()
-	DEFAULT_CHAT_FRAME:AddMessage("\nDebug:\n  Current pet: " .. (ns.PetGUIDtoName(ns.db.currentPet) or "-none-") .. "\n  Previous pet: " .. (ns.PetGUIDtoName(ns.db.previousPet) or "-none-") .. "\n	 Current char pet: " .. (ns.PetGUIDtoName(ns.dbc.currentPet) or "-none-") .. "\n  Previous char pet: " .. (ns.PetGUIDtoName(ns.dbc.previousPet) or "-none-") .. "\n" .. ns.Status(),0,1,0.7)
+	DEFAULT_CHAT_FRAME:AddMessage("\nDebug:\n  Current pet: " .. (ns.PetIDtoName(ns.db.currentPet) or "-none-") .. "\n  Previous pet: " .. (ns.PetIDtoName(ns.db.previousPet) or "-none-") .. "\n	 Current char pet: " .. (ns.PetIDtoName(ns.dbc.currentPet) or "-none-") .. "\n  Previous char pet: " .. (ns.PetIDtoName(ns.dbc.previousPet) or "-none-") .. "\n" .. ns.Status(),0,1,0.7)
 end
 
 -- with pet info
 ---[=[
 function ns:dbpp(msg)
-	print("\n|cffFFA500--- PETWALKER DEBUG: " .. msg .. " - Current ns.db pet: " .. (ns.PetGUIDtoName(ns.db.currentPet) or "-none-"))
+	print("\n|cffFFA500--- PETWALKER DEBUG: " .. msg .. " -- Current DB pet: " .. tostring(ns.PetIDtoName(ns.dbc.cfavs and ns.dbc.currentPet or ns.dbc.currentPet)))
 end
 --]=]
 
