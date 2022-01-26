@@ -188,21 +188,16 @@ MANUAL SUMMON, via command
 ---------------------------------------------------------------------------]]--
 
 function ns.ManualSummonNew()
-	if not poolInitialized then
-		ns:InitializePool()
-	end
-	local newPet, maxFavs
-	local actualPet = C_PetJournal.GetSummonedPetGUID()
-	repeat
-		newPet, maxFavs = ns:Shuffle()
-	until not actualPet or newPet ~= actualPet or maxFavs < 2
-	if actualPet == newPet then return end
+	if not poolInitialized then ns:InitializePool() end
+	local pet = C_PetJournal.GetSummonedPetGUID()
+	local newpet = ns:Shuffle()
+	if pet == newpet then return end
 	lastCall = GetTime()
 	-- Temporarily using the SafeSummon function, to test the exclusions; but maybe it is a good idea to keep it like that?
-	ns:SafeSummon(newPet)
+	ns:SafeSummon(newpet)
 -- 	C_PetJournal.SummonPetByGUID(newPet)
 	lastSummonTime = lastCall
-	ns:dbpp("ManualSummonNew() has summoned \"" .. (ns.PetGUIDtoName(newPet) or "Nothing") .. "\" ")
+	ns:dbpp("ManualSummonNew() has summoned \"" .. (ns.PetGUIDtoName(newpet) or "Nothing") .. "\" ")
 end
 
 
