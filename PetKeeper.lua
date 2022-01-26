@@ -35,14 +35,20 @@ local savePetNormalDelay = 3
 local excludedSpecies = {
 	280, -- Guild Page
 	282, -- Guild Herald
+-- 	214, -- Argent Squire (Pony Bridle char achiev: 3736)
+-- 	216, -- Argent Gruntling
 }
--- TODO: What about Feign Death?!
-local excludedAuras = {
-	32612, -- Mage: Invisibility
-	110960, -- Mage: Greater Invisibility
-	131347, -- DH: Gliding
-	311796, -- Pet: Daisy as backpack (/beckon)
-} -- More exclusions in the Summon function itself
+
+local function IsExcluded(species)
+	for _, s in pairs(excludedSpecies) do
+		if s == species then
+			ns:dbp("Excluded pet found!")
+			return true
+		end
+	end
+	return false
+end
+
 
 function ns.ADDON_LOADED(self,event,arg1)
 	if arg1 == addonName then
@@ -128,6 +134,7 @@ function ns.AutoAction()
 	if not ns.db.enable then return end
 	petVerified = true
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
+	if IsExcluded(actualPet) then return end
 	local timerDue
 	if ns.db.timer ~= 0 then
 		if lastCall + ns.db.timer * 60 < GetTime() then
@@ -137,9 +144,9 @@ function ns.AutoAction()
 	if not actualPet or timerDue then
 		ns:dbpp("AutoAction() has run")
 		if not timerDue then
-			ns.AutoRestore()
+			ns.AutoRestore(actualPet)
 		else
-			ns.AutoNew()
+			ns.AutoNew(actualPet)
 		end
 	end
 end
@@ -148,12 +155,13 @@ end
 AUTO RESTORE: Pet is lost --> restore it
 ---------------------------------------------------------------------------]]--
 
-function ns.AutoRestore()
+function ns.AutoRestore(pet)
+	print("AutoRestore actualPet variable = " .. (ns.PetGUIDtoName(pet) or "NOTHING!!")) -- debug
 	if not ns.db.enable then return end
 	if GetTime() - lastSummonTime < 2 then return end
 	if GetTime() - lastAutoRestoreRunTime < 2 then return end
-	local actualPet = C_PetJournal.GetSummonedPetGUID()
-	if not actualPet then
+-- 	local actualPet = C_PetJournal.GetSummonedPetGUID() -- should get passed from the parent function
+	if not pet then
 		if ns.dbc.cfavs_enabled then
 			ns:SafeSummon(ns.dbc.currentPet)
 		else
@@ -168,10 +176,11 @@ end
 --[[---------------------------------------------------------------------------
 NEW PET AUTOMATIC SUMMON: Runs when timer is due
 ---------------------------------------------------------------------------]]--
-function ns.AutoNew()
+function ns.AutoNew(pet)
+	print("AutoNew actualPet variable = " .. (ns.PetGUIDtoName(pet) or "NOTHING!!")) -- debug
 	if not poolInitialized then ns:InitializePool() end
 	local newPet = ns:Shuffle()
-	if newPet == actualPet then return end
+	if newPet == pet then return end
 	if newPet and (lastCall+1.5 < GetTime()) then
 		lastCall = GetTime()
 		ns:SafeSummon(newPet)
@@ -244,7 +253,9 @@ SAVING: Save a newly summoned pet, no matter how it was summoned. Should run wit
 function ns.SavePet()
 	savePetDelay = savePetNormalDelay
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
-	if not actualPet or (GetTime() - lastSavePetTime < 1) or not petVerified then return end
+	if not actualPet or IsExcluded(actualPet) or (GetTime() - lastSavePetTime < 1) or not petVerified then
+		return
+	end
 	if ns.dbc.cfavs_enabled then
 		if ns.dbc.currentPet == actualPet then return end
 		ns.dbc.previousPet = ns.dbc.currentPet
@@ -311,16 +322,6 @@ function ns:SafeSummon(pet)
 end
 
 
-
-local function IsExcluded(species)
-	for _, s in pairs(excludedSpecies) do
-		if s == species then
-			ns:dbp("Excluded pet found!")
-			return true
-		end
-	end
-	return false
-end
 --[[===========================================================================
 Creating the POOL, from where the random pet is summoned.
 This can be, depending on user setting:
