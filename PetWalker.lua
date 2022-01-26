@@ -345,9 +345,9 @@ function ns.InitializePool(self)
 	if #petPool <= 1 and ns.db.timer ~= 0 and poolMsgLockout < GetTime() then
 		local n = #petPool
 		if ns.db.favsOnly then
-			DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (n < 1 and "0 (zero) pets" or "Only 1 pet") .. " available for summoning! You should either flag more pets as favorite, or set the ramdom pool to \"All Pets\", or set the random-summon timer to \"0\". Please note that certain pets are excluded from random summoning, to not break their usability (for example \"Guild Herald\").",0,1,0.7)
+			ns.MsgLowPetPoolFavs(n)
 		else
-			DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (n < 1 and "0 (zero) pets" or "Only 1 pet") .. " available for summoning! You should either collect more pets, or set the random-summon timer to \"0\". Please note that certain pets are excluded from random summoning, to not break their usability (for example \"Guild Herald\").",0,1,0.7)
+			ns.MsgLowPetPoolAll(n)
 		end
 		poolMsgLockout = GetTime() + 10
 	end
@@ -512,6 +512,19 @@ function SlashCmdList.PetWalker(cmd)
 	end
 end
 
+
+--[[---------------------------------------------------------------------------
+Warnings, Notifications
+---------------------------------------------------------------------------]]--
+
+-- TODO: Do we need a warning at 1 selectable pet? Or should this be considered a valid use-case? (User manually summons a pet from Journal, but wants to get back his (only) fav pet when the timer is due.)
+function ns.MsgLowPetPoolFavs(nPool)
+	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (nPool < 1 and "0 (zero) pets" or "Only 1 pet") .. " available for summoning! You should either flag more pets as favorite, or set the ramdom pool to \"All Pets\", or set the random-summon timer to \"0\". Please note that certain pets are excluded from random summoning, to not break their usability (for example \"Guild Herald\").",0,1,0.7)
+end
+
+function ns.MsgLowPetPoolAll(nPool)
+	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (nPool < 1 and "0 (zero) pets" or "Only 1 pet") .. " available for summoning! You should either collect more pets, or set the random-summon timer to \"0\". Please note that certain pets are excluded from random summoning, to not break their usability (for example \"Guild Herald\").",0,1,0.7)
+end
 
 --[[---------------------------------------------------------------------------
 -- GUI stuff for Pet Journal
