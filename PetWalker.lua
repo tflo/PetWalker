@@ -1,7 +1,5 @@
 local addonName, ns = ...
 
-ns.db = PetWalkerDB
-ns.dbc = PetWalkerPerCharDB
 
 ns = CreateFrame("Frame","PetWalker")
 
@@ -52,8 +50,9 @@ end
 
 function ns.ADDON_LOADED(self,event,arg1)
 	if arg1 == addonName then
-		ns.dbc = ns.dbc or {}
-		ns.db = ns.db  or {}
+		PetWalkerDB = PetWalkerDB or {}
+		PetWalkerPerCharDB = PetWalkerPerCharDB or {}
+		ns.db, ns.dbc = PetWalkerDB, PetWalkerPerCharDB
 		ns.dbc.cfavs = ns.dbc.cfavs or {}
 		if ns.dbc.cfavs_enabled == nil then ns.dbc.cfavs_enabled = false end
 		ns.db.timer = ns.db.timer or 0
