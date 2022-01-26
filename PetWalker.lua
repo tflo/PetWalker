@@ -293,6 +293,7 @@ local function InArena()
 	return instanceType == "arena"
 end
 
+-- Called by 3: ns.AutoRestore, ns.AutoNew, ns.ManualSummonNew
 function ns:SafeSummon(pet)
 	if not pet then return end -- needed?
 	if not UnitAffectingCombat("player")
@@ -321,7 +322,9 @@ This can be, depending on user setting:
 — All available pets (except the exclusions)
 ===========================================================================]]--
 
+-- Called by 3: PET_JOURNAL_LIST_UPDATE; conditionally by ns.AutoNew, ns.ManualSummonNew
 function ns.InitializePool(self)
+	ns:dbp("Running ns.InitializePool()")
 	table.wipe(petPool)
 	local index = 1
 	while true do
@@ -338,7 +341,7 @@ function ns.InitializePool(self)
 		end
 		index = index + 1
 	end
-	poolInitialized = true	-- added this bc otherwise the query makes no sense
+	poolInitialized = true -- Condition in ns.AutoNew and ns.ManualSummonNew
 	if #petPool <= 1 and ns.db.timer ~= 0 and poolMsgLockout < GetTime() then
 		local n = #petPool
 		if ns.db.favsOnly then
@@ -386,6 +389,7 @@ function ns.CFavsUpdate()
 end
 
 
+-- Called by 2: ns.AutoNew, ns.ManualSummonNew
 function ns.Shuffle(self)
 	local n = #petPool
 	local newpet
@@ -406,7 +410,7 @@ UI STUFF (Slash and Pet journal checkbox)
 ===========================================================================]]--
 
 --[[---------------------------------------------------------------------------
--- Toggles, Commands
+Toggles, Commands
 ---------------------------------------------------------------------------]]--
 
 function ns:DismissAndDisable()
@@ -468,9 +472,9 @@ function ns:ListCharFavs()
 end
 
 
---------------------------------------------------------------------------------
--- Slash UI
---------------------------------------------------------------------------------
+--[[---------------------------------------------------------------------------
+Slash UI
+---------------------------------------------------------------------------]]--
 
 local helpText = "\nPetWalker Help: '/pw' or '/petw' supports these commands:\n  d: Dismiss current pet and disable auto-summon\n  a: Toggle auto-summon\n  n: Summon new pet from pool\n  f: Toggle selection pool: favorites only, or all pets\n  c: Toggle character-specific favorites, or global\n  <number>: Summon timer in minutes (1 to 999, 0 to disable)\n  p: Summon previous pet\n  s: Display current status/settings\n  h: This help text\nIn Key Bindigs > AddOns you can directly bind some commands."
 
