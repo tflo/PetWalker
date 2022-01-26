@@ -388,16 +388,17 @@ end
 
 
 function ns.Shuffle(self)
-	local maxn = #petPool
-	local random
-	if maxn == 1 then
-		random = petPool[1]
-	elseif maxn > 1 then
+	local n = #petPool
+	local newpet
+	if n == 1 then
+		newpet = petPool[1]
+	elseif n > 1 then
+		local activepet = C_PetJournal.GetSummonedPetGUID()
 		repeat
-			random = petPool[math.random(maxn)]
-		until C_PetJournal.GetSummonedPetGUID() ~= random
+			newpet = petPool[math.random(n)]
+		until activepet ~= newpet
 	end
-	return random, maxn
+	return newpet
 end
 
 
