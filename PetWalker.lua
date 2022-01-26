@@ -135,7 +135,7 @@ function ns.AutoAction()
 	petVerified = true
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
 	if IsExcluded(actualPet) then return end
-	if ns.db.timer ~= 0 then
+	if ns.db.timer ~= 0 and #petPool >= 1 then
 		if lastCall + ns.db.timer * 60 < GetTime() then
 			ns:dbpp("AutoAction() has run and decided for New Pet.")
 			ns.AutoNew(actualPet)
