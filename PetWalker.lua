@@ -14,7 +14,6 @@ BINDING_NAME_Manual = "Summon New Pet"
 BINDING_NAME_Dismiss = "Dismiss Pet & Disable Auto-summon"
 
 local thisChar = UnitName("player")
-
 local lastCall
 local petPool = {}
 local poolInitialized = false
@@ -47,6 +46,32 @@ local function IsExcluded(species)
 	return false
 end
 
+
+--[[---------------------------------------------------------------------------
+Messages
+---------------------------------------------------------------------------]]--
+
+-- TODO: Do we need a warning at 1 selectable pet? Or should this be considered a valid use-case? (User manually summons a pet from Journal, but wants to get back his (only) fav pet when the timer is due.)
+local function MsgLowPetPoolFavs(nPool)
+	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (nPool < 1 and "0 (zero) pets" or "Only 1 pet") .. " available for summoning! You should either flag more pets as favorite, or set the ramdom pool to \"All Pets\", or set the random-summon timer to \"0\". Please note that certain pets are excluded from random summoning, to not break their usability (for example \"Guild Herald\").",0,1,0.7)
+end
+
+local function MsgLowPetPoolAll(nPool)
+	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (nPool < 1 and "0 (zero) pets" or "Only 1 pet") .. " available for summoning! You should either collect more pets, or set the random-summon timer to \"0\". Please note that certain pets are excluded from random summoning, to not break their usability (for example \"Guild Herald\").",0,1,0.7)
+end
+
+local function MsgNoSavedPet()
+	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": No 'current pet' has been saved yet" .. (ns.dbc.cfavs_enabled and " on this character" or "") .. ". Could not restore pet.", 0,1,0.7)
+end
+
+local function MsgAutoRestoreDone(pet)
+	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": Your lost pet (" .. pet .. ") has been re-summoned.", 0,1,0.7)
+end
+
+
+--[[===========================================================================
+LOADING
+===========================================================================]]--
 
 function ns.ADDON_LOADED(self,event,arg1)
 	if arg1 == addonName then
@@ -156,13 +181,15 @@ function ns.AutoRestore(pet)
 	if ns.dbc.cfavs_enabled then
 		if ns.dbc.currentPet then
 			ns:SafeSummon(ns.dbc.currentPet)
+			MsgAutoRestoreDone(ns.dbc.currentPet)
 		else
-			DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": No char-specific current pet has been saved yet. Could not restore pet.", 0,1,0.7)
+			MsgNoSavedPet()
 		end
 	elseif ns.db.currentPet then
 		ns:SafeSummon(ns.db.currentPet)
+		MsgAutoRestoreDone(ns.db.currentPet)
 	else
-		DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": No current pet has been saved yet. Could not restore pet.", 0,1,0.7)
+		MsgNoSavedPet()
 	end
 	ns:dbp("AutoRestore() has run")
 	lastAutoRestoreRunTime = GetTime()
@@ -345,9 +372,9 @@ function ns.InitializePool(self)
 	if #petPool <= 1 and ns.db.timer ~= 0 and poolMsgLockout < GetTime() then
 		local n = #petPool
 		if ns.db.favsOnly then
-			ns.MsgLowPetPoolFavs(n)
+			MsgLowPetPoolFavs(n)
 		else
-			ns.MsgLowPetPoolAll(n)
+			MsgLowPetPoolAll(n)
 		end
 		poolMsgLockout = GetTime() + 15
 	end
@@ -402,9 +429,9 @@ function ns.Shuffle(self)
 		newpet = petPool[1]
 	else
 		if ns.db.favsOnly then
-			ns.MsgLowPetPoolFavs(n)
+			MsgLowPetPoolFavs(n)
 		else
-			ns.MsgLowPetPoolAll(n)
+			MsgLowPetPoolAll(n)
 		end
 	end
 	return newpet
@@ -518,19 +545,6 @@ function SlashCmdList.PetWalker(cmd)
 	end
 end
 
-
---[[---------------------------------------------------------------------------
-Warnings, Notifications
----------------------------------------------------------------------------]]--
-
--- TODO: Do we need a warning at 1 selectable pet? Or should this be considered a valid use-case? (User manually summons a pet from Journal, but wants to get back his (only) fav pet when the timer is due.)
-function ns.MsgLowPetPoolFavs(nPool)
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (nPool < 1 and "0 (zero) pets" or "Only 1 pet") .. " available for summoning! You should either flag more pets as favorite, or set the ramdom pool to \"All Pets\", or set the random-summon timer to \"0\". Please note that certain pets are excluded from random summoning, to not break their usability (for example \"Guild Herald\").",0,1,0.7)
-end
-
-function ns.MsgLowPetPoolAll(nPool)
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (nPool < 1 and "0 (zero) pets" or "Only 1 pet") .. " available for summoning! You should either collect more pets, or set the random-summon timer to \"0\". Please note that certain pets are excluded from random summoning, to not break their usability (for example \"Guild Herald\").",0,1,0.7)
-end
 
 --[[---------------------------------------------------------------------------
 -- GUI stuff for Pet Journal
