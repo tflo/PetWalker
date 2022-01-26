@@ -140,7 +140,7 @@ function ns.AutoAction()
 			timerDue = true
 		end
 	end
-	if not actualPet or timerDue then
+	if not actualPet or timerDue then -- TODO: we can write this simpler
 		ns:dbpp("AutoAction() has run")
 		if not timerDue then
 			ns.AutoRestore(actualPet)
@@ -155,12 +155,12 @@ AUTO RESTORE: Pet is lost --> restore it
 ---------------------------------------------------------------------------]]--
 
 function ns.AutoRestore(pet)
-	print("AutoRestore actualPet variable = " .. (ns.PetGUIDtoName(pet) or "NOTHING!!")) -- debug
+-- 	print("AutoRestore actualPet variable = " .. (ns.PetGUIDtoName(pet) or "NOTHING!!")) -- debug
 	if not ns.db.enable then return end
 	if GetTime() - lastSummonTime < 2 then return end
 	if GetTime() - lastAutoRestoreRunTime < 2 then return end
 -- 	local actualPet = C_PetJournal.GetSummonedPetGUID() -- should get passed from the parent function
-	if not pet then
+	if not pet then -- TODO: this is redundant in the context of the parent function!
 		if ns.dbc.cfavs_enabled then
 			ns:SafeSummon(ns.dbc.currentPet)
 		else
