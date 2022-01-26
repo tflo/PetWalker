@@ -1,19 +1,12 @@
 local addonName, ns = ...
-
-
-ns = CreateFrame("Frame","PetWalker")
-
-ns:SetScript("OnEvent", function(self, event, ...)
-	return self[event](self, event, ...)
-end)
-ns:RegisterEvent("ADDON_LOADED")
-
-BINDING_HEADER_ThisAddon = addonName
-BINDING_NAME_Auto = "Toggle Auto-summon"
-BINDING_NAME_Manual = "Summon New Pet"
-BINDING_NAME_Dismiss = "Dismiss Pet & Disable Auto-summon"
-
+local dbVersion = 1
 local _
+
+
+--[[===========================================================================
+Some Variables
+===========================================================================]]--
+
 local thisChar = UnitName("player")
 local lastCall
 local petPool = {}
@@ -48,26 +41,17 @@ local function IsExcluded(species)
 end
 
 
---[[---------------------------------------------------------------------------
-Messages
----------------------------------------------------------------------------]]--
+ns = CreateFrame("Frame","PetWalker")
 
--- TODO: Do we need a warning at 1 selectable pet? Or should this be considered a valid use-case? (User manually summons a pet from Journal, but wants to get back his (only) fav pet when the timer is due.)
-local function MsgLowPetPool(nPool)
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (nPool < 1 and "0 (zero) pets" or "Only 1 pet") .. " eligible for summoning! You should either " .. (ns.db.favsOnly and "flag more pets as favorite, or set the ramdom pool to 'All Pets'" or "collect more pets") .. ", or set the random-summon timer to '0'. Please note that certain pets are excluded from random summoning, to not break their usability (for example Guild Herald)." .. ((ns.dbc.cfavs_enabled and ns.db.favsOnly) and "\nNote that you have set this char to use char-specific favorite pets. Maybe switching to global favorites ('/pw c') will help."),0,1,0.7)
-end
+ns:SetScript("OnEvent", function(self, event, ...)
+	return self[event](self, event, ...)
+end)
+ns:RegisterEvent("ADDON_LOADED")
 
-local function MsgNoSavedPet()
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": No 'current pet' has been saved yet" .. (ns.dbc.cfavs_enabled and " on this character" or "") .. ". Could not restore pet.", 0,1,0.7)
-end
-
-local function MsgAutoRestoreDone(pet)
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": Your last pet (" .. ns.PetIDtoName(pet) .. ") has been re-summoned.", 0,1,0.7)
-end
-
-local function MsgNewPetDone(pet, nPool)
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (nPool >1 and "A new random" or "Your only eligible") .. " pet (" .. ns.PetIDtoName(pet) .. ") has been summoned" .. (nPool == 1 and " or was already active" or "") .. ".", 0,1,0.7)
-end
+BINDING_HEADER_ThisAddon = addonName
+BINDING_NAME_Auto = "Toggle Auto-summon"
+BINDING_NAME_Manual = "Summon New Pet"
+BINDING_NAME_Dismiss = "Dismiss Pet & Disable Auto-summon"
 
 
 --[[===========================================================================
@@ -76,15 +60,28 @@ LOADING
 
 function ns.ADDON_LOADED(self,event,arg1)
 	if arg1 == addonName then
+
 		PetWalkerDB = PetWalkerDB or {}
 		PetWalkerPerCharDB = PetWalkerPerCharDB or {}
 		ns.db, ns.dbc = PetWalkerDB, PetWalkerPerCharDB
-		ns.dbc.cfavs = ns.dbc.cfavs or {}
-		ns.dbc.cfavs_enabled = ns.dbc.cfavs_enabled or false
-		ns.db.timer = ns.db.timer or 12
+
+		if not ns.db.dbVersion or ns.db.dbVersion ~= dbVersion then
+			table.wipe(ns.db)
+		end
+		if not ns.dbc.dbVersion or ns.dbc.dbVersion ~= dbVersion then
+			local tmpCharFavs = ns.dbc.charFavs -- charFavs
+			table.wipe(ns.dbc)
+			ns.dbc.charFavs = tmpCharFavs
+		end
+		ns.db.dbVersion  = dbVersion
+		ns.dbc.dbVersion = ns.db.dbVersion
+
+		ns.db.autoEnabled = ns.db.autoEnabled == nil and true or ns.db.autoEnabled
+		ns.db.newPetTimer = ns.db.newPetTimer or 12
 		ns.db.favsOnly = ns.db.favsOnly == nil and true or ns.db.favsOnly
-		ns.db.enable = ns.db.enable == nil and true or ns.db.enable
-		ns.db.debugmode = ns.db.debugmode or false
+		ns.dbc.charFavsEnabled = ns.dbc.charFavsEnabled or false
+		ns.dbc.charFavs = ns.dbc.charFavs or {}
+		ns.db.debugMode = ns.db.debugMode or false
 
 		lastCall = GetTime() + 20
 		savePetDelay = savePetLoginDelay
@@ -138,13 +135,39 @@ function ns.ADDON_LOADED(self,event,arg1)
 		hooksecurefunc("CollectionsJournal_UpdateSelectedTab", function(self)
 			local selected = PanelTemplates_GetSelectedTab(self);
 			if selected == 2 then
-				ns.CFavs_Button:SetChecked(ns.dbc.cfavs_enabled)
+				ns.CFavs_Button:SetChecked(ns.dbc.charFavsEnabled)
 				ns.CFavs_Button:Show()
 			else
 				ns.CFavs_Button:Hide()
 			end
 		end)
 	end
+end
+
+function ns.ahtimer(s)
+	local mytimer = C_Timer.NewTimer(s, ns.AutoAction)
+end
+
+
+--[[===========================================================================
+Messages
+===========================================================================]]--
+
+-- TODO: Do we need a warning at 1 selectable pet? Or should this be considered a valid use-case? (User manually summons a pet from Journal, but wants to get back his (only) fav pet when the timer is due.)
+local function MsgLowPetPool(nPool)
+	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (nPool < 1 and "0 (zero) pets" or "Only 1 pet") .. " eligible for summoning! You should either " .. (ns.db.favsOnly and "flag more pets as favorite, or set the ramdom pool to 'All Pets'" or "collect more pets") .. ", or set the random-summon timer to '0'. Please note that certain pets are excluded from random summoning, to not break their usability (for example Guild Herald)." .. ((ns.dbc.charFavsEnabled and ns.db.favsOnly) and "\nNote that you have set this char to use char-specific favorite pets. Maybe switching to global favorites ('/pw c') will help."),0,1,0.7)
+end
+
+local function MsgNoSavedPet()
+	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": No 'current pet' has been saved yet" .. (ns.dbc.charFavsEnabled and " on this character" or "") .. ". Could not restore pet.", 0,1,0.7)
+end
+
+local function MsgAutoRestoreDone(pet)
+	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": Your last pet (" .. ns.PetIDtoName(pet) .. ") has been re-summoned.", 0,1,0.7)
+end
+
+local function MsgNewPetDone(pet, nPool)
+	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (nPool >1 and "A new random" or "Your only eligible") .. " pet (" .. ns.PetIDtoName(pet) .. ") has been summoned" .. (nPool == 1 and " or was already active" or "") .. ".", 0,1,0.7)
 end
 
 
@@ -158,11 +181,11 @@ It DECIDES whether to restore a (lost) pet, or summoning a new one (if the timer
 ---------------------------------------------------------------------------]]--
 
 function ns.AutoAction()
-	if not ns.db.enable then return end
+	if not ns.db.autoEnabled then return end
 	petVerified = true
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	if IsExcluded(actpet) then return end
-	if ns.db.timer ~= 0 and lastCall + ns.db.timer * 60 < GetTime() then
+	if ns.db.newPetTimer ~= 0 and lastCall + ns.db.newPetTimer * 60 < GetTime() then
 		ns:debugprintL2("AutoAction() has run and decided for New Pet.")
 		ns:NewPet(actpet)
 	elseif not actpet then
@@ -178,7 +201,7 @@ RESTORE: Pet is lost --> restore it
 function ns:RestorePet()
 	if GetTime() - lastSummonTime < 2 then return end
 	if GetTime() - lastAutoRestoreRunTime < 2 then return end
-	if ns.dbc.cfavs_enabled then
+	if ns.dbc.charFavsEnabled then
 		if ns.dbc.currentPet then
 			ns:SafeSummon(ns.dbc.currentPet)
 			MsgAutoRestoreDone(ns.dbc.currentPet)
@@ -231,7 +254,7 @@ MANUAL SUMMON of the previously summoned pet
 ---------------------------------------------------------------------------]]--
 
 function ns.ManualSummonPrevious()
-	if ns.dbc.cfavs_enabled then
+	if ns.dbc.charFavsEnabled then
 		C_PetJournal.SummonPetByGUID(ns.dbc.previousPet)
 	else
 		C_PetJournal.SummonPetByGUID(ns.db.previousPet)
@@ -246,10 +269,10 @@ One time action,  somewhere AFTER LOGIN. Try to restore the same pat as the last
 ---------------------------------------------------------------------------]]--
 
 function ns.LoginCheck()
-	if not ns.db.enable then return end
+	if not ns.db.autoEnabled then return end
 	petVerified = true
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
-	if ns.dbc.cfavs_enabled then
+	if ns.dbc.charFavsEnabled then
 		if not actualPet or actualPet ~= ns.dbc.currentPet then
 			ns:SafeSummon(ns.dbc.currentPet)
 		end
@@ -272,7 +295,7 @@ function ns.SavePet()
 	if not actualPet or IsExcluded(actualPet) or (GetTime() - lastSavePetTime < 1) or not petVerified then
 		return
 	end
-	if ns.dbc.cfavs_enabled then
+	if ns.dbc.charFavsEnabled then
 		if ns.dbc.currentPet == actualPet then return end
 		ns.dbc.previousPet = ns.dbc.currentPet
 		ns.dbc.currentPet = actualPet
@@ -367,7 +390,7 @@ function ns.InitializePool(self)
 		index = index + 1
 	end
 	poolInitialized = true -- Condition in ns:NewPet and ns.ManualSummonNew
-	if #petPool <= 1 and ns.db.timer ~= 0 and poolMsgLockout < GetTime() then
+	if #petPool <= 1 and ns.db.newPetTimer ~= 0 and poolMsgLockout < GetTime() then
 		MsgLowPetPool(#petPool)
 		poolMsgLockout = GetTime() + 15
 	end
@@ -376,19 +399,19 @@ end
 
 -- Largely unaltered code from NugMiniPet
 function ns.CFavsUpdate()
-	local enable = ns.dbc.cfavs_enabled
+	local enable = ns.dbc.charFavsEnabled
 	if enable then
 		C_PetJournal.PetIsFavorite1 = C_PetJournal.PetIsFavorite1 or C_PetJournal.PetIsFavorite
 		C_PetJournal.SetFavorite1 = C_PetJournal.SetFavorite1 or C_PetJournal.SetFavorite
 		C_PetJournal.GetPetInfoByIndex1 = C_PetJournal.GetPetInfoByIndex1 or C_PetJournal.GetPetInfoByIndex
 		C_PetJournal.PetIsFavorite = function(petGUID)
-			return ns.dbc.cfavs[petGUID] or false
+			return ns.dbc.charFavs[petGUID] or false
 		end
 		C_PetJournal.SetFavorite = function(petGUID, new)
 			if new == 1 then
-				ns.dbc.cfavs[petGUID] = true
+				ns.dbc.charFavs[petGUID] = true
 			else
-				ns.dbc.cfavs[petGUID] = nil
+				ns.dbc.charFavs[petGUID] = nil
 			end
 			if PetJournal then PetJournal_OnEvent(PetJournal, "PET_JOURNAL_LIST_UPDATE") end
 			ns:PET_JOURNAL_LIST_UPDATE()
@@ -422,15 +445,15 @@ function ns:DismissAndDisable()
 	if activePetGUID then
 		C_PetJournal.SummonPetByGUID(activePetGUID);
 	end
-	ns.db.enable = false
-	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.enable) end
-	DEFAULT_CHAT_FRAME:AddMessage("Pet dismissed and auto-summon "..(ns.db.enable and "enabled" or "disabled"),0,1,0.7)
+	ns.db.autoEnabled = false
+	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.autoEnabled) end
+	DEFAULT_CHAT_FRAME:AddMessage("Pet dismissed and auto-summon "..(ns.db.autoEnabled and "enabled" or "disabled"),0,1,0.7)
 end
 
 function ns:AutoToggle()
-	ns.db.enable = not ns.db.enable
-	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.enable) end
-	DEFAULT_CHAT_FRAME:AddMessage("Pet auto-summon "..(ns.db.enable and "enabled" or "disabled"),0,1,0.7)
+	ns.db.autoEnabled = not ns.db.autoEnabled
+	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.autoEnabled) end
+	DEFAULT_CHAT_FRAME:AddMessage("Pet auto-summon "..(ns.db.autoEnabled and "enabled" or "disabled"),0,1,0.7)
 end
 
 function ns:FavsToggle()
@@ -440,22 +463,22 @@ function ns:FavsToggle()
 end
 
 function ns.CharFavsSlashToggle() -- for slash command only
-	ns.dbc.cfavs_enabled = not ns.dbc.cfavs_enabled
+	ns.dbc.charFavsEnabled = not ns.dbc.charFavsEnabled
 	ns:CFavsUpdate()
-	DEFAULT_CHAT_FRAME:AddMessage("Character-specific favorites "..(ns.dbc.cfavs_enabled and "enabled" or "disabled"),0,1,0.7)
+	DEFAULT_CHAT_FRAME:AddMessage("Character-specific favorites "..(ns.dbc.charFavsEnabled and "enabled" or "disabled"),0,1,0.7)
 end
 
 function ns.DebugModeToggle() -- for slash command only
-	ns.db.debugmode = not ns.db.debugmode
-	DEFAULT_CHAT_FRAME:AddMessage("Debug mode "..(ns.db.debugmode and "enabled" or "disabled"),0,1,0.7)
+	ns.db.debugMode = not ns.db.debugMode
+	DEFAULT_CHAT_FRAME:AddMessage("Debug mode "..(ns.db.debugMode and "enabled" or "disabled"),0,1,0.7)
 end
 
 function ns:TimerSlashCmd(value)
 	value = tonumber(value)
 	if value >= 0 and value < 1000 then
-		ns.db.timer = value
-	--			ns.TimerEditBox:SetText(ns.db.timer) -- only needed for GUI edit box, which is currently disabled
-	DEFAULT_CHAT_FRAME:AddMessage(ns.db.timer == 0 and "Summon timer disabled" or "Summoning a new pet every " .. ns.db.timer .. " minutes",0,1,0.7)
+		ns.db.newPetTimer = value
+	--			ns.TimerEditBox:SetText(ns.db.newPetTimer) -- only needed for GUI edit box, which is currently disabled
+	DEFAULT_CHAT_FRAME:AddMessage(ns.db.newPetTimer == 0 and "Summon timer disabled" or "Summoning a new pet every " .. ns.db.newPetTimer .. " minutes",0,1,0.7)
 	end
 end
 
@@ -463,7 +486,7 @@ end
 function ns:ListCharFavs()
 	local charFavsNames = {}
 	local count = 0
-	for id, _ in pairs(ns.dbc.cfavs) do
+	for id, _ in pairs(ns.dbc.charFavs) do
 	count = count + 1
 	local index = 1
 		while true do
@@ -488,7 +511,7 @@ Slash UI
 local helpText = "\nPetWalker Help: '/pw' or '/petw' supports these commands:\n  d: Dismiss current pet and disable auto-summon\n  a: Toggle auto-summon\n  n: Summon new pet from pool\n  f: Toggle selection pool: favorites only, or all pets\n  c: Toggle character-specific favorites, or global\n  <number>: Summon timer in minutes (1 to 999, 0 to disable)\n  p: Summon previous pet\n  s: Display current status/settings\n  h: This help text\nIn Key Bindigs > AddOns you can directly bind some commands."
 
 function ns.Status()
-	local text = "\nPetWalker Status:\n  Auto-summon is " .. (ns.db.enable and "enabled" or "disabled") .. "\n  Summon timer is " .. (ns.db.timer > 0 and ns.db.timer .. " minutes" .. " - Next random pet in " .. ns.RemainingTimer() or "disbled") .. "\n  Selection pool is set to " .. (ns.db.favsOnly and "favorites only" or "all pets") .. "\n  Character-specific favorites are " .. (ns.dbc.cfavs_enabled and "enabled" or "disabled") .. " for " .. thisChar .. "\n  " .. ns:ListCharFavs()
+	local text = "\nPetWalker Status:\n  Auto-summon is " .. (ns.db.autoEnabled and "enabled" or "disabled") .. "\n  Summon timer is " .. (ns.db.newPetTimer > 0 and ns.db.newPetTimer .. " minutes" .. " - Next random pet in " .. ns.RemainingTimer() or "disbled") .. "\n  Selection pool is set to " .. (ns.db.favsOnly and "favorites only" or "all pets") .. "\n  Character-specific favorites are " .. (ns.dbc.charFavsEnabled and "enabled" or "disabled") .. " for " .. thisChar .. "\n  " .. ns:ListCharFavs()
 	return text
 end
 
@@ -550,9 +573,9 @@ end
 function ns.CreateCfavsCheckBox(self)
 	local f, label = self:CreateCheckBoxBase()
 	f:SetPoint("BOTTOMLEFT",PetJournal,"BOTTOMLEFT",400,1)
-	f:SetChecked(ns.dbc.cfavs_enabled)
+	f:SetChecked(ns.dbc.charFavsEnabled)
 	f:SetScript("OnClick",function(self,button)
-		ns.dbc.cfavs_enabled = not ns.dbc.cfavs_enabled
+		ns.dbc.charFavsEnabled = not ns.dbc.charFavsEnabled
 		ns:CFavsUpdate()
 	end)
 	f:SetScript("OnEnter",function(self)
@@ -588,14 +611,14 @@ end
 
 -- without pet info
 function ns:debugprintL1(msg)
-if not ns.db.debugmode then return end
+if not ns.db.debugMode then return end
 	print("\n|cffFFA500### PETWALKER DEBUG: " .. msg .. " ###")
 end
 
 -- with pet info
 function ns:debugprintL2(msg)
-if not ns.db.debugmode then return end
-	print("\n|cffFFA500### PETWALKER DEBUG: " .. msg .. " ### Current DB pet: " .. tostring(ns.PetIDtoName(ns.dbc.cfavs and ns.dbc.currentPet or ns.dbc.currentPet)) .. " ###")
+if not ns.db.debugMode then return end
+	print("\n|cffFFA500### PETWALKER DEBUG: " .. msg .. " ### Current DB pet: " .. tostring(ns.PetIDtoName(ns.dbc.charFavs and ns.dbc.currentPet or ns.dbc.currentPet)) .. " ###")
 end
 
 -- Table dump
@@ -619,7 +642,7 @@ local function SecToMin(seconds)
 end
 
 function ns.RemainingTimer()
-	local rem = lastCall + ns.db.timer * 60 - GetTime()
+	local rem = lastCall + ns.db.newPetTimer * 60 - GetTime()
 	rem = rem > 0 and rem or 0
 	return SecToMin(rem)
 end
