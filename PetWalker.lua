@@ -158,16 +158,14 @@ It DECIDES whether to restore a (lost) pet, or summoning a new one (if the timer
 function ns.AutoAction()
 	if not ns.db.enable then return end
 	petVerified = true
-	local actualPet = C_PetJournal.GetSummonedPetGUID()
-	if IsExcluded(actualPet) then return end
-	if ns.db.timer ~= 0 and #petPool >= 1 then
-		if lastCall + ns.db.timer * 60 < GetTime() then
-			ns:dbpp("AutoAction() has run and decided for New Pet.")
-			ns.AutoNew(actualPet)
-		end
-	elseif not actualPet then
+	local actpet = C_PetJournal.GetSummonedPetGUID()
+	if IsExcluded(actpet) then return end
+	if ns.db.timer ~= 0 and lastCall + ns.db.timer * 60 < GetTime() then
+		ns:dbpp("AutoAction() has run and decided for New Pet.")
+		ns:NewPet(actpet)
+	elseif not actpet then
 		ns:dbpp("AutoAction() has run and decided to Restore Pet.")
-		ns.AutoRestore(actualPet)
+		ns:RestorePet(actpet)
 	end
 end
 
@@ -175,7 +173,7 @@ end
 RESTORE: Pet is lost --> restore it
 ---------------------------------------------------------------------------]]--
 
-function ns.AutoRestore(pet)
+function ns:RestorePet()
 	if GetTime() - lastSummonTime < 2 then return end
 	if GetTime() - lastAutoRestoreRunTime < 2 then return end
 	if ns.dbc.cfavs_enabled then
@@ -199,32 +197,30 @@ end
 --[[---------------------------------------------------------------------------
 NEW PET SUMMON: Runs when timer is due
 ---------------------------------------------------------------------------]]--
-function ns.AutoNew(pet)
-	if not poolInitialized then ns:InitializePool() end
-	local newPet = ns:Shuffle()
-	if newPet == pet then return end
-	if newPet and (lastCall+1.5 < GetTime()) then
-		lastCall = GetTime()
-		ns:SafeSummon(newPet)
+-- Called by 1: ns.AutoAction
+
+function ns:NewPet(actpet)
+	if lastCall + 1.5 > GetTime() then return end
+	if not poolInitialized then
+		ns:InitializePool()
 	end
-end
-
-
---[[---------------------------------------------------------------------------
-MANUAL SUMMON, via command
----------------------------------------------------------------------------]]--
-
-function ns.ManualSummonNew()
-	if not poolInitialized then ns:InitializePool() end
-	local pet = C_PetJournal.GetSummonedPetGUID()
-	local newpet = ns:Shuffle()
-	if pet == newpet then return end
+	local n = #petPool
+	local newpet
+	if n == 0 then
+		MsgLowPetPool(n)
+		if not actpet then ns:RestorePet() end
+	else
+		if n == 1 then
+			newpet = petPool[1]
+		else
+			repeat
+				newpet = petPool[math.random(n)]
+			until actpet ~= newpet
+		end
+		ns:SafeSummon(newpet)
+		MsgNewPetDone(newpet, n)
+	end
 	lastCall = GetTime()
-	-- Temporarily using the SafeSummon function, to test the exclusions; but maybe it is a good idea to keep it like that?
-	ns:SafeSummon(newpet)
--- 	C_PetJournal.SummonPetByGUID(newPet)
-	lastSummonTime = lastCall
-	ns:dbpp("ManualSummonNew() has summoned \"" .. (ns.PetGUIDtoName(newpet) or "Nothing") .. "\" ")
 end
 
 
@@ -368,14 +364,9 @@ function ns.InitializePool(self)
 		end
 		index = index + 1
 	end
-	poolInitialized = true -- Condition in ns.AutoNew and ns.ManualSummonNew
+	poolInitialized = true -- Condition in ns:NewPet and ns.ManualSummonNew
 	if #petPool <= 1 and ns.db.timer ~= 0 and poolMsgLockout < GetTime() then
-		local n = #petPool
-		if ns.db.favsOnly then
-			MsgLowPetPoolFavs(n)
-		else
-			MsgLowPetPoolAll(n)
-		end
+		MsgLowPetPool(#petPool)
 		poolMsgLockout = GetTime() + 15
 	end
 end
@@ -413,28 +404,6 @@ function ns.CFavsUpdate()
 	end
 	if PetJournal then PetJournal_OnEvent(PetJournal, "PET_JOURNAL_LIST_UPDATE") end
 	ns:PET_JOURNAL_LIST_UPDATE()
-end
-
-
--- Called by 2: ns.AutoNew, ns.ManualSummonNew
-function ns.Shuffle(self)
-	local n = #petPool
-	local newpet
-	if n > 1 then
-		local activepet = C_PetJournal.GetSummonedPetGUID()
-		repeat
-			newpet = petPool[math.random(n)]
-		until activepet ~= newpet
-	elseif n == 1 then
-		newpet = petPool[1]
-	else
-		if ns.db.favsOnly then
-			MsgLowPetPoolFavs(n)
-		else
-			MsgLowPetPoolAll(n)
-		end
-	end
-	return newpet
 end
 
 
@@ -525,7 +494,7 @@ function SlashCmdList.PetWalker(cmd)
 	elseif cmd == 'a' or cmd == 'auto' then
 		ns:AutoToggle()
 	elseif cmd == 'n' or cmd == 'new' then
-		ns:ManualSummonNew()
+		ns:NewPet(C_PetJournal.GetSummonedPetGUID())
 	elseif cmd == 'f' or cmd == 'fav' then
 		ns:FavsToggle()
 	elseif cmd == 'c' or cmd == 'char' then

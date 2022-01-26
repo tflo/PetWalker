@@ -3,7 +3,7 @@
         PetWalker:AutoToggle()
     </Binding>
     <Binding name="Manual" category="ADDONS">
-        PetWalker:ManualSummonNew()
+        PetWalker:NewPet(C_PetJournal.GetSummonedPetGUID())
     </Binding>
     <Binding name="Dismiss" category="ADDONS">
         PetWalker:DismissAndDisable()
