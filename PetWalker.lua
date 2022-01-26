@@ -25,6 +25,7 @@ local lastSavePetTime = GetTime() - 20
 local savePetDelay
 local savePetLoginDelay = 10
 local savePetNormalDelay = 3
+local poolMsgLockout = 0 -- ATM needed to prevent chat spam with our "too less favorites" message. TODO: Find the exact cause of the pool initialization spam, which must be somewhere in the Favorite Selection function! I think it would be also OK to initialize only after closing the pet journal (or Rematch!) frame.
 
 -- Guild Page and Herald don't have fix IDs, so we have to go by speciesID
 -- Nor sure what to do with the Argent Squire pet: CD activates only if we access the bank/mail/vendor, and it is also a valid pet for random favorite summons. But maybe we should just give him a guaranteed minimum live time of 3 min or so? Or just rely on the user intelligence to switch off auto-summoning when he accesses the bank? Or maybe test for the pony bridle achiev and not auto-unsummon him if present?
@@ -335,18 +336,27 @@ function ns.InitializePool(self)
 	while true do
 		local petID, speciesID, _, _, _, favorite = C_PetJournal.GetPetInfoByIndex(index)
 		if not petID then break end
+		if not IsExcluded(speciesID) then
 		if ns.db.favsOnly then
-			if favorite and not IsExcluded(speciesID) then
+				if favorite then
 				table.insert(petPool, petID)
 			end
 		else
-			if not IsExcluded(speciesID) then
 				table.insert(petPool, petID)
 			end
 		end
 		index = index + 1
 	end
 	poolInitialized = true	-- added this bc otherwise the query makes no sense
+	if #petPool <= 1 and ns.db.timer ~= 0 and poolMsgLockout < GetTime() then
+		local n = #petPool
+		if ns.db.favsOnly then
+			DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (n < 1 and "0 (zero) pets" or "Only 1 pet") .. " available for summoning! You should either flag more pets as favorite, or set the ramdom pool to \"All Pets\", or set the random-summon timer to \"0\". Please note that certain pets are excluded from random summoning, to not break their usability (for example \"Guild Herald\").",0,1,0.7)
+		else
+			DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (n < 1 and "0 (zero) pets" or "Only 1 pet") .. " available for summoning! You should either collect more pets, or set the random-summon timer to \"0\". Please note that certain pets are excluded from random summoning, to not break their usability (for example \"Guild Herald\").",0,1,0.7)
+		end
+		poolMsgLockout = GetTime() + 10
+	end
 end
 
 
