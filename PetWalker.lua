@@ -83,6 +83,7 @@ function ns.ADDON_LOADED(self,event,arg1)
 		ns.db.timer = ns.db.timer or 12
 		ns.db.favsOnly = ns.db.favsOnly or true
 		ns.db.enable = ns.db.enable or true
+		ns.db.debugmode = ns.db.debugmode or false
 
 		lastCall = GetTime() + 20
 		savePetDelay = savePetLoginDelay
@@ -443,6 +444,11 @@ function ns.CharFavsSlashToggle() -- for slash command only
 	DEFAULT_CHAT_FRAME:AddMessage("Character-specific favorites "..(ns.dbc.cfavs_enabled and "enabled" or "disabled"),0,1,0.7)
 end
 
+function ns.DebugModeToggle() -- for slash command only
+	ns.db.debugmode = not ns.db.debugmode
+	DEFAULT_CHAT_FRAME:AddMessage("Debug mode "..(ns.db.debugmode and "enabled" or "disabled"),0,1,0.7)
+end
+
 function ns:TimerSlashCmd(value)
 	value = tonumber(value)
 	if value >= 0 and value < 1000 then
@@ -489,8 +495,10 @@ SLASH_PetWalker1, SLASH_PetWalker2 = '/pw', '/petw'
 function SlashCmdList.PetWalker(cmd)
 	if cmd == 'd' or cmd == 'dis' then
 		ns:DismissAndDisable()
-	elseif cmd == 'db' or cmd == 'deb' then
+	elseif cmd == 'dd' or cmd == 'debd' then
 		ns:DebugDisplay()
+	elseif cmd == 'dm' or cmd == 'debm' then
+		ns.DebugModeToggle()
 	elseif cmd == 'a' or cmd == 'auto' then
 		ns:AutoToggle()
 	elseif cmd == 'n' or cmd == 'new' then
@@ -574,7 +582,7 @@ end
 
 
 function ns:DebugDisplay()
-	DEFAULT_CHAT_FRAME:AddMessage("\nDebug:\n  Current pet: " .. (ns.PetIDtoName(ns.db.currentPet) or "-none-") .. "\n  Previous pet: " .. (ns.PetIDtoName(ns.db.previousPet) or "-none-") .. "\n	 Current char pet: " .. (ns.PetIDtoName(ns.dbc.currentPet) or "-none-") .. "\n  Previous char pet: " .. (ns.PetIDtoName(ns.dbc.previousPet) or "-none-") .. "\n" .. ns.Status(),0,1,0.7)
+	DEFAULT_CHAT_FRAME:AddMessage("\nDebug:\n  Current pet: " .. (ns.PetIDtoName(ns.db.currentPet) or "-none-") .. "\n  Previous pet: " .. (ns.PetIDtoName(ns.db.previousPet) or "-none-") .. "\n  Current char pet: " .. (ns.PetIDtoName(ns.dbc.currentPet) or "-none-") .. "\n  Previous char pet: " .. (ns.PetIDtoName(ns.dbc.previousPet) or "-none-") .. "\n" .. ns.Status(),0,1,0.7)
 end
 
 -- without pet info
