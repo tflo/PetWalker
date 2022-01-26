@@ -172,7 +172,7 @@ function ns.AutoAction()
 end
 
 --[[---------------------------------------------------------------------------
-AUTO RESTORE: Pet is lost --> restore it
+RESTORE: Pet is lost --> restore it
 ---------------------------------------------------------------------------]]--
 
 function ns.AutoRestore(pet)
@@ -197,7 +197,7 @@ end
 
 
 --[[---------------------------------------------------------------------------
-NEW PET AUTOMATIC SUMMON: Runs when timer is due
+NEW PET SUMMON: Runs when timer is due
 ---------------------------------------------------------------------------]]--
 function ns.AutoNew(pet)
 	if not poolInitialized then ns:InitializePool() end
@@ -320,7 +320,7 @@ local function InArena()
 	return instanceType == "arena"
 end
 
--- Called by 3: ns.AutoRestore, ns.AutoNew, ns.ManualSummonNew
+-- Called by 3: ns:RestorePet, ns:NewPet, ns.ManualSummonNew
 function ns:SafeSummon(pet)
 	if not pet then return end -- needed?
 	if not UnitAffectingCombat("player")
@@ -349,7 +349,7 @@ This can be, depending on user setting:
 — All available pets (except the exclusions)
 ===========================================================================]]--
 
--- Called by 3: PET_JOURNAL_LIST_UPDATE; conditionally by ns.AutoNew, ns.ManualSummonNew
+-- Called by 3: PET_JOURNAL_LIST_UPDATE; conditionally by ns:NewPet, ns.ManualSummonNew
 function ns.InitializePool(self)
 	ns:dbp("Running ns.InitializePool()")
 	table.wipe(petPool)
@@ -588,7 +588,7 @@ end
 
 
 --[[===========================================================================
--- Debugging
+-- Debugging and Utils
 ===========================================================================]]--
 
 function ns.PetGUIDtoName(guid)
