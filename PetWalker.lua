@@ -27,13 +27,12 @@ local savePetLoginDelay = 10
 local savePetNormalDelay = 3
 
 -- Guild Page and Herald don't have fix IDs, so we have to go by speciesID
--- TODO: We must also make sure that we do not unsummon these pets via AutoRestore or AutoNew. The Guild pets despawn automatically, so we can simply check if they are there, but the Argent Tourny pet should be treated differently: CD activates only if we access the bank, and it is also a valid pet for random favorite summons. Difficult. But maybe we should just give him a fix live time of 20 min or so? Or just hope that the user disables PetWalker when he accesses the bank? Or maybe check for the pony bridle achiev and not autosummon /autounsummon him then? (GetAchievementInfo)
--- --> make two categories of petspeciesIDs: 'doNotSummon' and 'doNotUnsummon'.
+-- Nor sure what to do with the Argent Squire pet: CD activates only if we access the bank/mail/vendor, and it is also a valid pet for random favorite summons. But maybe we should just give him a guaranteed minimum live time of 3 min or so? Or just rely on the user intelligence to switch off auto-summoning when he accesses the bank? Or maybe test for the pony bridle achiev and not auto-unsummon him if present?
 -- TODO: check the Hordies speciesID
 local excludedSpecies = {
-	280, -- Guild Page
-	282, -- Guild Herald
--- 	214, -- Argent Squire (Pony Bridle char achiev: 3736)
+	280, -- Guild Page -- Pet is vendor and has CD
+	282, -- Guild Herald -- Pet is vendor and has CD
+-- 	214, -- Argent Squire (Pony Bridle char achievement: 3736)
 -- 	216, -- Argent Gruntling
 }
 
@@ -74,9 +73,13 @@ function ns.ADDON_LOADED(self,event,arg1)
 
 		ns:CFavsUpdate()
 
-		-- this event basically is only needed for the timed summon
+		-- This is our main event, and it happens quite frequently. Resource usage is pretty low, since we are only checking the timer and if a pet is out. Nevertheless, we should - maybe - consider some less frequent event in place of this. (e.g. ZONE_CHANGED, mount/unmount or such)
 		self:RegisterEvent("PLAYER_STARTED_MOVING")
 		self.PLAYER_STARTED_MOVING = ns.AutoAction
+
+		-- TODO: Test this!
+-- 		self:RegisterEvent("PLAYER_STARTED_MOVING")
+-- 		self.PLAYER_STARTED_MOVING = ns.AutoAction
 
 		-- experimental: for not-much-moving chars at the auction house
 		self:RegisterEvent("PLAYER_STARTED_LOOKING")
@@ -87,6 +90,7 @@ function ns.ADDON_LOADED(self,event,arg1)
 			end
 		end
 
+		-- TODO: Does this fire too often? (see https://wowpedia.fandom.com/wiki/COMPANION_UPDATE)
 		self:RegisterEvent("COMPANION_UPDATE")
 		function ns.COMPANION_UPDATE(self,event,arg1)
 			if arg1 == "CRITTER" then
@@ -176,7 +180,6 @@ end
 NEW PET AUTOMATIC SUMMON: Runs when timer is due
 ---------------------------------------------------------------------------]]--
 function ns.AutoNew(pet)
-	print("AutoNew actualPet variable = " .. (ns.PetGUIDtoName(pet) or "NOTHING!!")) -- debug
 	if not poolInitialized then ns:InitializePool() end
 	local newPet = ns:Shuffle()
 	if newPet == pet then return end
@@ -206,7 +209,7 @@ function ns.ManualSummonNew()
 	ns:SafeSummon(newPet)
 -- 	C_PetJournal.SummonPetByGUID(newPet)
 	lastSummonTime = lastCall
-	ns:dbpp("ManualSummonNew() has summoned \"" .. ns.PetGUIDtoName(newPet) .. "\" ")
+	ns:dbpp("ManualSummonNew() has summoned \"" .. (ns.PetGUIDtoName(newPet) or "Nothing") .. "\" ")
 end
 
 
@@ -230,7 +233,6 @@ One time action,  somewhere AFTER LOGIN. Try to restore the same pat as the last
 ---------------------------------------------------------------------------]]--
 
 function ns.LoginCheck()
---	if not poolInitialized then ns:InitializePool() end
 	if not ns.db.enable then return end
 	petVerified = true
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
