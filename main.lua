@@ -449,9 +449,9 @@ Toggles, Commands
 ---------------------------------------------------------------------------]]--
 
 function ns:DismissAndDisable()
-	local activePetGUID = C_PetJournal.GetSummonedPetGUID()
-	if activePetGUID then
-		C_PetJournal.SummonPetByGUID(activePetGUID);
+	local actpet = C_PetJournal.GetSummonedPetGUID()
+	if actpet then
+		C_PetJournal.SummonPetByGUID(actpet);
 	end
 	ns.db.autoEnabled = false
 	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.autoEnabled) end
