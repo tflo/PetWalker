@@ -130,9 +130,15 @@ ADDON_LOADED: PetWalker
 		Let's do a test:
 		Unset the 'isInitialized' var with that event, and initialize only when
 		needed, that is before selecting a random pet.
+		--> This seems to work, so far!
 		]]
-		self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
-		self.PET_JOURNAL_LIST_UPDATE = self.InitializePool
+		ns:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
+-- 		ns.PET_JOURNAL_LIST_UPDATE = ns.InitializePool
+		function ns.PET_JOURNAL_LIST_UPDATE()
+			poolInitialized = false
+			ns:debugprintL1("ns.PET_JOURNAL_LIST_UPDATE has run. poolInitialized =="
+			.. tostring(poolInitialized))
+		end
 
 		ns:CFavsUpdate()
 
@@ -519,6 +525,9 @@ end
 function ns.CharFavsSlashToggle() -- for slash command only
 	ns.dbc.charFavsEnabled = not ns.dbc.charFavsEnabled
 	ns:CFavsUpdate()
+	--[[ This is redundant, _if_ we leave the 'poolInitialized = false' in the
+	PET_JOURNAL_LIST_UPDATE function, which gets called by the ns:CFavsUpdate above ]]
+	poolInitialized = false
 	DEFAULT_CHAT_FRAME:AddMessage("Character-specific favorites "..(ns.dbc.charFavsEnabled and "enabled" or "disabled"),0,1,0.7)
 end
 
