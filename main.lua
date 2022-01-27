@@ -18,11 +18,31 @@ local lastSavePetTime = GetTime() - 20
 local savePetDelay
 local savePetLoginDelay = 10
 local savePetNormalDelay = 3
-local poolMsgLockout = 0 -- ATM needed to prevent chat spam with our "too less favorites" message. TODO: Find the exact cause of the pool initialization spam, which must be somewhere in the Favorite Selection function! I think it would be also OK to initialize only after closing the pet journal (or Rematch!) frame.
+--[[
+ATM needed to prevent chat spam with our "too less favorites" message. TODO:
+Find the exact cause of the pool initialization spam, which must be somewhere in
+the Favorite Selection function! I think it would be also OK to initialize only
+after closing the pet journal (or Rematch!) frame.
+--> Partially solved now, by inverting the initialization logic (event only sets
+the var to false)
+]]
+local poolMsgLockout = 0
 
--- Guild Page and Herald don't have fix IDs, so we have to go by speciesID
--- Nor sure what to do with the Argent Squire pet: CD activates only if we access the bank/mail/vendor, and it is also a valid pet for random favorite summons. But maybe we should just give him a guaranteed minimum live time of 3 min or so? Or just rely on the user intelligence to switch off auto-summoning when he accesses the bank? Or maybe test for the pony bridle achiev and not auto-unsummon him if present?
--- TODO: check the Hordies speciesID
+--[[
+Guild Page and Herald don't have fix IDs, so we have to go by speciesID Nor
+sure what to do with the Argent Squire pet: CD activates only if we access the
+bank/mail/vendor, and it is also a valid pet for random favorite summons.
+But maybe we should just give him a guaranteed minimum live time of 3 min or so?
+
+Or just rely on the user intelligence to switch off auto-summoning when he
+accesses the bank? Or maybe test for the pony bridle achiev and not
+auto-unsummon him if present?
+
+TODO:
+- check the Hordies speciesID
+- Maybe add the self-unsummoning pets, like the different Snowman (though, it
+  could be considered fun to auto-resummon the Snowman repeatedly :)
+]]
 local excludedSpecies = {
 	280, -- Guild Page -- Pet is vendor and has CD
 	282, -- Guild Herald -- Pet is vendor and has CD
@@ -92,9 +112,14 @@ ADDON_LOADED: PetWalker
 		lastCall = GetTime() + 20
 		savePetDelay = savePetLoginDelay
 
-		-- Is this needed?
-		-- Seems we also get - sometimes - a COMPANION_UPDATE event after login (which triggers a SavePet()). Also it doesn't find the variables from the ns.db, if run too early. So, this is difficult to time, and also depends on the load time of the char.
-		-- So, let's try with PLAYER_ENTERING_WORLD:
+		--[[
+		Is this needed?
+		Seems we also get - sometimes - a COMPANION_UPDATE event after login
+		(which triggers a SavePet()). Also it doesn't find the variables from
+		the ns.db, if run too early. So, this is difficult to time, and also
+		depends on the load time of the char.
+		So, let's try with PLAYER_ENTERING_WORLD:
+		]]
 --		self:RegisterEvent("PLAYER_ENTERING_WORLD")
 --		self.PLAYER_ENTERING_WORLD = ns.LoginCheck
 		C_Timer.After(16, function() ns.LoginCheck() end)
@@ -120,7 +145,10 @@ ADDON_LOADED: PetWalker
 		end
 
 
-		-- TODO: Does this fire too often? (see https://wowpedia.fandom.com/wiki/COMPANION_UPDATE)
+		--[[
+		TODO: Does this fire too often? (see
+		https://wowpedia.fandom.com/wiki/COMPANION_UPDATE)
+		]]
 		self:RegisterEvent("COMPANION_UPDATE")
 		function ns.COMPANION_UPDATE(self,event,arg1)
 			if arg1 == "CRITTER" then
@@ -167,7 +195,7 @@ Messages
 
 -- TODO: Do we need a warning at 1 selectable pet? Or should this be considered a valid use-case? (User manually summons a pet from Journal, but wants to get back his (only) fav pet when the timer is due.)
 local function MsgLowPetPool(nPool)
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (nPool < 1 and "0 (zero) pets" or "Only 1 pet") .. " eligible for summoning! You should either " .. (ns.db.favsOnly and "flag more pets as favorite, or set the ramdom pool to 'All Pets'" or "collect more pets") .. ", or set the random-summon timer to '0'. Please note that certain pets are excluded from random summoning, to not break their usability (for example Guild Herald)." .. ((ns.dbc.charFavsEnabled and ns.db.favsOnly) and "\nNote that you have set this char to use char-specific favorite pets. Maybe switching to global favorites ('/pw c') will help." or ""),0,1,0.7)
+	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (nPool < 1 and "0 (zero) pets" or "Only 1 pet") .. " eligible as random summon! You should either " .. (ns.db.favsOnly and "flag more pets as favorite, or set the ramdom pool to 'All Pets'" or "collect more pets") .. ", or set the random-summon timer to '0'. Please note that certain pets are excluded from random summoning, to not break their usability (for example Guild Herald)." .. ((ns.dbc.charFavsEnabled and ns.db.favsOnly) and "\nNote that you have set this char to use char-specific favorite pets. Maybe switching to global favorites ('/pw c') will help." or ""),0,1,0.7)
 end
 
 local function MsgNoSavedPet()
