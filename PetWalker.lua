@@ -188,7 +188,7 @@ function ns.AutoAction()
 		ns:NewPet(actpet)
 	elseif not actpet then
 		ns:debugprintL2("AutoAction() has run and decided to Restore Pet.")
-		ns:RestorePet(actpet)
+		ns:RestorePet()
 	end
 end
 
@@ -231,7 +231,7 @@ function ns:NewPet(actpet)
 	local npool = #petPool
 	local newpet
 	if npool == 0 then
-		MsgLowPetPool(n)
+		MsgLowPetPool(npool)
 		if not actpet then ns:RestorePet() end
 	else
 		if npool == 1 then
