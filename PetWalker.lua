@@ -81,6 +81,7 @@ function ns.ADDON_LOADED(self,event,arg1)
 		ns.db.favsOnly = ns.db.favsOnly == nil and true or ns.db.favsOnly
 		ns.dbc.charFavsEnabled = ns.dbc.charFavsEnabled or false
 		ns.dbc.charFavs = ns.dbc.charFavs or {}
+		ns.dbc.eventAlt = ns.dbc.eventAlt or false
 		ns.db.debugMode = ns.db.debugMode or false
 
 		lastCall = GetTime() + 20
@@ -98,18 +99,15 @@ function ns.ADDON_LOADED(self,event,arg1)
 
 		ns:CFavsUpdate()
 
-		-- This is our main event, and it happens quite frequently. Resource usage is pretty low, since we are only checking the timer and if a pet is out. Nevertheless, we should - maybe - consider some less frequent event in place of this. (e.g. ZONE_CHANGED, mount/unmount or such)
-		self:RegisterEvent("PLAYER_STARTED_MOVING")
-		self.PLAYER_STARTED_MOVING = ns.AutoAction
-
-		-- experimental: for not-much-moving chars at the auction house
-		self:RegisterEvent("PLAYER_STARTED_LOOKING")
-		function ns.PLAYER_STARTED_LOOKING(self,event)
-			local zone = GetMinimapZoneText()
-			if zone == 'Booty Bay' then
-				ns.AutoAction()
-			end
+		if ns.dbc.eventAlt then
+			self:RegisterEvent("PLAYER_STARTED_LOOKING")
+			self.PLAYER_STARTED_LOOKING = ns.AutoAction
+		else
+			self:RegisterEvent("PLAYER_STARTED_MOVING")
+			self.PLAYER_STARTED_MOVING = ns.AutoAction
 		end
+
+
 
 		-- TODO: Does this fire too often? (see https://wowpedia.fandom.com/wiki/COMPANION_UPDATE)
 		self:RegisterEvent("COMPANION_UPDATE")
@@ -447,19 +445,24 @@ function ns:DismissAndDisable()
 	end
 	ns.db.autoEnabled = false
 	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.autoEnabled) end
-	DEFAULT_CHAT_FRAME:AddMessage("Pet dismissed and auto-summon "..(ns.db.autoEnabled and "enabled" or "disabled"),0,1,0.7)
+	DEFAULT_CHAT_FRAME:AddMessage("Pet dismissed and auto-summon " .. (ns.db.autoEnabled and "enabled" or "disabled"),0,1,0.7)
 end
 
 function ns:AutoToggle()
 	ns.db.autoEnabled = not ns.db.autoEnabled
 	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.autoEnabled) end
-	DEFAULT_CHAT_FRAME:AddMessage("Pet auto-summon "..(ns.db.autoEnabled and "enabled" or "disabled"),0,1,0.7)
+	DEFAULT_CHAT_FRAME:AddMessage("Pet auto-summon " .. (ns.db.autoEnabled and "enabled" or "disabled"),0,1,0.7)
+end
+
+function ns:EventAlt()
+	ns.dbc.eventAlt = not ns.dbc.eventAlt
+	DEFAULT_CHAT_FRAME:AddMessage("Listening to Event " .. (ns.dbc.eventAlt and "PLAYER_STARTED_LOOKING" or "PLAYER_STARTED_MOVING (default)") .. " # Requires reload",0,1,0.7)
 end
 
 function ns:FavsToggle()
 	ns.db.favsOnly = not ns.db.favsOnly
 	poolInitialized = false
-	DEFAULT_CHAT_FRAME:AddMessage("Selection pool: "..(ns.db.favsOnly and "favorites only" or "all pets"),0,1,0.7)
+	DEFAULT_CHAT_FRAME:AddMessage("Selection pool: " .. (ns.db.favsOnly and "favorites only" or "all pets"),0,1,0.7)
 end
 
 function ns.CharFavsSlashToggle() -- for slash command only
@@ -529,6 +532,8 @@ function SlashCmdList.PetWalker(cmd)
 		ns:NewPet(C_PetJournal.GetSummonedPetGUID())
 	elseif cmd == 'f' or cmd == 'fav' then
 		ns:FavsToggle()
+	elseif cmd == 'e' or cmd == 'eve' then
+		ns:EventAlt()
 	elseif cmd == 'c' or cmd == 'char' then
 		ns.CharFavsSlashToggle()
 	elseif cmd == 'p' or cmd == 'prev' then
