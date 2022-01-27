@@ -182,7 +182,6 @@ function ns.AutoAction()
 	if not ns.db.autoEnabled then return end
 	petVerified = true
 	local actpet = C_PetJournal.GetSummonedPetGUID()
-	if IsExcluded(actpet) then return end
 	if ns.db.newPetTimer ~= 0 and lastCall + ns.db.newPetTimer * 60 < GetTime() then
 		ns:debugprintL2("AutoAction() has run and decided for New Pet.")
 		ns:NewPet(actpet)
@@ -223,7 +222,7 @@ NEW PET SUMMON: Runs when timer is due
 -- Called by 1: ns.AutoAction
 
 function ns:NewPet(actpet)
-	if lastCall + 1.5 > GetTime() then return end
+	if lastCall + 1.5 > GetTime() or IsExcluded(actpet) then return end
 	if not poolInitialized then
 		ns:debugprintL1("ns.NewPet --> InitializePool")
 		ns.InitializePool()
