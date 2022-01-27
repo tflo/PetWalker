@@ -618,7 +618,7 @@ end
 -- with pet info
 function ns:debugprintL2(msg)
 if not ns.db.debugMode then return end
-	print("\n|cffFFA500### PETWALKER DEBUG: " .. msg .. " ### Current DB pet: " .. tostring(ns.PetIDtoName(ns.dbc.charFavs and ns.dbc.currentPet or ns.dbc.currentPet)) .. " ###")
+	print("\n|cffFFA500### PETWALKER DEBUG: " .. msg .. " ### Current DB pet: " .. ns.PetIDtoName((ns.dbc.charFavs and ns.dbc.currentPet or ns.db.currentPet)) .. " ###")
 end
 
 -- Table dump
