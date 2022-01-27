@@ -59,6 +59,11 @@ LOADING
 ===========================================================================]]--
 
 function ns.ADDON_LOADED(self,event,arg1)
+
+--[[---------------------------------------------------------------------------
+ADDON_LOADED: PetWalker
+---------------------------------------------------------------------------]]--
+
 	if arg1 == addonName then
 
 		PetWalkerDB = PetWalkerDB or {}
@@ -94,6 +99,13 @@ function ns.ADDON_LOADED(self,event,arg1)
 --		self.PLAYER_ENTERING_WORLD = ns.LoginCheck
 		C_Timer.After(16, function() ns.LoginCheck() end)
 
+
+		--[[
+		This thing fires very often
+		Let's do a test:
+		Unset the 'isInitialized' var with that event, and initialize only when
+		needed, that is before selecting a random pet.
+		]]
 		self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 		self.PET_JOURNAL_LIST_UPDATE = self.InitializePool
 
@@ -108,7 +120,6 @@ function ns.ADDON_LOADED(self,event,arg1)
 		end
 
 
-
 		-- TODO: Does this fire too often? (see https://wowpedia.fandom.com/wiki/COMPANION_UPDATE)
 		self:RegisterEvent("COMPANION_UPDATE")
 		function ns.COMPANION_UPDATE(self,event,arg1)
@@ -117,6 +128,12 @@ function ns.ADDON_LOADED(self,event,arg1)
 			end
 		end
 
+
+--[[---------------------------------------------------------------------------
+ADDON_LOADED: Blizzard_Collections
+---------------------------------------------------------------------------]]--
+
+	-- TODO: the same for Rematch
 	elseif arg1 == "Blizzard_Collections" then
 		for i, btn in ipairs(PetJournal.listScroll.buttons) do
 			btn:SetScript("OnClick",function(self, button)
@@ -129,6 +146,7 @@ function ns.ADDON_LOADED(self,event,arg1)
 			end)
 		end
 
+		-- TODO: the same for Rematch
 		ns.CFavs_Button = self:CreateCfavsCheckBox()
 		hooksecurefunc("CollectionsJournal_UpdateSelectedTab", function(self)
 			local selected = PanelTemplates_GetSelectedTab(self);
@@ -140,10 +158,6 @@ function ns.ADDON_LOADED(self,event,arg1)
 			end
 		end)
 	end
-end
-
-function ns.ahtimer(s)
-	local mytimer = C_Timer.NewTimer(s, ns.AutoAction)
 end
 
 
@@ -407,8 +421,7 @@ end
 
 -- Largely unaltered code from NugMiniPet
 function ns.CFavsUpdate()
-	local enable = ns.dbc.charFavsEnabled
-	if enable then
+	if ns.dbc.charFavsEnabled then
 		C_PetJournal.PetIsFavorite1 = C_PetJournal.PetIsFavorite1 or C_PetJournal.PetIsFavorite
 		C_PetJournal.SetFavorite1 = C_PetJournal.SetFavorite1 or C_PetJournal.SetFavorite
 		C_PetJournal.GetPetInfoByIndex1 = C_PetJournal.GetPetInfoByIndex1 or C_PetJournal.GetPetInfoByIndex
