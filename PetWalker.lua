@@ -164,8 +164,12 @@ local function MsgAutoRestoreDone(pet)
 	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": Restored your last pet (" .. ns.PetIDtoName(pet) .. ")", 0,1,0.7)
 end
 
-local function MsgNewPetDone(pet, nPool)
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (nPool >1 and "A new random" or "Your only eligible") .. " pet (" .. ns.PetIDtoName(pet) .. ") has been summoned" .. (nPool == 1 and " or was already active" or "") .. ".", 0,1,0.7)
+local function MsgNewPetDone(ap, np, n)
+	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": Summoned " .. (n >1 and "a new random" or "your only eligible random") .. " pet (" .. ns.PetIDtoName(np) .. ")", 0,1,0.7)
+end
+
+local function MsgOnlyFavIsActive(ap)
+	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": Your only eligible random pet (" .. ns.PetIDtoName(np) .. ") is already active", 0,1,0.7)
 end
 
 
@@ -235,13 +239,16 @@ function ns:NewPet(actpet)
 	else
 		if npool == 1 then
 			newpet = petPool[1]
+			if actpet == newpet then
+				MsgOnlyFavIsActive(actpet)
+			end
 		else
 			repeat
 				newpet = petPool[math.random(npool)]
 			until actpet ~= newpet
+			ns:SafeSummon(newpet)
 		end
 		MsgNewPetDone(actpet, newpet, npool)
-		ns:SafeSummon(newpet)
 	end
 	lastCall = GetTime()
 end
@@ -290,7 +297,10 @@ SAVING: Save a newly summoned pet, no matter how it was summoned. Should run wit
 function ns.SavePet()
 	savePetDelay = savePetNormalDelay
 	local actualPet = C_PetJournal.GetSummonedPetGUID()
-	if not actualPet or IsExcluded(actualPet) or (GetTime() - lastSavePetTime < 1) or not petVerified then
+	if not actualPet
+		or IsExcluded(actualPet)
+		or (GetTime() - lastSavePetTime < 1)
+		or not petVerified then
 		return
 	end
 	if ns.dbc.charFavsEnabled then
