@@ -225,23 +225,24 @@ NEW PET SUMMON: Runs when timer is due
 function ns:NewPet(actpet)
 	if lastCall + 1.5 > GetTime() then return end
 	if not poolInitialized then
-		ns:InitializePool()
+		ns:debugprintL1("ns.NewPet --> InitializePool")
+		ns.InitializePool()
 	end
-	local n = #petPool
+	local npool = #petPool
 	local newpet
-	if n == 0 then
+	if npool == 0 then
 		MsgLowPetPool(n)
 		if not actpet then ns:RestorePet() end
 	else
-		if n == 1 then
+		if npool == 1 then
 			newpet = petPool[1]
 		else
 			repeat
-				newpet = petPool[math.random(n)]
+				newpet = petPool[math.random(npool)]
 			until actpet ~= newpet
 		end
+		MsgNewPetDone(actpet, newpet, npool)
 		ns:SafeSummon(newpet)
-		MsgNewPetDone(newpet, n)
 	end
 	lastCall = GetTime()
 end
