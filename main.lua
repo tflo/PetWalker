@@ -48,18 +48,9 @@ local excludedSpecies = {
 	282, -- Guild Herald, Alliance-- Pet is vendor and has CD
 	283, -- Guild Herald, Horde-- Pet is vendor and has CD
 -- 	214, -- Argent Squire (Pony Bridle char achievement: 3736)
--- 	216, -- Argent Gruntling
+-- 	216, -- Argent Gruntling,
+	2403, --Dummy ID for debugging! Comment this out!
 }
-
-local function IsExcluded(species)
-	for _, s in pairs(excludedSpecies) do
-		if s == species then
--- 			ns:debugprintL1("Excluded pet found!")
-			return true
-		end
-	end
-	return false
-end
 
 
 ns = CreateFrame("Frame","PetWalker")
@@ -226,6 +217,25 @@ end
 MAIN ACTIONS
 ===========================================================================]]--
 
+local debugflag = "blank"
+
+--[[ To be used only in func InitializePool and IsExcludedByPetID ]]
+local function IsExcludedBySpecies(spec, debugflag)
+	for _, e in pairs(excludedSpecies) do
+		if e == spec then
+			ns:debugprintL1("Excluded pet found while doing: " .. debugflag)
+			return true
+		end
+	end
+	return false
+end
+
+--[[ To be used only in func NewPet and SavePet ]]
+local function IsExcludedByPetID(id, debugflag)
+	id, speciesID = '"'..id..'"', C_PetJournal.GetPetInfoByPetID(id)
+	return IsExcludedBySpecies(speciesID, debugflag)
+end
+
 --[[---------------------------------------------------------------------------
 The main function that runs when player started moving.
 It DECIDES whether to restore a (lost) pet, or summoning a new one (if the timer is set and due).
@@ -277,7 +287,8 @@ NEW PET SUMMON: Runs when timer is due
 function ns:NewPet(actpet)
 	if lastCall + 1.5 > GetTime() then return end
 	lastCall = GetTime()
-	if IsExcluded(actpet) then return end
+	debugflag = "NewPet" -- TODO: remove this and the flag in the func
+	if actpet and IsExcludedByPetID(actpet, debugflag) then return end
 	if not poolInitialized then
 		ns:debugprintL1("ns.NewPet --> InitializePool")
 		ns.InitializePool()
@@ -293,6 +304,7 @@ function ns:NewPet(actpet)
 			newpet = petPool[1]
 			if actpet == newpet then
 				MsgOnlyFavIsActive(actpet)
+				return
 			end
 		else
 			repeat
@@ -349,8 +361,9 @@ Should run with the COMPANION_UPDATE event.
 function ns.SavePet()
 	savePetDelay = savePetNormalDelay
 	local actpet = C_PetJournal.GetSummonedPetGUID()
+	debugflag = "SavePet" -- TODO: remove this and the flag in the func
 	if not actpet
-		or IsExcluded(actpet)
+		or IsExcludedByPetID(actpet, debugflag)
 		or (GetTime() - lastSavePetTime < 1)
 		or not petVerified then
 		return
@@ -434,12 +447,13 @@ This can be, depending on user setting:
 -- Called by 3: PET_JOURNAL_LIST_UPDATE; conditionally by ns:NewPet, ns.ManualSummonNew
 function ns.InitializePool(self)
 	ns:debugprintL1("Running ns.InitializePool()")
+	local debugflag = "InitializePool"
 	table.wipe(petPool)
 	local index = 1
 	while true do
 		local petID, speciesID, _, _, _, favorite = C_PetJournal.GetPetInfoByIndex(index)
 		if not petID then break end
-		if not IsExcluded(speciesID) then
+		if not IsExcludedBySpecies(speciesID, debugflag) then
 			if ns.db.favsOnly then
 				if favorite then
 					table.insert(petPool, petID)
