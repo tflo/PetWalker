@@ -659,16 +659,10 @@ end
 -- Debugging and Utils
 ===========================================================================]]--
 
+
 function ns.PetIDtoName(id)
-	local index = 1
-	while true do
-		local petID, _, _, _, _, _, _, name = C_PetJournal.GetPetInfoByIndex(index)
-		if not petID then break end
-		if petID == id then
-			return name
-		end
-		index = index + 1
-	end
+	local id, name = '"'..id..'"', select(8, C_PetJournal.GetPetInfoByPetID(id))
+	return name
 end
 
 
