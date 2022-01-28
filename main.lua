@@ -679,13 +679,13 @@ end
 -- without pet info
 function ns:debugprintL1(msg)
 if not ns.db.debugMode then return end
-	print("\n|cffFFA500### PETWALKER DEBUG: " .. msg .. " ###")
+	print("\n|cffFFA500### PETWALKER DEBUG: " .. (msg or "<nil>") .. " ###")
 end
 
 -- with pet info
 function ns:debugprintL2(msg)
 if not ns.db.debugMode then return end
-	print("\n|cffFFA500### PETWALKER DEBUG: " .. msg .. " ### Current DB pet: " .. ns.PetIDtoName((ns.dbc.charFavs and ns.dbc.currentPet or ns.db.currentPet)) .. " ###")
+	print("\n|cffFFA500### PETWALKER DEBUG: " .. (msg or "<nil>") .. " ### Current DB pet: " .. (ns.PetIDtoName((ns.dbc.charFavs and ns.dbc.currentPet or ns.db.currentPet)) or "<nil>") .. " ###")
 end
 
 -- Table dump
