@@ -552,23 +552,15 @@ end
 
 -- Used for info print
 function ns:ListCharFavs()
-	local charFavsNames = {}
+	local favnames = {}
 	local count = 0
 	for id, _ in pairs(ns.dbc.charFavs) do
 	count = count + 1
-	local index = 1
-		while true do
-			local petGUID, _, _, _, _, _, _, name = C_PetJournal.GetPetInfoByIndex(index)
-			if not petGUID then break end
-			if petGUID == id then
-				table.insert(charFavsNames, name)
-				break
+		local id, name = '"'..id..'"', select(8, C_PetJournal.GetPetInfoByPetID(id))
+		table.insert(favnames, name)
 			end
-			index = index + 1
-		end
-	end
-	charFavsNames = table.concat(charFavsNames, '; ')
-	return thisChar .. " currently has " .. count .. " character-specific favorite pets" .. (count > 0 and ":" or "") .. "\n" .. (charFavsNames or "")
+	favnames = table.concat(favnames, '; ')
+	return thisChar .. " currently has " .. count .. " character-specific favorite pets" .. (count > 0 and ":" or "") .. "\n" .. (favnames or "")
 end
 
 
