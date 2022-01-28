@@ -191,8 +191,48 @@ end
 Messages
 ===========================================================================]]--
 
+--[[
+an: addon name
+bn: basetext: notification
+bw: basetext: warning
+sq: subtext: quote
+se: subtext: emphasis
+]]
+
+local colSchemeGreen = {
+	basetext = {
+		notification = '8FBC8F',
+		warning = 'FA8072',
+	},
+	element = {
+		addonname = '7CFC00',
+		quote = '808000',
+		emphasis = 'ADFF2F',
+		keyword = '00FA9A',
+		state = '32CD32',
+		command = 'D2691E',
+	}
+}
+
+local function SetColors(scheme)
+	local prefix = '|r|cff'
+	local colorstrings = {
+		bn = prefix .. scheme.basetext.notification,
+		bw = prefix .. scheme.basetext.warning,
+		an = prefix .. scheme.element.addonname,
+		q = prefix .. scheme.element.quote,
+		e = prefix .. scheme.element.emphasis,
+		k = prefix .. (scheme.element.heading or scheme.element.emphasis),
+		s = prefix .. (scheme.element.state or scheme.element.emphasis),
+		c = prefix .. (scheme.element.command or scheme.element.emphasis),
+	}
+	return colorstrings
+end
+
+local CO = SetColors(colSchemeGreen)
+
 local function ChatUserNotification(msg)
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. msg, 0,1,0.7)
+	DEFAULT_CHAT_FRAME:AddMessage(CO.an .. addonName .. ": " .. msg)
 end
 
 -- TODO: Do we need a warning at 1 selectable pet? Or should this be considered a valid use-case? (User manually summons a pet from Journal, but wants to get back his (only) fav pet when the timer is due.)
@@ -582,7 +622,8 @@ function ns:ListCharFavs()
 		table.insert(favlinks, name)
 	end
 	favlinks = table.concat(favlinks, ' ')
-	return thisChar .. " has " .. count .. " character-specific favorite pets" .. (count > 0 and ":" or "") .. "\n" .. (favlinks or "")
+	return CO.e .. thisChar .. CO.bn .. " has " .. CO.e .. count .. CO.bn ..
+	" character-specific favorite pets" .. (count > 0 and ":" or "") .. "\n" .. (favlinks or "")
 end
 
 
@@ -591,17 +632,105 @@ Slash UI
 ---------------------------------------------------------------------------]]--
 
 function ns.HelpText()
-ChatUserNotification("Help: '/pw' or '/petw' supports these commands:\n  d: Dismiss current pet and disable auto-summon\n  a: Toggle auto-summon\n  n: Summon new pet from pool\n  f: Toggle selection pool: favorites only, or all pets\n  c: Toggle character-specific favorites, or global\n  <number>: Summon timer in minutes (1 to 999, 0 to disable)\n  p: Summon previous pet\n  s: Display current status/settings\n  h: This help text\nIn Key Bindigs > AddOns you can directly bind some commands.")
+	local content = {
+		CO.bn .. "Help: ",
+		CO.c .. "\n/pw ",
+		"or ",
+		CO.c .. "/petw ",
+		"supports these commands: ",
+		CO.c .. "\n  d",
+		": ",
+		CO.k .. "Dismiss ",
+		"current pet and ",
+		CO.k .. "disable auto-summon ",
+		"(new pet / restore)",
+		CO.c .. "\n  a",
+		": ",
+		"Toggle ",
+		CO.k .. "auto-summon ",
+		"(new pet / restore)",
+		CO.c .. "\n  n",
+		": ",
+		"Summon ",
+		CO.k .. "new pet ",
+		"from pool",
+		CO.c .. "\n  f",
+		": ",
+		"Toggle ",
+		CO.k .. "pet pool: ",
+		CO.s .. "Favorites Only",
+		", or ",
+		CO.s .. "All Pets",
+		CO.c .. "\n  c",
+		": ",
+		"Toggle ",
+		CO.k .. "favorites: ",
+		CO.s .. "Per-character",
+		", or ",
+		CO.s .. "Global Favorites",
+		CO.c .. "\n  <number>",
+		": ",
+		"Set ",
+		CO.k .. "Summon Timer ",
+		"in minutes (",
+		CO.c .. "1 ",
+		"to ",
+		CO.c .. "999",
+		"; ",
+		CO.c .. "0 ",
+		"to ",
+		CO.k .. "disable",
+		")",
+		CO.c .. "\n  p",
+		": ",
+		"Summon ",
+		CO.k .. "previous pet ",
+		CO.c .. "\n  s",
+		": ",
+		"Display current ",
+		CO.k .. "status/settings",
+		CO.c .. "\n  h",
+		": ",
+		"This help text",
+		"\nIn ",
+		"Key Bindigs > AddOns ",
+		"you can directly bind some commands",
+	}
+	local content = table.concat(content, CO.bn)
+	ChatUserNotification(content)
 end
+
 
 function ns.Status()
 	if not poolInitialized then ns.InitializePool() end
-	ChatUserNotification("Status & Settings:\n  Automatic random-summon / restore is " .. (ns.db.autoEnabled and "enabled" or "disabled") ..
-	"\n  Summon timer is " .. (ns.db.newPetTimer > 0 and ns.db.newPetTimer .. " minutes" .. " -- Next random pet in " .. ns.RemainingTimer() or "disbled") ..
-	"\n  Pet pool is set to " .. (ns.db.favsOnly and "Favorites Only" or "All Pets") .. " -- Eligible pets: " .. #petPool ..
-	"\n  Per-character favorites are " .. (ns.dbc.charFavsEnabled and "enabled" or "disabled") .. " for " .. thisChar ..
-	"\n  " .. ns:ListCharFavs())
+	local content = {
+		CO.bn .. "Status & Settings:",
+		CO.k .."\n  Automatic Random-summon / Restore ",
+		"is ",
+		CO.s .. (ns.db.autoEnabled and "enabled" or "disabled"),
+		CO.k .. "\n  Summon Timer ",
+		"is ",
+		CO.s .. (ns.db.newPetTimer > 0 and ns.db.newPetTimer .. CO.bn .. " minutes" or "disbled"),
+		" • Next random pet in ",
+		CO.e .. ns.RemainingTimer(),
+		CO.k .. "\n  Pet Pool ",
+		"is set to ",
+		CO.s .. (ns.db.favsOnly and "Favorites Only" or "All Pets"),
+		" • Eligible pets: ",
+		CO.e .. #petPool,
+		CO.k .. "\n  Per-character Favorites ",
+		"are ",
+		CO.s .. (ns.dbc.charFavsEnabled and "enabled" or "disabled"),
+		" for ",
+		CO.e .. thisChar,
+		"\n",
+		ns:ListCharFavs(),
+	}
+	local content = table.concat(content, CO.bn)
+	ChatUserNotification(content)
 end
+
+
 
 SLASH_PetWalker1, SLASH_PetWalker2 = '/pw', '/petw'
 function SlashCmdList.PetWalker(cmd)
