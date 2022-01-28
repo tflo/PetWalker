@@ -39,13 +39,14 @@ accesses the bank? Or maybe test for the pony bridle achiev and not
 auto-unsummon him if present?
 
 TODO:
-- check the Hordies speciesID
 - Maybe add the self-unsummoning pets, like the different Snowman (though, it
   could be considered fun to auto-resummon the Snowman repeatedly :)
 ]]
 local excludedSpecies = {
-	280, -- Guild Page -- Pet is vendor and has CD
-	282, -- Guild Herald -- Pet is vendor and has CD
+	280, -- Guild Page, Alliance -- Pet is vendor and has CD
+	281, -- Guild Page, Horde -- Pet is vendor and has CD
+	282, -- Guild Herald, Alliance-- Pet is vendor and has CD
+	283, -- Guild Herald, Horde-- Pet is vendor and has CD
 -- 	214, -- Argent Squire (Pony Bridle char achievement: 3736)
 -- 	216, -- Argent Gruntling
 }
