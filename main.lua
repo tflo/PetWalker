@@ -191,6 +191,10 @@ end
 Messages
 ===========================================================================]]--
 
+local function ChatUserNotification(msg)
+	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. msg, 0,1,0.7)
+end
+
 -- TODO: Do we need a warning at 1 selectable pet? Or should this be considered a valid use-case? (User manually summons a pet from Journal, but wants to get back his (only) fav pet when the timer is due.)
 local function MsgLowPetPool(nPool)
 	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (nPool < 1 and "0 (zero) pets" or "Only 1 pet") .. " eligible as random summon! You should either " .. (ns.db.favsOnly and "flag more pets as favorite, or set the ramdom pool to 'All Pets'" or "collect more pets") .. ", or set the random-summon timer to '0'. Please note that certain pets are excluded from random summoning, to not break their usability (for example Guild Herald)." .. ((ns.dbc.charFavsEnabled and ns.db.favsOnly) and "\nNote that you have set this char to use char-specific favorite pets. Maybe switching to global favorites ('/pw c') will help." or ""),0,1,0.7)
@@ -586,11 +590,17 @@ end
 Slash UI
 ---------------------------------------------------------------------------]]--
 
-local helpText = "\nPetWalker Help: '/pw' or '/petw' supports these commands:\n  d: Dismiss current pet and disable auto-summon\n  a: Toggle auto-summon\n  n: Summon new pet from pool\n  f: Toggle selection pool: favorites only, or all pets\n  c: Toggle character-specific favorites, or global\n  <number>: Summon timer in minutes (1 to 999, 0 to disable)\n  p: Summon previous pet\n  s: Display current status/settings\n  h: This help text\nIn Key Bindigs > AddOns you can directly bind some commands."
+function ns.HelpText()
+ChatUserNotification("Help: '/pw' or '/petw' supports these commands:\n  d: Dismiss current pet and disable auto-summon\n  a: Toggle auto-summon\n  n: Summon new pet from pool\n  f: Toggle selection pool: favorites only, or all pets\n  c: Toggle character-specific favorites, or global\n  <number>: Summon timer in minutes (1 to 999, 0 to disable)\n  p: Summon previous pet\n  s: Display current status/settings\n  h: This help text\nIn Key Bindigs > AddOns you can directly bind some commands.")
+end
 
 function ns.Status()
-	local text = "\nPetWalker Status:\n  Auto-summon is " .. (ns.db.autoEnabled and "enabled" or "disabled") .. "\n  Summon timer is " .. (ns.db.newPetTimer > 0 and ns.db.newPetTimer .. " minutes" .. " - Next random pet in " .. ns.RemainingTimer() or "disbled") .. "\n  Selection pool is set to " .. (ns.db.favsOnly and "favorites only" or "all pets") .. "\n  Character-specific favorites are " .. (ns.dbc.charFavsEnabled and "enabled" or "disabled") .. " for " .. thisChar .. "\n  " .. ns:ListCharFavs()
-	return text
+	if not poolInitialized then ns.InitializePool() end
+	ChatUserNotification("Status & Settings:\n  Automatic random-summon / restore is " .. (ns.db.autoEnabled and "enabled" or "disabled") ..
+	"\n  Summon timer is " .. (ns.db.newPetTimer > 0 and ns.db.newPetTimer .. " minutes" .. " -- Next random pet in " .. ns.RemainingTimer() or "disbled") ..
+	"\n  Pet pool is set to " .. (ns.db.favsOnly and "Favorites Only" or "All Pets") .. " -- Eligible pets: " .. #petPool ..
+	"\n  Per-character favorites are " .. (ns.dbc.charFavsEnabled and "enabled" or "disabled") .. " for " .. thisChar ..
+	"\n  " .. ns:ListCharFavs())
 end
 
 SLASH_PetWalker1, SLASH_PetWalker2 = '/pw', '/petw'
@@ -615,13 +625,14 @@ function SlashCmdList.PetWalker(cmd)
 	elseif cmd == 'p' or cmd == 'prev' then
 		ns.ManualSummonPrevious()
 	elseif cmd == 's' or cmd == 'status' then
-		DEFAULT_CHAT_FRAME:AddMessage(ns.Status(),0,1,0.7)
+		ns.Status()
 	elseif tonumber(cmd) then
 		ns:TimerSlashCmd(cmd)
 	elseif cmd == 'h' or cmd == 'help' then
-		DEFAULT_CHAT_FRAME:AddMessage(helpText,0,1,0.7)
+		ns.HelpText()
 	elseif cmd == '' then
-		DEFAULT_CHAT_FRAME:AddMessage(ns.Status() .. helpText,0,1,0.7)
+		ns.Status()
+		ns.HelpText()
 	else
 		DEFAULT_CHAT_FRAME:AddMessage("ns: Invalid command or/and arguments. Enter '/pk help' for a list of commands.", 0,1,0.7)
 	end
@@ -689,7 +700,12 @@ end
 
 
 function ns:DebugDisplay()
-	DEFAULT_CHAT_FRAME:AddMessage("\nDebug:\n  Current pet: " .. (ns.PetIDtoName(ns.db.currentPet) or "<nil>") .. "\n  Previous pet: " .. (ns.PetIDtoName(ns.db.previousPet) or "<nil>") .. "\n  Current char pet: " .. (ns.PetIDtoName(ns.dbc.currentPet) or "<nil>") .. "\n  Previous char pet: " .. (ns.PetIDtoName(ns.dbc.previousPet) or "<nil>") .. "\n" .. ns.Status(),0,1,0.7)
+	ns.Status()
+	DEFAULT_CHAT_FRAME:AddMessage("Debug:\n  DB current pet: " ..
+	(ns.PetIDtoName(ns.db.currentPet) or "<nil>") ..
+	"\n  DB previous pet: " .. (ns.PetIDtoName(ns.db.previousPet) or "<nil>") ..
+	"\n  Char DB current pet: " .. (ns.PetIDtoName(ns.dbc.currentPet) or "<nil>") ..
+	"\n  Char DB previous pet: " .. (ns.PetIDtoName(ns.dbc.previousPet) or "<nil>") .. "\n" ,0,1,0.7)
 end
 
 -- without pet info
