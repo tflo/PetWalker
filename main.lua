@@ -209,7 +209,7 @@ local function MsgNewPetDone(ap, np, n)
 end
 
 local function MsgOnlyFavIsActive(ap)
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": Your only eligible random pet (" .. ns.PetIDtoName(np) .. ") is already active", 0,1,0.7)
+	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": Your only eligible random pet (" .. ns.PetIDtoName(ap) .. ") is already active", 0,1,0.7)
 end
 
 
@@ -472,6 +472,10 @@ function ns.InitializePool(self)
 end
 
 
+--[[===========================================================================
+Char Favs
+===========================================================================]]--
+
 -- Largely unaltered code from NugMiniPet
 function ns.CFavsUpdate()
 	if ns.dbc.charFavsEnabled then
@@ -569,10 +573,10 @@ function ns:ListCharFavs()
 	local favnames = {}
 	local count = 0
 	for id, _ in pairs(ns.dbc.charFavs) do
-	count = count + 1
+		count = count + 1
 		local id, name = '"'..id..'"', select(8, C_PetJournal.GetPetInfoByPetID(id))
 		table.insert(favnames, name)
-			end
+	end
 	favnames = table.concat(favnames, '; ')
 	return thisChar .. " currently has " .. count .. " character-specific favorite pets" .. (count > 0 and ":" or "") .. "\n" .. (favnames or "")
 end
@@ -600,7 +604,8 @@ function SlashCmdList.PetWalker(cmd)
 	elseif cmd == 'a' or cmd == 'auto' then
 		ns:AutoToggle()
 	elseif cmd == 'n' or cmd == 'new' then
-		ns:NewPet(C_PetJournal.GetSummonedPetGUID())
+		local actpet = C_PetJournal.GetSummonedPetGUID()
+		ns:NewPet(actpet)
 	elseif cmd == 'f' or cmd == 'fav' then
 		ns:FavsToggle()
 	elseif cmd == 'e' or cmd == 'eve' then
@@ -670,13 +675,14 @@ end
 
 
 function ns.PetIDtoName(id)
+if not id then return "<nil> from PetIDtoName" end
 	local id, name = '"'..id..'"', select(8, C_PetJournal.GetPetInfoByPetID(id))
 	return name
 end
 
 
 function ns:DebugDisplay()
-	DEFAULT_CHAT_FRAME:AddMessage("\nDebug:\n  Current pet: " .. (ns.PetIDtoName(ns.db.currentPet) or "-none-") .. "\n  Previous pet: " .. (ns.PetIDtoName(ns.db.previousPet) or "-none-") .. "\n  Current char pet: " .. (ns.PetIDtoName(ns.dbc.currentPet) or "-none-") .. "\n  Previous char pet: " .. (ns.PetIDtoName(ns.dbc.previousPet) or "-none-") .. "\n" .. ns.Status(),0,1,0.7)
+	DEFAULT_CHAT_FRAME:AddMessage("\nDebug:\n  Current pet: " .. (ns.PetIDtoName(ns.db.currentPet) or "<nil>") .. "\n  Previous pet: " .. (ns.PetIDtoName(ns.db.previousPet) or "<nil>") .. "\n  Current char pet: " .. (ns.PetIDtoName(ns.dbc.currentPet) or "<nil>") .. "\n  Previous char pet: " .. (ns.PetIDtoName(ns.dbc.previousPet) or "<nil>") .. "\n" .. ns.Status(),0,1,0.7)
 end
 
 -- without pet info
