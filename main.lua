@@ -342,26 +342,27 @@ end
 
 
 --[[---------------------------------------------------------------------------
-SAVING: Save a newly summoned pet, no matter how it was summoned. Should run with the COMPANION_UPDATE event.
+SAVING: Save a newly summoned pet, no matter how it was summoned.
+Should run with the COMPANION_UPDATE event.
 ---------------------------------------------------------------------------]]--
 
 function ns.SavePet()
 	savePetDelay = savePetNormalDelay
-	local actualPet = C_PetJournal.GetSummonedPetGUID()
-	if not actualPet
-		or IsExcluded(actualPet)
+	local actpet = C_PetJournal.GetSummonedPetGUID()
+	if not actpet
+		or IsExcluded(actpet)
 		or (GetTime() - lastSavePetTime < 1)
 		or not petVerified then
 		return
 	end
 	if ns.dbc.charFavsEnabled then
-		if ns.dbc.currentPet == actualPet then return end
+		if ns.dbc.currentPet == actpet then return end
 		ns.dbc.previousPet = ns.dbc.currentPet
-		ns.dbc.currentPet = actualPet
+		ns.dbc.currentPet = actpet
 	else
-		if ns.db.currentPet == actualPet then return end
+		if ns.db.currentPet == actpet then return end
 		ns.db.previousPet = ns.db.currentPet
-		ns.db.currentPet = actualPet
+		ns.db.currentPet = actpet
 	end
 	ns:debugprintL2("SavePet() has run")
 	lastSavePetTime = GetTime()
