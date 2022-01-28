@@ -274,12 +274,15 @@ NEW PET SUMMON: Runs when timer is due
 -- Called by 1: ns.AutoAction
 
 function ns:NewPet(actpet)
-	if lastCall + 1.5 > GetTime() or IsExcluded(actpet) then return end
+	if lastCall + 1.5 > GetTime() then return end
+	lastCall = GetTime()
+	if IsExcluded(actpet) then return end
 	if not poolInitialized then
 		ns:debugprintL1("ns.NewPet --> InitializePool")
 		ns.InitializePool()
 	end
 	local npool = #petPool
+	ns.debugprintL1("ns.AutoAction: npool==" .. npool)
 	local newpet
 	if npool == 0 then
 		MsgLowPetPool(npool)
@@ -294,11 +297,10 @@ function ns:NewPet(actpet)
 			repeat
 				newpet = petPool[math.random(npool)]
 			until actpet ~= newpet
-			ns:SafeSummon(newpet)
 		end
 		MsgNewPetDone(actpet, newpet, npool)
+		ns:SafeSummon(newpet)
 	end
-	lastCall = GetTime()
 end
 
 
