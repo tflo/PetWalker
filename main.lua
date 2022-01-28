@@ -201,15 +201,15 @@ local function MsgNoSavedPet()
 end
 
 local function MsgAutoRestoreDone(pet)
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": Restored your last pet (" .. ns.PetIDtoName(pet) .. ")", 0,1,0.7)
+	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": Restored your last pet " .. ns.PetIDtoLink(pet), 0,1,0.7)
 end
 
 local function MsgNewPetDone(ap, np, n)
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": Summoned " .. (n >1 and "a new random" or "your only eligible random") .. " pet (" .. ns.PetIDtoName(np) .. ")", 0,1,0.7)
+	ChatUserNotification("Summoned " .. (n >1 and "a new random" or "your only eligible random") .. " pet " .. ns.PetIDtoLink(np))
 end
 
 local function MsgOnlyFavIsActive(ap)
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": Your only eligible random pet (" .. ns.PetIDtoName(ap) .. ") is already active", 0,1,0.7)
+	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": Your only eligible random pet " .. ns.PetIDtoLink(ap) .. " is already active", 0,1,0.7)
 end
 
 
@@ -570,15 +570,15 @@ end
 
 -- Used for info print
 function ns:ListCharFavs()
-	local favnames = {}
+	local favlinks = {}
 	local count = 0
 	for id, _ in pairs(ns.dbc.charFavs) do
 		count = count + 1
-		local id, name = '"'..id..'"', select(8, C_PetJournal.GetPetInfoByPetID(id))
-		table.insert(favnames, name)
+		name = C_PetJournal.GetBattlePetLink(id)
+		table.insert(favlinks, name)
 	end
-	favnames = table.concat(favnames, '; ')
-	return thisChar .. " currently has " .. count .. " character-specific favorite pets" .. (count > 0 and ":" or "") .. "\n" .. (favnames or "")
+	favlinks = table.concat(favlinks, ' ')
+	return thisChar .. " has " .. count .. " character-specific favorite pets" .. (count > 0 and ":" or "") .. "\n" .. (favlinks or "")
 end
 
 
@@ -676,8 +676,15 @@ end
 
 function ns.PetIDtoName(id)
 if not id then return "<nil> from PetIDtoName" end
-	local id, name = '"'..id..'"', select(8, C_PetJournal.GetPetInfoByPetID(id))
+-- 	local id, name = '"'..id..'"', select(8, C_PetJournal.GetPetInfoByPetID(id))
+	local name = select(8, C_PetJournal.GetPetInfoByPetID(id))
 	return name
+end
+
+function ns.PetIDtoLink(id)
+if not id then return "<nil> from PetIDtoLink" end
+	local link = C_PetJournal.GetBattlePetLink(id)
+	return link
 end
 
 
