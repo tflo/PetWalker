@@ -53,7 +53,7 @@ local excludedSpecies = {
 local function IsExcluded(species)
 	for _, s in pairs(excludedSpecies) do
 		if s == species then
-			ns:debugprintL1("Excluded pet found!")
+-- 			ns:debugprintL1("Excluded pet found!")
 			return true
 		end
 	end
@@ -368,7 +368,8 @@ end
 
 
 --[[---------------------------------------------------------------------------
-SAFE-SUMMON: Used in the AutoSummon function, and currently also in the Manual Summon function
+SAFE-SUMMON: Used in the AutoSummon function, and currently also in the
+Manual Summon function
 ---------------------------------------------------------------------------]]--
 
 -- TODO: What about Feign Death?!
