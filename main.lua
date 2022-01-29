@@ -10,7 +10,9 @@ ns.events:SetScript("OnEvent", function(self, event, ...)
 		ns[event](self,...)
 	end
 end)
-ns.events:RegisterEvent("ADDON_LOADED")
+
+-- ns.events:RegisterEvent("ADDON_LOADED")
+ns.events:RegisterEvent("PLAYER_LOGIN")
 
 --[[---------------------------------------------------------------------------
 For the Bindings file
@@ -35,122 +37,118 @@ end
 LOADING
 ===========================================================================]]--
 
-function ns:ADDON_LOADED(addon)
+function ns:PLAYER_LOGIN()
 
 --[[---------------------------------------------------------------------------
-ADDON_LOADED: PetWalker
+Init
 ---------------------------------------------------------------------------]]--
-	if addon == addonName then
 
-		PetWalkerDB = PetWalkerDB or {}
-		PetWalkerPerCharDB = PetWalkerPerCharDB or {}
-		ns.db, ns.dbc = PetWalkerDB, PetWalkerPerCharDB
-		ns.db.dbVersion  = dbVersion
+	PetWalkerDB = PetWalkerDB or {}
+	PetWalkerPerCharDB = PetWalkerPerCharDB or {}
+	ns.db, ns.dbc = PetWalkerDB, PetWalkerPerCharDB
+	ns.db.dbVersion  = dbVersion
 
-		ns.dbc.dbVersion = ns.db.dbVersion
-		ns.db.autoEnabled = ns.db.autoEnabled == nil and true or ns.db.autoEnabled
-		ns.db.newPetTimer = ns.db.newPetTimer or 12
-		ns.db.lastNewPetTime = ns.db.lastNewPetTime or 0
-		ns.db.favsOnly = ns.db.favsOnly == nil and true or ns.db.favsOnly
-		ns.dbc.charFavsEnabled = ns.dbc.charFavsEnabled or false
-		ns.dbc.charFavs = ns.dbc.charFavs or {}
-		ns.dbc.eventAlt = ns.dbc.eventAlt or false
-		ns.db.debugMode = ns.db.debugMode or false
+	ns.dbc.dbVersion = ns.db.dbVersion
+	ns.db.autoEnabled = ns.db.autoEnabled == nil and true or ns.db.autoEnabled
+	ns.db.newPetTimer = ns.db.newPetTimer or 12
+	ns.db.lastNewPetTime = ns.db.lastNewPetTime or 0
+	ns.db.favsOnly = ns.db.favsOnly == nil and true or ns.db.favsOnly
+	ns.dbc.charFavsEnabled = ns.dbc.charFavsEnabled or false
+	ns.dbc.charFavs = ns.dbc.charFavs or {}
+	ns.dbc.eventAlt = ns.dbc.eventAlt or false
+	ns.db.debugMode = ns.db.debugMode or false
 
-		if not ns.db.dbVersion or ns.db.dbVersion ~= dbVersion then
-			table.wipe(ns.db)
-		end
-		if not ns.dbc.dbVersion or ns.dbc.dbVersion ~= dbVersion then
-			local tmpCharFavs = ns.dbc.charFavs -- charFavs
-			table.wipe(ns.dbc)
-			ns.dbc.charFavs = tmpCharFavs
-		end
+	if not ns.db.dbVersion or ns.db.dbVersion ~= dbVersion then
+		table.wipe(ns.db)
+	end
+	if not ns.dbc.dbVersion or ns.dbc.dbVersion ~= dbVersion then
+		local tmpCharFavs = ns.dbc.charFavs -- charFavs
+		table.wipe(ns.dbc)
+		ns.dbc.charFavs = tmpCharFavs
+	end
 
 --[[
-		Is this needed?
-		Seems we also get - sometimes - a COMPANION_UPDATE event after login
-		(which triggers a SavePet()). Also it doesn't find the variables from
-		the ns.db, if run too early. So, this is difficult to time, and also
-		depends on the load time of the char.
-		So, let's try with PLAYER_ENTERING_WORLD:
-		]]
+	Is this needed?
+	Seems we also get - sometimes - a COMPANION_UPDATE event after login
+	(which triggers a SavePet()). Also it doesn't find the variables from
+	the ns.db, if run too early. So, this is difficult to time, and also
+	depends on the load time of the char.
+	So, let's try with PLAYER_ENTERING_WORLD:
+	]]
 --		self:RegisterEvent("PLAYER_ENTERING_WORLD")
 --		self.PLAYER_ENTERING_WORLD = ns.LoginCheck
-		C_Timer.After(10, function() ns.LoginCheck() end)
+	C_Timer.After(10, function() ns.LoginCheck() end)
 
 
-		--[[
-		This thing fires very often
-		Let's do a test:
-		Unset the 'isInitialized' var with that event, and initialize only when
-		needed, that is before selecting a random pet.
-		--> This seems to work, so far!
-		]]
-		ns.events:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
+	--[[
+	This thing fires very often
+	Let's do a test:
+	Unset the 'isInitialized' var with that event, and initialize only when
+	needed, that is before selecting a random pet.
+	--> This seems to work, so far!
+	]]
+	ns.events:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 -- 		ns.PET_JOURNAL_LIST_UPDATE = ns.InitializePool
-		function ns.PET_JOURNAL_LIST_UPDATE()
-			poolInitialized = false
-			ns:debugprintL1("ns.PET_JOURNAL_LIST_UPDATE has run. poolInitialized =="
-			.. tostring(poolInitialized))
+	function ns.PET_JOURNAL_LIST_UPDATE()
+		poolInitialized = false
+		ns:debugprintL1("ns.PET_JOURNAL_LIST_UPDATE has run. poolInitialized =="
+		.. tostring(poolInitialized))
+	end
+
+	ns:CFavsUpdate()
+
+	if ns.dbc.eventAlt then
+		ns.events:RegisterEvent("PLAYER_STARTED_LOOKING")
+		function ns:PLAYER_STARTED_LOOKING()
+			ns.AutoAction()
 		end
-
-		ns:CFavsUpdate()
-
-		if ns.dbc.eventAlt then
-			ns.events:RegisterEvent("PLAYER_STARTED_LOOKING")
-			function ns:PLAYER_STARTED_LOOKING()
-				ns.AutoAction()
-			end
-		else
-			ns.events:RegisterEvent("PLAYER_STARTED_MOVING")
-			function ns:PLAYER_STARTED_MOVING()
-				ns.AutoAction()
-			end
+	else
+		ns.events:RegisterEvent("PLAYER_STARTED_MOVING")
+		function ns:PLAYER_STARTED_MOVING()
+			ns.AutoAction()
 		end
+	end
 
 
-		--[[
-		TODO: Does this fire too often? (see
-		https://wowpedia.fandom.com/wiki/COMPANION_UPDATE)
-		]]
-		ns.events:RegisterEvent("COMPANION_UPDATE")
-		function ns:COMPANION_UPDATE(type)
-			if type == "CRITTER" then
-			C_Timer.After(1, function() ns.SavePet() end)
-			end
+	--[[
+	TODO: Does this fire too often? (see
+	https://wowpedia.fandom.com/wiki/COMPANION_UPDATE)
+	]]
+	ns.events:RegisterEvent("COMPANION_UPDATE")
+	function ns:COMPANION_UPDATE(what)
+		if what == "CRITTER" then
+		C_Timer.After(2, function() ns.SavePet() end)
 		end
+	end
 
 
 --[[---------------------------------------------------------------------------
-ADDON_LOADED: Blizzard_Collections
+Pet Journal
 ---------------------------------------------------------------------------]]--
 
-	-- TODO: the same for Rematch
-	elseif addon == "Blizzard_Collections" then
-		for i, btn in ipairs(PetJournal.listScroll.buttons) do
-			btn:SetScript("OnClick",function(self, button)
-				if IsControlKeyDown() then
-					local isFavorite = C_PetJournal.PetIsFavorite(self.petID)
-					C_PetJournal.SetFavorite(self.petID, isFavorite and 0 or 1)
-				else
-					return PetJournalListItem_OnClick(self,button)
-				end
-			end)
-		end
-
-		-- TODO: the same for Rematch
-		ns.CFavs_Button = ns:CreateCfavsCheckBox()
-		hooksecurefunc("CollectionsJournal_UpdateSelectedTab", function(self)
-			local selected = PanelTemplates_GetSelectedTab(self);
-			if selected == 2 then
-				ns.CFavs_Button:SetChecked(ns.dbc.charFavsEnabled)
-				ns.CFavs_Button:Show()
+-- TODO: the same for Rematch
+	for i, btn in ipairs(PetJournal.listScroll.buttons) do
+		btn:SetScript("OnClick",function(self, button)
+			if IsControlKeyDown() then
+				local isFavorite = C_PetJournal.PetIsFavorite(self.petID)
+				C_PetJournal.SetFavorite(self.petID, isFavorite and 0 or 1)
 			else
-				ns.CFavs_Button:Hide()
+				return PetJournalListItem_OnClick(self,button)
 			end
 		end)
 	end
--- ns.events:UnregisterEvent("ADDON_LOADED")
+
+	-- TODO: the same for Rematch
+	ns.CFavs_Button = ns:CreateCfavsCheckBox()
+	hooksecurefunc("CollectionsJournal_UpdateSelectedTab", function(self)
+		local selected = PanelTemplates_GetSelectedTab(self);
+		if selected == 2 then
+			ns.CFavs_Button:SetChecked(ns.dbc.charFavsEnabled)
+			ns.CFavs_Button:Show()
+		else
+			ns.CFavs_Button:Hide()
+		end
+	end)
 end
 
 
