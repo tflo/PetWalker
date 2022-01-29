@@ -54,9 +54,8 @@ ns.db.debugMode = ns.db.debugMode or false
 Some Variables
 ===========================================================================]]--
 
-local thisChar = UnitName("player")
 local lastCall = GetTime() - ns.db.newPetTimer * 60 / 2
-local petPool = {}
+ns.petPool = {}
 local poolInitialized = false
 local petVerified = false
 local lastSummonTime = GetTime() - 20
@@ -210,76 +209,6 @@ end
 
 
 --[[===========================================================================
-Messages
-===========================================================================]]--
-
---[[
-an: addon name
-bn: basetext: notification
-bw: basetext: warning
-sq: subtext: quote
-se: subtext: emphasis
-]]
-
-local colSchemeGreen = {
-	basetext = {
-		notification = '8FBC8F',
-		warning = 'FA8072',
-	},
-	element = {
-		addonname = '7CFC00',
-		quote = '808000',
-		emphasis = 'ADFF2F',
-		keyword = '00FA9A',
-		state = '32CD32',
-		command = 'D2691E',
-	}
-}
-
-local function SetColors(scheme)
-	local prefix = '|r|cff'
-	local colorstrings = {
-		bn = prefix .. scheme.basetext.notification,
-		bw = prefix .. scheme.basetext.warning,
-		an = prefix .. scheme.element.addonname,
-		q = prefix .. scheme.element.quote,
-		e = prefix .. scheme.element.emphasis,
-		k = prefix .. (scheme.element.heading or scheme.element.emphasis),
-		s = prefix .. (scheme.element.state or scheme.element.emphasis),
-		c = prefix .. (scheme.element.command or scheme.element.emphasis),
-	}
-	return colorstrings
-end
-
-local CO = SetColors(colSchemeGreen)
-
-local function ChatUserNotification(msg)
-	DEFAULT_CHAT_FRAME:AddMessage(CO.an .. addonName .. ": " .. msg)
-end
-
--- TODO: Do we need a warning at 1 selectable pet? Or should this be considered a valid use-case? (User manually summons a pet from Journal, but wants to get back his (only) fav pet when the timer is due.)
-local function MsgLowPetPool(nPool)
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (nPool < 1 and "0 (zero) pets" or "Only 1 pet") .. " eligible as random summon! You should either " .. (ns.db.favsOnly and "flag more pets as favorite, or set the ramdom pool to 'All Pets'" or "collect more pets") .. ", or set the random-summon timer to '0'. Please note that certain pets are excluded from random summoning, to not break their usability (for example Guild Herald)." .. ((ns.dbc.charFavsEnabled and ns.db.favsOnly) and "\nNote that you have set this char to use char-specific favorite pets. Maybe switching to global favorites ('/pw c') will help." or ""),0,1,0.7)
-end
-
-local function MsgNoSavedPet()
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": No 'current pet' has been saved yet" .. (ns.dbc.charFavsEnabled and " on this character" or "") .. ". Could not restore pet.", 0,1,0.7)
-end
-
-local function MsgAutoRestoreDone(pet)
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": Restored your last pet " .. ns.PetIDtoLink(pet), 0,1,0.7)
-end
-
-local function MsgNewPetDone(ap, np, n)
-	ChatUserNotification("Summoned " .. (n >1 and "a new random" or "your only eligible random") .. " pet " .. ns.PetIDtoLink(np))
-end
-
-local function MsgOnlyFavIsActive(ap)
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": Your only eligible random pet " .. ns.PetIDtoLink(ap) .. " is already active", 0,1,0.7)
-end
-
-
---[[===========================================================================
 MAIN ACTIONS
 ===========================================================================]]--
 
@@ -330,15 +259,15 @@ function ns:RestorePet()
 	if ns.dbc.charFavsEnabled then
 		if ns.dbc.currentPet then
 			ns:SafeSummon(ns.dbc.currentPet)
-			MsgAutoRestoreDone(ns.dbc.currentPet)
+			ns.MsgAutoRestoreDone(ns.dbc.currentPet)
 		else
-			MsgNoSavedPet()
+			ns.MsgNoSavedPet()
 		end
 	elseif ns.db.currentPet then
 		ns:SafeSummon(ns.db.currentPet)
-		MsgAutoRestoreDone(ns.db.currentPet)
+		ns.MsgAutoRestoreDone(ns.db.currentPet)
 	else
-		MsgNoSavedPet()
+		ns.MsgNoSavedPet()
 	end
 	ns:debugprintL1("AutoRestore() has run")
 	lastAutoRestoreRunTime = GetTime()
@@ -359,25 +288,25 @@ function ns:NewPet(actpet)
 		ns:debugprintL1("ns.NewPet --> InitializePool")
 		ns.InitializePool()
 	end
-	local npool = #petPool
+	local npool = #ns.petPool
 	ns.debugprintL1("ns.AutoAction: npool==" .. npool)
 	local newpet
 	if npool == 0 then
-		MsgLowPetPool(npool)
+		ns.MsgLowPetPool(npool)
 		if not actpet then ns:RestorePet() end
 	else
 		if npool == 1 then
-			newpet = petPool[1]
+			newpet = ns.petPool[1]
 			if actpet == newpet then
-				MsgOnlyFavIsActive(actpet)
+				ns.MsgOnlyFavIsActive(actpet)
 				return
 			end
 		else
 			repeat
-				newpet = petPool[math.random(npool)]
+				newpet = ns.petPool[math.random(npool)]
 			until actpet ~= newpet
 		end
-		MsgNewPetDone(actpet, newpet, npool)
+		ns.MsgNewPetDone(actpet, newpet, npool)
 		ns:SafeSummon(newpet)
 	end
 end
