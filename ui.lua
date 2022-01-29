@@ -18,7 +18,7 @@ local colSchemeGreen = {
 		emphasis = 'ADFF2F',
 		keyword = '00FA9A',
 		state = '32CD32',
-		command = 'D2691E',
+		command = 'FF00FF',
 	}
 }
 
@@ -48,25 +48,29 @@ local function ChatUserNotification(msg)
 end
 
 -- TODO: Do we need a warning at 1 selectable pet? Or should this be considered a valid use-case? (User manually summons a pet from Journal, but wants to get back his (only) fav pet when the timer is due.)
-function ns.MsgLowPetPool(nPool)
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": " .. (nPool < 1 and "0 (zero) pets" or "Only 1 pet") .. " eligible as random summon! You should either " .. (ns.db.favsOnly and "flag more pets as favorite, or set the ramdom pool to 'All Pets'" or "collect more pets") .. ", or set the random-summon timer to '0'. Please note that certain pets are excluded from random summoning, to not break their usability (for example Guild Herald)." .. ((ns.dbc.charFavsEnabled and ns.db.favsOnly) and "\nNote that you have set this char to use char-specific favorite pets. Maybe switching to global favorites ('/pw c') will help." or ""),0,1,0.7)
-end
+-- function ns.MsgLowPetPool(nPool)
+-- 	ChatUserNotification(CO.bw .. ": " .. (nPool < 1 and "0 (zero) pets" or "Only 1 pet") .. " eligible as random summon! You should either " .. (ns.db.favsOnly and "flag more pets as favorite, or set the ramdom pool to 'All Pets'" or "collect more pets") .. ", or set the random-summon timer to '0'. Please note that certain pets are excluded from random summoning, to not break their usability (for example Guild Herald)." .. ((ns.dbc.charFavsEnabled and ns.db.favsOnly) and "\nNote that you have set this char to use char-specific favorite pets. Maybe switching to global favorites ('/pw c') will help." or ""))
+-- end
 
 function ns.MsgNoSavedPet()
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": No 'current pet' has been saved yet" .. (ns.dbc.charFavsEnabled and " on this character" or "") .. ". Could not restore pet.", 0,1,0.7)
+	ChatUserNotification(CO.bw .. "No 'current pet' has been saved yet" .. (ns.dbc.charFavsEnabled and " for " .. CO.e .. thisChar or "") .. " --> could not restore pet.")
 end
 
 function ns.MsgAutoRestoreDone(pet)
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": Restored your last pet " .. ns.PetIDtoLink(pet), 0,1,0.7)
+	ChatUserNotification(CO.bn .. "Restored your last pet " .. ns.PetIDtoLink(pet))
 end
 
 function ns.MsgNewPetDone(ap, np, n)
-	ChatUserNotification("Summoned " .. (n >1 and "a new random" or "your only eligible random") .. " pet " .. ns.PetIDtoLink(np))
+	ChatUserNotification(CO.bn .. "Summoned " .. (n >1 and "a new random" or "your only eligible random") .. " pet " .. ns.PetIDtoLink(np))
 end
 
 function ns.MsgOnlyFavIsActive(ap)
-	DEFAULT_CHAT_FRAME:AddMessage(addonName .. ": Your only eligible random pet " .. ns.PetIDtoLink(ap) .. " is already active", 0,1,0.7)
+	ChatUserNotification(CO.bn .. "Your only eligible random pet " .. ns.PetIDtoLink(ap) .. " is already active")
 end
+
+--[[---------------------------------------------------------------------------
+Three big messages: Status, Low Pet Pool, and Help
+---------------------------------------------------------------------------]]--
 
 function ns.HelpText()
 	local content = {
@@ -166,6 +170,25 @@ function ns.Status()
 	local content = table.concat(content, CO.bn)
 	ChatUserNotification(content)
 end
+
+
+function ns.MsgLowPetPool(nPool)
+	local R = CO.bw
+	local content = {
+		(nPool < 1 and CO.e .. "0 (zero) " ..R.. " pets " or R.. "Only " ..CO.e .. "1 " ..R.. "pet "),
+		"eligible as random summon!",
+		"\nYou should either " .. (ns.db.favsOnly and "flag more pets as favorite, or set the ramdom pool to " .. CO.s .."All Pets" or "collect more pets"),
+		", or set the random-summon timer to ",
+		CO.s .. "0",
+		". \nPlease note that certain pets are excluded from random summoning, to not break their usability (for example ",
+		CO.q .. "Guild Herald",
+		"). ",
+		((ns.dbc.charFavsEnabled and ns.db.favsOnly) and "\nYou have set " .. CO.e .. thisChar ..R.. " to use " .. CO.s .. "char-specific favorite " ..R.. "pets. Maybe switching to " .. CO.s .. "global favorites " ..R.. "(" .. CO.c .. "/pw c" ..R.. ") will help." or ""),
+	}
+	local content = table.concat(content, R)
+	ChatUserNotification(content)
+end
+
 
 --[[===========================================================================
 Slash UI
