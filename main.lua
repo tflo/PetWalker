@@ -1,7 +1,16 @@
 local addonName, ns = ...
+-- _G[addonName] = ns -- Debug
 local dbVersion = 1
 local _
-_G[addonName] = ns -- testing to access from bindings.xml
+
+ns.events = CreateFrame("Frame")
+
+ns.events:SetScript("OnEvent", function(self, event, ...)
+	if ns[event] then
+		ns[event](self,...)
+	end
+end)
+ns.events:RegisterEvent("ADDON_LOADED")
 
 --[[---------------------------------------------------------------------------
 For the Bindings file
@@ -23,47 +32,139 @@ function PetWalker_DismissAndDisable_Keybind_Command()
 end
 
 --[[===========================================================================
-DB
+LOADING
 ===========================================================================]]--
 
-PetWalkerDB = PetWalkerDB or {}
-PetWalkerPerCharDB = PetWalkerPerCharDB or {}
-ns.db, ns.dbc = PetWalkerDB, PetWalkerPerCharDB
+function ns:ADDON_LOADED(addon)
 
-if not ns.db.dbVersion or ns.db.dbVersion ~= dbVersion then
-	table.wipe(ns.db)
-end
-if not ns.dbc.dbVersion or ns.dbc.dbVersion ~= dbVersion then
-	local tmpCharFavs = ns.dbc.charFavs -- charFavs
-	table.wipe(ns.dbc)
-	ns.dbc.charFavs = tmpCharFavs
-end
-ns.db.dbVersion  = dbVersion
-ns.dbc.dbVersion = ns.db.dbVersion
+--[[---------------------------------------------------------------------------
+ADDON_LOADED: PetWalker
+---------------------------------------------------------------------------]]--
+	if addon == addonName then
 
-ns.db.autoEnabled = ns.db.autoEnabled == nil and true or ns.db.autoEnabled
-ns.db.newPetTimer = ns.db.newPetTimer or 12
-ns.db.favsOnly = ns.db.favsOnly == nil and true or ns.db.favsOnly
-ns.dbc.charFavsEnabled = ns.dbc.charFavsEnabled or false
-ns.dbc.charFavs = ns.dbc.charFavs or {}
-ns.dbc.eventAlt = ns.dbc.eventAlt or false
-ns.db.debugMode = ns.db.debugMode or false
+		PetWalkerDB = PetWalkerDB or {}
+		PetWalkerPerCharDB = PetWalkerPerCharDB or {}
+		ns.db, ns.dbc = PetWalkerDB, PetWalkerPerCharDB
+		ns.db.dbVersion  = dbVersion
+
+		ns.dbc.dbVersion = ns.db.dbVersion
+		ns.db.autoEnabled = ns.db.autoEnabled == nil and true or ns.db.autoEnabled
+		ns.db.newPetTimer = ns.db.newPetTimer or 12
+		ns.db.lastNewPetTime = ns.db.lastNewPetTime or 0
+		ns.db.favsOnly = ns.db.favsOnly == nil and true or ns.db.favsOnly
+		ns.dbc.charFavsEnabled = ns.dbc.charFavsEnabled or false
+		ns.dbc.charFavs = ns.dbc.charFavs or {}
+		ns.dbc.eventAlt = ns.dbc.eventAlt or false
+		ns.db.debugMode = ns.db.debugMode or false
+
+		if not ns.db.dbVersion or ns.db.dbVersion ~= dbVersion then
+			table.wipe(ns.db)
+		end
+		if not ns.dbc.dbVersion or ns.dbc.dbVersion ~= dbVersion then
+			local tmpCharFavs = ns.dbc.charFavs -- charFavs
+			table.wipe(ns.dbc)
+			ns.dbc.charFavs = tmpCharFavs
+		end
+
+--[[
+		Is this needed?
+		Seems we also get - sometimes - a COMPANION_UPDATE event after login
+		(which triggers a SavePet()). Also it doesn't find the variables from
+		the ns.db, if run too early. So, this is difficult to time, and also
+		depends on the load time of the char.
+		So, let's try with PLAYER_ENTERING_WORLD:
+		]]
+--		self:RegisterEvent("PLAYER_ENTERING_WORLD")
+--		self.PLAYER_ENTERING_WORLD = ns.LoginCheck
+		C_Timer.After(10, function() ns.LoginCheck() end)
+
+
+		--[[
+		This thing fires very often
+		Let's do a test:
+		Unset the 'isInitialized' var with that event, and initialize only when
+		needed, that is before selecting a random pet.
+		--> This seems to work, so far!
+		]]
+		ns.events:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
+-- 		ns.PET_JOURNAL_LIST_UPDATE = ns.InitializePool
+		function ns.PET_JOURNAL_LIST_UPDATE()
+			poolInitialized = false
+			ns:debugprintL1("ns.PET_JOURNAL_LIST_UPDATE has run. poolInitialized =="
+			.. tostring(poolInitialized))
+		end
+
+		ns:CFavsUpdate()
+
+		if ns.dbc.eventAlt then
+			ns.events:RegisterEvent("PLAYER_STARTED_LOOKING")
+			function ns:PLAYER_STARTED_LOOKING()
+				ns.AutoAction()
+			end
+		else
+			ns.events:RegisterEvent("PLAYER_STARTED_MOVING")
+			function ns:PLAYER_STARTED_MOVING()
+				ns.AutoAction()
+			end
+		end
+
+
+		--[[
+		TODO: Does this fire too often? (see
+		https://wowpedia.fandom.com/wiki/COMPANION_UPDATE)
+		]]
+		ns.events:RegisterEvent("COMPANION_UPDATE")
+		function ns:COMPANION_UPDATE(type)
+			if type == "CRITTER" then
+			C_Timer.After(1, function() ns.SavePet() end)
+			end
+		end
+
+
+--[[---------------------------------------------------------------------------
+ADDON_LOADED: Blizzard_Collections
+---------------------------------------------------------------------------]]--
+
+	-- TODO: the same for Rematch
+	elseif addon == "Blizzard_Collections" then
+		for i, btn in ipairs(PetJournal.listScroll.buttons) do
+			btn:SetScript("OnClick",function(self, button)
+				if IsControlKeyDown() then
+					local isFavorite = C_PetJournal.PetIsFavorite(self.petID)
+					C_PetJournal.SetFavorite(self.petID, isFavorite and 0 or 1)
+				else
+					return PetJournalListItem_OnClick(self,button)
+				end
+			end)
+		end
+
+		-- TODO: the same for Rematch
+		ns.CFavs_Button = ns:CreateCfavsCheckBox()
+		hooksecurefunc("CollectionsJournal_UpdateSelectedTab", function(self)
+			local selected = PanelTemplates_GetSelectedTab(self);
+			if selected == 2 then
+				ns.CFavs_Button:SetChecked(ns.dbc.charFavsEnabled)
+				ns.CFavs_Button:Show()
+			else
+				ns.CFavs_Button:Hide()
+			end
+		end)
+	end
+ns.events:UnregisterEvent("ADDON_LOADED")
+end
 
 
 --[[===========================================================================
 Some Variables
 ===========================================================================]]--
 
-local lastCall = GetTime() - ns.db.newPetTimer * 60 / 2
 ns.petPool = {}
 local poolInitialized = false
 local petVerified = false
 local lastSummonTime = GetTime() - 20
 local lastAutoRestoreRunTime = GetTime() - 20
 local lastSavePetTime = GetTime() - 20
-local savePetDelay
-local savePetLoginDelay = 10
-local savePetNormalDelay = 3
+
 --[[
 ATM needed to prevent chat spam with our "too less favorites" message. TODO:
 Find the exact cause of the pool initialization spam, which must be somewhere in
@@ -99,114 +200,6 @@ local excludedSpecies = {
 }
 
 
-ns.events = CreateFrame("Frame")
-
-ns.events:SetScript("OnEvent", function(self, event, ...)
-	return ns[event](self, event, ...)
-end)
-ns.events:RegisterEvent("ADDON_LOADED")
-
-BINDING_HEADER_THISADDON = addonName
-BINDING_NAME_AUTO = "Toggle Auto-summon"
-BINDING_NAME_MANUAL = "Summon New Pet"
-BINDING_NAME_DISMISS = "Dismiss Pet & Disable Auto-summon"
-
-
---[[===========================================================================
-LOADING
-===========================================================================]]--
-
-function ns.ADDON_LOADED(self,event,arg1)
-
---[[---------------------------------------------------------------------------
-ADDON_LOADED: PetWalker
----------------------------------------------------------------------------]]--
-
-	if arg1 == addonName then
-
-		--[[
-		Is this needed?
-		Seems we also get - sometimes - a COMPANION_UPDATE event after login
-		(which triggers a SavePet()). Also it doesn't find the variables from
-		the ns.db, if run too early. So, this is difficult to time, and also
-		depends on the load time of the char.
-		So, let's try with PLAYER_ENTERING_WORLD:
-		]]
---		self:RegisterEvent("PLAYER_ENTERING_WORLD")
---		self.PLAYER_ENTERING_WORLD = ns.LoginCheck
-		savePetDelay = savePetLoginDelay
-		C_Timer.After(16, function() ns.LoginCheck() end)
-
-
-		--[[
-		This thing fires very often
-		Let's do a test:
-		Unset the 'isInitialized' var with that event, and initialize only when
-		needed, that is before selecting a random pet.
-		--> This seems to work, so far!
-		]]
-		ns.events:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
--- 		ns.PET_JOURNAL_LIST_UPDATE = ns.InitializePool
-		function ns.PET_JOURNAL_LIST_UPDATE()
-			poolInitialized = false
-			ns:debugprintL1("ns.PET_JOURNAL_LIST_UPDATE has run. poolInitialized =="
-			.. tostring(poolInitialized))
-		end
-
-		ns:CFavsUpdate()
-
-		if ns.dbc.eventAlt then
-			ns.events:RegisterEvent("PLAYER_STARTED_LOOKING")
-			self.PLAYER_STARTED_LOOKING = ns.AutoAction
-		else
-			ns.events:RegisterEvent("PLAYER_STARTED_MOVING")
-			self.PLAYER_STARTED_MOVING = ns.AutoAction
-		end
-
-
-		--[[
-		TODO: Does this fire too often? (see
-		https://wowpedia.fandom.com/wiki/COMPANION_UPDATE)
-		]]
-		ns.events:RegisterEvent("COMPANION_UPDATE")
-		function ns.COMPANION_UPDATE(self,event,arg1)
-			if arg1 == "CRITTER" then
-			C_Timer.After(savePetDelay, function() ns.SavePet() end)
-			end
-		end
-
-
---[[---------------------------------------------------------------------------
-ADDON_LOADED: Blizzard_Collections
----------------------------------------------------------------------------]]--
-
-	-- TODO: the same for Rematch
-	elseif arg1 == "Blizzard_Collections" then
-		for i, btn in ipairs(PetJournal.listScroll.buttons) do
-			btn:SetScript("OnClick",function(self, button)
-				if IsControlKeyDown() then
-					local isFavorite = C_PetJournal.PetIsFavorite(self.petID)
-					C_PetJournal.SetFavorite(self.petID, isFavorite and 0 or 1)
-				else
-					return PetJournalListItem_OnClick(self,button)
-				end
-			end)
-		end
-
-		-- TODO: the same for Rematch
-		ns.CFavs_Button = ns:CreateCfavsCheckBox()
-		hooksecurefunc("CollectionsJournal_UpdateSelectedTab", function(self)
-			local selected = PanelTemplates_GetSelectedTab(self);
-			if selected == 2 then
-				ns.CFavs_Button:SetChecked(ns.dbc.charFavsEnabled)
-				ns.CFavs_Button:Show()
-			else
-				ns.CFavs_Button:Hide()
-			end
-		end)
-	end
-end
-
 
 --[[===========================================================================
 MAIN ACTIONS
@@ -240,7 +233,7 @@ function ns.AutoAction()
 	if not ns.db.autoEnabled then return end
 	petVerified = true
 	local actpet = C_PetJournal.GetSummonedPetGUID()
-	if ns.db.newPetTimer ~= 0 and lastCall + ns.db.newPetTimer * 60 < GetTime() then
+	if ns.db.newPetTimer ~= 0 and ns.db.lastNewPetTime + ns.db.newPetTimer * 60 < GetTime() then
 		ns:debugprintL2("AutoAction() has run and decided for New Pet.")
 		ns:NewPet(actpet)
 	elseif not actpet then
@@ -280,8 +273,8 @@ NEW PET SUMMON: Runs when timer is due
 -- Called by 1: ns.AutoAction
 
 function ns:NewPet(actpet)
-	if lastCall + 1.5 > GetTime() then return end
-	lastCall = GetTime()
+	if ns.db.lastNewPetTime + 1.5 > GetTime() then return end
+	ns.db.lastNewPetTime = GetTime()
 	debugflag = "NewPet" -- TODO: remove this and the flag in the func
 	if actpet and IsExcludedByPetID(actpet, debugflag) then return end
 	if not poolInitialized then
@@ -322,8 +315,8 @@ function ns.ManualSummonPrevious()
 	else
 		C_PetJournal.SummonPetByGUID(ns.db.previousPet)
 	end
-	lastCall = GetTime()
-	lastSummonTime = lastCall
+	ns.db.lastNewPetTime = GetTime()
+	lastSummonTime = ns.db.lastNewPetTime
 end
 
 
@@ -354,7 +347,6 @@ Should run with the COMPANION_UPDATE event.
 ---------------------------------------------------------------------------]]--
 
 function ns.SavePet()
-	savePetDelay = savePetNormalDelay
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	debugflag = "SavePet" -- TODO: remove this and the flag in the func
 	if not actpet
@@ -443,7 +435,7 @@ This can be, depending on user setting:
 function ns.InitializePool(self)
 	ns:debugprintL1("Running ns.InitializePool()")
 	local debugflag = "InitializePool"
-	table.wipe(petPool)
+	table.wipe(ns.petPool)
 	local index = 1
 	while true do
 		local petID, speciesID, _, _, _, favorite = C_PetJournal.GetPetInfoByIndex(index)
@@ -451,17 +443,17 @@ function ns.InitializePool(self)
 		if not IsExcludedBySpecies(speciesID, debugflag) then
 			if ns.db.favsOnly then
 				if favorite then
-					table.insert(petPool, petID)
+					table.insert(ns.petPool, petID)
 				end
 			else
-				table.insert(petPool, petID)
+				table.insert(ns.petPool, petID)
 			end
 		end
 		index = index + 1
 	end
 	poolInitialized = true -- Condition in ns:NewPet and ns.ManualSummonNew
-	if #petPool <= 1 and ns.db.newPetTimer ~= 0 and poolMsgLockout < GetTime() then
-		MsgLowPetPool(#petPool)
+	if #ns.petPool <= 1 and ns.db.newPetTimer ~= 0 and poolMsgLockout < GetTime() then
+		ns.MsgLowPetPool(#ns.petPool)
 		poolMsgLockout = GetTime() + 15
 	end
 end
@@ -506,224 +498,14 @@ end
 
 
 --[[===========================================================================
-UI STUFF (Slash and Pet journal checkbox)
+GUI stuff for Pet Journal
 ===========================================================================]]--
 
---[[---------------------------------------------------------------------------
-Toggles, Commands
----------------------------------------------------------------------------]]--
-
-function ns:DismissAndDisable()
-	local actpet = C_PetJournal.GetSummonedPetGUID()
-	if actpet then
-		C_PetJournal.SummonPetByGUID(actpet);
-	end
-	ns.db.autoEnabled = false
-	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.autoEnabled) end
-	DEFAULT_CHAT_FRAME:AddMessage("Pet dismissed and auto-summon " .. (ns.db.autoEnabled and "enabled" or "disabled"),0,1,0.7)
-end
-
-function ns:AutoToggle()
-	ns.db.autoEnabled = not ns.db.autoEnabled
-	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.autoEnabled) end
-	DEFAULT_CHAT_FRAME:AddMessage("Pet auto-summon " .. (ns.db.autoEnabled and "enabled" or "disabled"),0,1,0.7)
-end
-
-function ns:EventAlt()
-	ns.dbc.eventAlt = not ns.dbc.eventAlt
-	DEFAULT_CHAT_FRAME:AddMessage("Listening to Event " .. (ns.dbc.eventAlt and "PLAYER_STARTED_LOOKING" or "PLAYER_STARTED_MOVING (default)") .. " # Requires reload",0,1,0.7)
-end
-
-function ns:FavsToggle()
-	ns.db.favsOnly = not ns.db.favsOnly
-	poolInitialized = false
-	DEFAULT_CHAT_FRAME:AddMessage("Selection pool: " .. (ns.db.favsOnly and "favorites only" or "all pets"),0,1,0.7)
-end
-
-function ns.CharFavsSlashToggle() -- for slash command only
-	ns.dbc.charFavsEnabled = not ns.dbc.charFavsEnabled
-	ns:CFavsUpdate()
-	--[[ This is redundant, _if_ we leave the 'poolInitialized = false' in the
-	PET_JOURNAL_LIST_UPDATE function, which gets called by the ns:CFavsUpdate above ]]
-	poolInitialized = false
-	DEFAULT_CHAT_FRAME:AddMessage("Character-specific favorites "..(ns.dbc.charFavsEnabled and "enabled" or "disabled"),0,1,0.7)
-end
-
-function ns.DebugModeToggle() -- for slash command only
-	ns.db.debugMode = not ns.db.debugMode
-	DEFAULT_CHAT_FRAME:AddMessage("Debug mode "..(ns.db.debugMode and "enabled" or "disabled"),0,1,0.7)
-end
-
-function ns:TimerSlashCmd(value)
-	value = tonumber(value)
-	if value >= 0 and value < 1000 then
-		ns.db.newPetTimer = value
-	--			ns.TimerEditBox:SetText(ns.db.newPetTimer) -- only needed for GUI edit box, which is currently disabled
-	DEFAULT_CHAT_FRAME:AddMessage(ns.db.newPetTimer == 0 and "Summon timer disabled" or "Summoning a new pet every " .. ns.db.newPetTimer .. " minutes",0,1,0.7)
-	end
-end
-
--- Used for info print
-function ns:ListCharFavs()
-	local favlinks = {}
-	local count = 0
-	for id, _ in pairs(ns.dbc.charFavs) do
-		count = count + 1
-		name = C_PetJournal.GetBattlePetLink(id)
-		table.insert(favlinks, name)
-	end
-	favlinks = table.concat(favlinks, ' ')
-	return CO.e .. thisChar .. CO.bn .. " has " .. CO.e .. count .. CO.bn ..
-	" character-specific favorite pets" .. (count > 0 and ":" or "") .. "\n" .. (favlinks or "")
-end
-
-
---[[---------------------------------------------------------------------------
-Slash UI
----------------------------------------------------------------------------]]--
-
-function ns.HelpText()
-	local content = {
-		CO.bn .. "Help: ",
-		CO.c .. "\n/pw ",
-		"or ",
-		CO.c .. "/petw ",
-		"supports these commands: ",
-		CO.c .. "\n  d",
-		": ",
-		CO.k .. "Dismiss ",
-		"current pet and ",
-		CO.k .. "disable auto-summon ",
-		"(new pet / restore)",
-		CO.c .. "\n  a",
-		": ",
-		"Toggle ",
-		CO.k .. "auto-summon ",
-		"(new pet / restore)",
-		CO.c .. "\n  n",
-		": ",
-		"Summon ",
-		CO.k .. "new pet ",
-		"from pool",
-		CO.c .. "\n  f",
-		": ",
-		"Toggle ",
-		CO.k .. "pet pool: ",
-		CO.s .. "Favorites Only",
-		", or ",
-		CO.s .. "All Pets",
-		CO.c .. "\n  c",
-		": ",
-		"Toggle ",
-		CO.k .. "favorites: ",
-		CO.s .. "Per-character",
-		", or ",
-		CO.s .. "Global Favorites",
-		CO.c .. "\n  <number>",
-		": ",
-		"Set ",
-		CO.k .. "Summon Timer ",
-		"in minutes (",
-		CO.c .. "1 ",
-		"to ",
-		CO.c .. "999",
-		"; ",
-		CO.c .. "0 ",
-		"to ",
-		CO.k .. "disable",
-		")",
-		CO.c .. "\n  p",
-		": ",
-		"Summon ",
-		CO.k .. "previous pet ",
-		CO.c .. "\n  s",
-		": ",
-		"Display current ",
-		CO.k .. "status/settings",
-		CO.c .. "\n  h",
-		": ",
-		"This help text",
-		"\nIn ",
-		"Key Bindigs > AddOns ",
-		"you can directly bind some commands",
-	}
-	local content = table.concat(content, CO.bn)
-	ChatUserNotification(content)
-end
-
-
-function ns.Status()
-	if not poolInitialized then ns.InitializePool() end
-	local content = {
-		CO.bn .. "Status & Settings:",
-		CO.k .."\n  Automatic Random-summon / Restore ",
-		"is ",
-		CO.s .. (ns.db.autoEnabled and "enabled" or "disabled"),
-		CO.k .. "\n  Summon Timer ",
-		"is ",
-		CO.s .. (ns.db.newPetTimer > 0 and ns.db.newPetTimer .. CO.bn .. " minutes" or "disbled"),
-		" • Next random pet in ",
-		CO.e .. ns.RemainingTimer(),
-		CO.k .. "\n  Pet Pool ",
-		"is set to ",
-		CO.s .. (ns.db.favsOnly and "Favorites Only" or "All Pets"),
-		" • Eligible pets: ",
-		CO.e .. #petPool,
-		CO.k .. "\n  Per-character Favorites ",
-		"are ",
-		CO.s .. (ns.dbc.charFavsEnabled and "enabled" or "disabled"),
-		" for ",
-		CO.e .. thisChar,
-		"\n",
-		ns:ListCharFavs(),
-	}
-	local content = table.concat(content, CO.bn)
-	ChatUserNotification(content)
-end
-
-
-
-SLASH_PetWalker1, SLASH_PetWalker2 = '/pw', '/petw'
-function SlashCmdList.PetWalker(cmd)
-	if cmd == 'd' or cmd == 'dis' then
-		ns:DismissAndDisable()
-	elseif cmd == 'dd' or cmd == 'debd' then
-		ns:DebugDisplay()
-	elseif cmd == 'dm' or cmd == 'debm' then
-		ns.DebugModeToggle()
-	elseif cmd == 'a' or cmd == 'auto' then
-		ns:AutoToggle()
-	elseif cmd == 'n' or cmd == 'new' then
-		local actpet = C_PetJournal.GetSummonedPetGUID()
-		ns:NewPet(actpet)
-	elseif cmd == 'f' or cmd == 'fav' then
-		ns:FavsToggle()
-	elseif cmd == 'e' or cmd == 'eve' then
-		ns:EventAlt()
-	elseif cmd == 'c' or cmd == 'char' then
-		ns.CharFavsSlashToggle()
-	elseif cmd == 'p' or cmd == 'prev' then
-		ns.ManualSummonPrevious()
-	elseif cmd == 's' or cmd == 'status' then
-		ns.Status()
-	elseif tonumber(cmd) then
-		ns:TimerSlashCmd(cmd)
-	elseif cmd == 'h' or cmd == 'help' then
-		ns.HelpText()
-	elseif cmd == '' then
-		ns.Status()
-		ns.HelpText()
-	else
-		DEFAULT_CHAT_FRAME:AddMessage("ns: Invalid command or/and arguments. Enter '/pk help' for a list of commands.", 0,1,0.7)
-	end
-end
-
-
---[[---------------------------------------------------------------------------
--- GUI stuff for Pet Journal
----------------------------------------------------------------------------]]--
-
--- We disabled most of the GUI stuff, since now we have more settings than we can fit there. We leave the CharFavorites checkbox, because it makes sense to see at a glance (in the opened Pet Journal) which type of favs are enabled.
+--[[
+We disabled most of the GUI elements, since now we have more settings than we
+can fit there. We leave the CharFavorites checkbox, because it makes sense to
+see at a glance (in the opened Pet Journal) which type of favs are enabled.
+]]
 
 function ns.CreateCheckBoxBase(self)
 	local f = CreateFrame("CheckButton", "PetWalkerAutoCheckbox",PetJournal,"UICheckButtonTemplate")
@@ -821,7 +603,7 @@ local function SecToMin(seconds)
 end
 
 function ns.RemainingTimer()
-	local rem = lastCall + ns.db.newPetTimer * 60 - GetTime()
+	local rem = ns.db.lastNewPetTime + ns.db.newPetTimer * 60 - GetTime()
 	rem = rem > 0 and rem or 0
 	return SecToMin(rem)
 end
