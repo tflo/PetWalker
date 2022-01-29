@@ -1,11 +1,11 @@
 <Bindings>
 	<Binding name="AUTO" header="THISADDON" category="ADDONS">
-        PetWalker:AutoToggle()
+        PetWalker_AutoToggle_Keybind_Command()
     </Binding>
     <Binding name="MANUAL" category="ADDONS">
-        PetWalker:NewPet(C_PetJournal.GetSummonedPetGUID())
+		 PetWalker_NewPet_Keybind_Command()
     </Binding>
     <Binding name="DISMISS" category="ADDONS">
-        PetWalker:DismissAndDisable()
+        PetWalker_DismissAndDisable_Keybind_Command()
     </Binding>
 </Bindings>

@@ -3,6 +3,25 @@ local dbVersion = 1
 local _
 _G[addonName] = ns -- testing to access from bindings.xml
 
+--[[---------------------------------------------------------------------------
+For the Bindings file
+---------------------------------------------------------------------------]]--
+
+BINDING_HEADER_THISADDON = addonName
+BINDING_NAME_AUTO = "Toggle Auto-summon"
+BINDING_NAME_MANUAL = "Summon New Pet"
+BINDING_NAME_DISMISS = "Dismiss Pet & Disable Auto-summon"
+
+function PetWalker_NewPet_Keybind_Command()
+	ns:NewPet(C_PetJournal.GetSummonedPetGUID())
+end
+function PetWalker_AutoToggle_Keybind_Command()
+	ns:AutoToggle()
+end
+function PetWalker_DismissAndDisable_Keybind_Command()
+	ns:DismissAndDisable()
+end
+
 --[[===========================================================================
 DB
 ===========================================================================]]--
