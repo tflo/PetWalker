@@ -159,19 +159,10 @@ Some Variables
 ns.petPool = {}
 ns.poolInitialized = false
 local petVerified = false
-local lastSummonTime = GetTime() - 20
-local lastAutoRestoreRunTime = GetTime() - 20
-local lastSavePetTime = GetTime() - 20
-
---[[
-ATM needed to prevent chat spam with our "too less favorites" message. TODO:
-Find the exact cause of the pool initialization spam, which must be somewhere in
-the Favorite Selection function! I think it would be also OK to initialize only
-after closing the pet journal (or Rematch!) frame.
---> Partially solved now, by inverting the initialization logic (event only sets
-the var to false)
-]]
-local poolMsgLockout = 0
+local lastSummonTime = 0
+local lastAutoRestoreRunTime = 0
+local lastSavePetTime = 0
+local lastPoolMsgTime = 0
 
 --[[
 Guild Page and Herald don't have fix IDs, so we have to go by speciesID Nor
@@ -245,8 +236,8 @@ RESTORE: Pet is lost --> restore it
 ---------------------------------------------------------------------------]]--
 
 function ns:RestorePet()
-	if GetTime() - lastSummonTime < 2 then return end
-	if GetTime() - lastAutoRestoreRunTime < 2 then return end
+	local now = GetTime()
+	if now - lastSummonTime < 4 or now - lastAutoRestoreRunTime < 3 then return end
 	if ns.dbc.charFavsEnabled then
 		if ns.dbc.currentPet then
 			ns:SafeSummon(ns.dbc.currentPet)
@@ -261,18 +252,19 @@ function ns:RestorePet()
 		ns.MsgNoSavedPet()
 	end
 	ns:debugprintL1("AutoRestore() has run")
-	lastAutoRestoreRunTime = GetTime()
+	lastAutoRestoreRunTime = now
 end
 
 
 --[[---------------------------------------------------------------------------
 NEW PET SUMMON: Runs when timer is due
 ---------------------------------------------------------------------------]]--
--- Called by 1: ns.AutoAction
+-- Called by 3: ns.AutoAction, NewPet keybind, NewPet slash command
 
 function ns:NewPet(actpet)
-	if ns.db.lastNewPetTime + 1.5 > GetTime() then return end
-	ns.db.lastNewPetTime = GetTime()
+	local now = GetTime()
+	if now - ns.db.lastNewPetTime < 1.5 then return end
+	ns.db.lastNewPetTime = now
 	debugflag = "NewPet" -- TODO: remove this and the flag in the func
 	if actpet and IsExcludedByPetID(actpet, debugflag) then return end
 	if not ns.poolInitialized then
@@ -346,10 +338,11 @@ Should run with the COMPANION_UPDATE event.
 
 function ns.SavePet()
 	local actpet = C_PetJournal.GetSummonedPetGUID()
+	local now = GetTime()
 	debugflag = "SavePet" -- TODO: remove this and the flag in the func
 	if not actpet
 		or IsExcludedByPetID(actpet, debugflag)
-		or (GetTime() - lastSavePetTime < 1)
+		or now - lastSavePetTime < 3
 		or not petVerified then
 		return
 	end
@@ -363,7 +356,7 @@ function ns.SavePet()
 		ns.db.currentPet = actpet
 	end
 	ns:debugprintL2("SavePet() has run")
-	lastSavePetTime = GetTime()
+	lastSavePetTime = now
 end
 
 
@@ -450,9 +443,10 @@ function ns.InitializePool(self)
 		index = index + 1
 	end
 	ns.poolInitialized = true -- Condition in ns:NewPet and ns.ManualSummonNew
-	if #ns.petPool <= 1 and ns.db.newPetTimer ~= 0 and poolMsgLockout < GetTime() then
+	local now = GetTime()
+	if #ns.petPool <= 1 and ns.db.newPetTimer ~= 0 and now - lastPoolMsgTime > 30 then
 		ns.MsgLowPetPool(#ns.petPool)
-		poolMsgLockout = GetTime() + 15
+		lastPoolMsgTime = now
 	end
 end
 
