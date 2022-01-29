@@ -150,7 +150,7 @@ ADDON_LOADED: Blizzard_Collections
 			end
 		end)
 	end
-ns.events:UnregisterEvent("ADDON_LOADED")
+-- ns.events:UnregisterEvent("ADDON_LOADED")
 end
 
 
