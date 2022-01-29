@@ -4,11 +4,39 @@ local _
 _G[addonName] = ns -- testing to access from bindings.xml
 
 --[[===========================================================================
+DB
+===========================================================================]]--
+
+PetWalkerDB = PetWalkerDB or {}
+PetWalkerPerCharDB = PetWalkerPerCharDB or {}
+ns.db, ns.dbc = PetWalkerDB, PetWalkerPerCharDB
+
+if not ns.db.dbVersion or ns.db.dbVersion ~= dbVersion then
+	table.wipe(ns.db)
+end
+if not ns.dbc.dbVersion or ns.dbc.dbVersion ~= dbVersion then
+	local tmpCharFavs = ns.dbc.charFavs -- charFavs
+	table.wipe(ns.dbc)
+	ns.dbc.charFavs = tmpCharFavs
+end
+ns.db.dbVersion  = dbVersion
+ns.dbc.dbVersion = ns.db.dbVersion
+
+ns.db.autoEnabled = ns.db.autoEnabled == nil and true or ns.db.autoEnabled
+ns.db.newPetTimer = ns.db.newPetTimer or 12
+ns.db.favsOnly = ns.db.favsOnly == nil and true or ns.db.favsOnly
+ns.dbc.charFavsEnabled = ns.dbc.charFavsEnabled or false
+ns.dbc.charFavs = ns.dbc.charFavs or {}
+ns.dbc.eventAlt = ns.dbc.eventAlt or false
+ns.db.debugMode = ns.db.debugMode or false
+
+
+--[[===========================================================================
 Some Variables
 ===========================================================================]]--
 
 local thisChar = UnitName("player")
-local lastCall
+local lastCall = GetTime() - ns.db.newPetTimer * 60 / 2
 local petPool = {}
 local poolInitialized = false
 local petVerified = false
@@ -78,32 +106,6 @@ ADDON_LOADED: PetWalker
 
 	if arg1 == addonName then
 
-		PetWalkerDB = PetWalkerDB or {}
-		PetWalkerPerCharDB = PetWalkerPerCharDB or {}
-		ns.db, ns.dbc = PetWalkerDB, PetWalkerPerCharDB
-
-		if not ns.db.dbVersion or ns.db.dbVersion ~= dbVersion then
-			table.wipe(ns.db)
-		end
-		if not ns.dbc.dbVersion or ns.dbc.dbVersion ~= dbVersion then
-			local tmpCharFavs = ns.dbc.charFavs -- charFavs
-			table.wipe(ns.dbc)
-			ns.dbc.charFavs = tmpCharFavs
-		end
-		ns.db.dbVersion  = dbVersion
-		ns.dbc.dbVersion = ns.db.dbVersion
-
-		ns.db.autoEnabled = ns.db.autoEnabled == nil and true or ns.db.autoEnabled
-		ns.db.newPetTimer = ns.db.newPetTimer or 12
-		ns.db.favsOnly = ns.db.favsOnly == nil and true or ns.db.favsOnly
-		ns.dbc.charFavsEnabled = ns.dbc.charFavsEnabled or false
-		ns.dbc.charFavs = ns.dbc.charFavs or {}
-		ns.dbc.eventAlt = ns.dbc.eventAlt or false
-		ns.db.debugMode = ns.db.debugMode or false
-
-		lastCall = GetTime() + 20
-		savePetDelay = savePetLoginDelay
-
 		--[[
 		Is this needed?
 		Seems we also get - sometimes - a COMPANION_UPDATE event after login
@@ -114,6 +116,7 @@ ADDON_LOADED: PetWalker
 		]]
 --		self:RegisterEvent("PLAYER_ENTERING_WORLD")
 --		self.PLAYER_ENTERING_WORLD = ns.LoginCheck
+		savePetDelay = savePetLoginDelay
 		C_Timer.After(16, function() ns.LoginCheck() end)
 
 
