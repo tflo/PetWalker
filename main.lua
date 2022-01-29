@@ -1,7 +1,7 @@
 local addonName, ns = ...
 local dbVersion = 1
 local _
-
+_G[addonName] = ns -- testing to access from bindings.xml
 
 --[[===========================================================================
 Some Variables
@@ -53,12 +53,12 @@ local excludedSpecies = {
 }
 
 
-ns = CreateFrame("Frame","PetWalker")
+ns.events = CreateFrame("Frame")
 
-ns:SetScript("OnEvent", function(self, event, ...)
-	return self[event](self, event, ...)
+ns.events:SetScript("OnEvent", function(self, event, ...)
+	return ns[event](self, event, ...)
 end)
-ns:RegisterEvent("ADDON_LOADED")
+ns.events:RegisterEvent("ADDON_LOADED")
 
 BINDING_HEADER_THISADDON = addonName
 BINDING_NAME_AUTO = "Toggle Auto-summon"
@@ -124,7 +124,7 @@ ADDON_LOADED: PetWalker
 		needed, that is before selecting a random pet.
 		--> This seems to work, so far!
 		]]
-		ns:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
+		ns.events:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 -- 		ns.PET_JOURNAL_LIST_UPDATE = ns.InitializePool
 		function ns.PET_JOURNAL_LIST_UPDATE()
 			poolInitialized = false
@@ -135,10 +135,10 @@ ADDON_LOADED: PetWalker
 		ns:CFavsUpdate()
 
 		if ns.dbc.eventAlt then
-			self:RegisterEvent("PLAYER_STARTED_LOOKING")
+			ns.events:RegisterEvent("PLAYER_STARTED_LOOKING")
 			self.PLAYER_STARTED_LOOKING = ns.AutoAction
 		else
-			self:RegisterEvent("PLAYER_STARTED_MOVING")
+			ns.events:RegisterEvent("PLAYER_STARTED_MOVING")
 			self.PLAYER_STARTED_MOVING = ns.AutoAction
 		end
 
@@ -147,7 +147,7 @@ ADDON_LOADED: PetWalker
 		TODO: Does this fire too often? (see
 		https://wowpedia.fandom.com/wiki/COMPANION_UPDATE)
 		]]
-		self:RegisterEvent("COMPANION_UPDATE")
+		ns.events:RegisterEvent("COMPANION_UPDATE")
 		function ns.COMPANION_UPDATE(self,event,arg1)
 			if arg1 == "CRITTER" then
 			C_Timer.After(savePetDelay, function() ns.SavePet() end)
@@ -173,7 +173,7 @@ ADDON_LOADED: Blizzard_Collections
 		end
 
 		-- TODO: the same for Rematch
-		ns.CFavs_Button = self:CreateCfavsCheckBox()
+		ns.CFavs_Button = ns:CreateCfavsCheckBox()
 		hooksecurefunc("CollectionsJournal_UpdateSelectedTab", function(self)
 			local selected = PanelTemplates_GetSelectedTab(self);
 			if selected == 2 then
