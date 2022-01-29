@@ -49,7 +49,7 @@ local excludedSpecies = {
 	283, -- Guild Herald, Horde-- Pet is vendor and has CD
 -- 	214, -- Argent Squire (Pony Bridle char achievement: 3736)
 -- 	216, -- Argent Gruntling,
-	2403, --Dummy ID for debugging! Comment this out!
+-- 	2403, --Dummy ID for debugging! Comment this out!
 }
 
 
@@ -60,10 +60,10 @@ ns:SetScript("OnEvent", function(self, event, ...)
 end)
 ns:RegisterEvent("ADDON_LOADED")
 
-BINDING_HEADER_ThisAddon = addonName
-BINDING_NAME_Auto = "Toggle Auto-summon"
-BINDING_NAME_Manual = "Summon New Pet"
-BINDING_NAME_Dismiss = "Dismiss Pet & Disable Auto-summon"
+BINDING_HEADER_THISADDON = addonName
+BINDING_NAME_AUTO = "Toggle Auto-summon"
+BINDING_NAME_MANUAL = "Summon New Pet"
+BINDING_NAME_DISMISS = "Dismiss Pet & Disable Auto-summon"
 
 
 --[[===========================================================================
