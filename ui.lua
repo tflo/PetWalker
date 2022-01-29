@@ -139,7 +139,7 @@ end
 
 
 function ns.Status()
-	if not poolInitialized then ns.InitializePool() end
+	if not ns.poolInitialized then ns.InitializePool() end
 	local content = {
 		CO.bn .. "Status & Settings:",
 		CO.k .."\n  Automatic Random-summon / Restore ",
@@ -233,16 +233,16 @@ end
 
 function ns:FavsToggle()
 	ns.db.favsOnly = not ns.db.favsOnly
-	poolInitialized = false
+	ns.poolInitialized = false
 	DEFAULT_CHAT_FRAME:AddMessage("Selection pool: " .. (ns.db.favsOnly and "favorites only" or "all pets"),0,1,0.7)
 end
 
 function ns.CharFavsSlashToggle() -- for slash command only
 	ns.dbc.charFavsEnabled = not ns.dbc.charFavsEnabled
 	ns:CFavsUpdate()
-	--[[ This is redundant, _if_ we leave the 'poolInitialized = false' in the
+	--[[ This is redundant, _if_ we leave the 'ns.poolInitialized = false' in the
 	PET_JOURNAL_LIST_UPDATE function, which gets called by the ns:CFavsUpdate above ]]
-	poolInitialized = false
+	ns.poolInitialized = false
 	DEFAULT_CHAT_FRAME:AddMessage("Character-specific favorites "..(ns.dbc.charFavsEnabled and "enabled" or "disabled"),0,1,0.7)
 end
 

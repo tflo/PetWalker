@@ -90,9 +90,9 @@ Init
 	ns.events:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 -- 		ns.PET_JOURNAL_LIST_UPDATE = ns.InitializePool
 	function ns.PET_JOURNAL_LIST_UPDATE()
-		poolInitialized = false
-		ns:debugprintL1("ns.PET_JOURNAL_LIST_UPDATE has run. poolInitialized =="
-		.. tostring(poolInitialized))
+		ns.poolInitialized = false
+		ns:debugprintL1("ns.PET_JOURNAL_LIST_UPDATE has run. ns.poolInitialized =="
+		.. tostring(ns.poolInitialized))
 	end
 
 	ns:CFavsUpdate()
@@ -157,7 +157,7 @@ Some Variables
 ===========================================================================]]--
 
 ns.petPool = {}
-local poolInitialized = false
+ns.poolInitialized = false
 local petVerified = false
 local lastSummonTime = GetTime() - 20
 local lastAutoRestoreRunTime = GetTime() - 20
@@ -275,7 +275,7 @@ function ns:NewPet(actpet)
 	ns.db.lastNewPetTime = GetTime()
 	debugflag = "NewPet" -- TODO: remove this and the flag in the func
 	if actpet and IsExcludedByPetID(actpet, debugflag) then return end
-	if not poolInitialized then
+	if not ns.poolInitialized then
 		ns:debugprintL1("ns.NewPet --> InitializePool")
 		ns.InitializePool()
 	end
@@ -449,7 +449,7 @@ function ns.InitializePool(self)
 		end
 		index = index + 1
 	end
-	poolInitialized = true -- Condition in ns:NewPet and ns.ManualSummonNew
+	ns.poolInitialized = true -- Condition in ns:NewPet and ns.ManualSummonNew
 	if #ns.petPool <= 1 and ns.db.newPetTimer ~= 0 and poolMsgLockout < GetTime() then
 		ns.MsgLowPetPool(#ns.petPool)
 		poolMsgLockout = GetTime() + 15
