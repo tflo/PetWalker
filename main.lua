@@ -235,20 +235,27 @@ RESTORE: Pet is lost --> restore it
 function ns:RestorePet()
 	local now = GetTime()
 	if now - lastSummonTime < 4 or now - lastAutoRestoreRunTime < 3 then return end
+	local currentpet
 	if ns.dbc.charFavsEnabled then
 		if ns.dbc.currentPet then
-			ns:SafeSummon(ns.dbc.currentPet)
-			ns.MsgAutoRestoreDone(ns.dbc.currentPet)
+			currentpet = ns.dbc.currentPet
 		else
 			ns.MsgNoSavedPet()
+			return
 		end
 	elseif ns.db.currentPet then
-		ns:SafeSummon(ns.db.currentPet)
-		ns.MsgAutoRestoreDone(ns.db.currentPet)
+		currentpet = ns.db.currentPet
 	else
 		ns.MsgNoSavedPet()
+		return
 	end
 	ns:debugprintL1("AutoRestore() has run")
+	C_Timer.After(1, function()
+		if now - lastSummonTime < 1 then
+			ns.MsgAutoRestoreDone(currentpet)
+		end
+	end)
+	ns:SafeSummon(currentpet)
 	lastAutoRestoreRunTime = now
 end
 
@@ -285,7 +292,11 @@ function ns:NewPet(actpet)
 				newpet = ns.petPool[math.random(npool)]
 			until actpet ~= newpet
 		end
+		C_Timer.After(1, function()
+			if now - lastSummonTime < 1 then
 				ns.MsgNewPetDone(actpet, newpet, npool)
+			end
+		end)
 		ns:SafeSummon(newpet)
 	end
 end
