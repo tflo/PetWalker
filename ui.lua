@@ -214,7 +214,7 @@ function SlashCmdList.PetWalker(cmd)
 	elseif cmd == 'c' or cmd == 'char' then
 		ns.CharFavsSlashToggle()
 	elseif cmd == 'p' or cmd == 'prev' then
-		ns.ManualSummonPrevious()
+		ns.PreviousPet()
 	elseif cmd == 's' or cmd == 'status' then
 		ns.Status()
 	elseif tonumber(cmd) then

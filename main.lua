@@ -20,16 +20,16 @@ For the Bindings file
 
 BINDING_HEADER_THISADDON = addonName
 BINDING_NAME_AUTO = "Toggle Auto-summon"
-BINDING_NAME_MANUAL = "Summon New Pet"
+BINDING_NAME_NEW = "Summon New Pet"
 BINDING_NAME_DISMISS = "Dismiss Pet & Disable Auto-summon"
 
-function PetWalker_NewPet_Keybind_Command()
-	ns:NewPet(C_PetJournal.GetSummonedPetGUID())
-end
-function PetWalker_AutoToggle_Keybind_Command()
+function F86D9DE5C_814D_4EEA_A84B_CB9BE07756BE()
 	ns:AutoToggle()
 end
-function PetWalker_DismissAndDisable_Keybind_Command()
+function F849A3D45_B1BD_4CA8_BA29_6DD2A8B78470()
+	ns:NewPet(C_PetJournal.GetSummonedPetGUID())
+end
+function F76DE57DF_295D_40B4_B8CE_E45A3DF02C18()
 	ns:DismissAndDisable()
 end
 
@@ -214,8 +214,8 @@ local function IsExcludedByPetID(id, debugflag)
 end
 
 --[[---------------------------------------------------------------------------
-The main function that runs when player started moving.
-It DECIDES whether to restore a (lost) pet, or summoning a new one (if the timer is set and due).
+The main function that runs when player started moving. It DECIDES whether to
+restore a (lost) pet, or summoning a new one (if the timer is set and due).
 ---------------------------------------------------------------------------]]--
 
 function ns.AutoAction()
@@ -272,7 +272,6 @@ function ns:NewPet(actpet)
 		ns.InitializePool()
 	end
 	local npool = #ns.petPool
-	ns.debugprintL1("ns.AutoAction: npool==" .. npool)
 	local newpet
 	if npool == 0 then
 		ns.MsgLowPetPool(npool)
@@ -311,19 +310,22 @@ end
 
 
 --[[---------------------------------------------------------------------------
-One time action,  somewhere AFTER LOGIN. Try to restore the same pat as the last logged-in char had active.
+One time action, somewhere AFTER LOGIN. Try to restore the same pat as the last
+logged-in char had active.
 ---------------------------------------------------------------------------]]--
+
+-- Called by 1: ns:PLAYER_LOGIN()
 
 function ns.LoginCheck()
 	if not ns.db.autoEnabled then return end
 	petVerified = true
-	local actualPet = C_PetJournal.GetSummonedPetGUID()
+	local actpet = C_PetJournal.GetSummonedPetGUID()
 	if ns.dbc.charFavsEnabled then
-		if not actualPet or actualPet ~= ns.dbc.currentPet then
+		if not actpet or actpet ~= ns.dbc.currentPet then
 			ns:SafeSummon(ns.dbc.currentPet)
 		end
 	else
-		if not actualPet or actualPet ~= ns.db.currentPet then
+		if not actpet or actpet ~= ns.db.currentPet then
 			ns:SafeSummon(ns.db.currentPet)
 		end
 	end
@@ -376,7 +378,7 @@ local excludedAuras = {
 local function OfflimitsAura(auras)
 	for _, a in pairs(auras) do
 		if GetPlayerAuraBySpellID(a) then
-			ns.dbp("Excluded Aura found!")
+			ns:debugprintL1("Excluded Aura found!")
 			return true
 		end
 	end
@@ -400,7 +402,7 @@ function ns:SafeSummon(pet)
 --		and not IsMounted() -- TODO: test if this is needed
 		and not IsFlying()
 		and not OfflimitsAura(excludedAuras)
-		and not IsStealthed()
+		and not IsStealthed() -- Includes Hunter Camouflage
 		and not (UnitIsControlling("player") and UnitChannelInfo("player"))
 		and not UnitHasVehicleUI("player")
 		and not UnitIsGhost("player")
@@ -419,7 +421,9 @@ Creating the POOL, from where the random pet is summoned.
 This can be, depending on user setting:
 — Global favorites
 — Per-character favorites
-— All available pets (except the exclusions)
+— All available pets (except the exclusions). Note that this is affected by the
+  filter settings in the Pet Journal, which means the player can create custom
+  pools without changing his favorites.
 ===========================================================================]]--
 
 -- Called by 3: PET_JOURNAL_LIST_UPDATE; conditionally by ns:NewPet, ns.ManualSummonNew

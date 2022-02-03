@@ -1,11 +1,11 @@
 <Bindings>
 	<Binding name="AUTO" header="THISADDON" category="ADDONS">
-        PetWalker_AutoToggle_Keybind_Command()
+        F86D9DE5C_814D_4EEA_A84B_CB9BE07756BE()
     </Binding>
-    <Binding name="MANUAL" category="ADDONS">
-		 PetWalker_NewPet_Keybind_Command()
+    <Binding name="NEW" category="ADDONS">
+		 F849A3D45_B1BD_4CA8_BA29_6DD2A8B78470()
     </Binding>
     <Binding name="DISMISS" category="ADDONS">
-        PetWalker_DismissAndDisable_Keybind_Command()
+        F76DE57DF_295D_40B4_B8CE_E45A3DF02C18()
     </Binding>
 </Bindings>
