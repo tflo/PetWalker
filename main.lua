@@ -298,14 +298,15 @@ end
 MANUAL SUMMON of the previously summoned pet
 ---------------------------------------------------------------------------]]--
 
-function ns.ManualSummonPrevious()
+function ns.PreviousPet()
+	local prevpet
 	if ns.dbc.charFavsEnabled then
-		C_PetJournal.SummonPetByGUID(ns.dbc.previousPet)
+		prevpet = ns.dbc.previousPet
 	else
-		C_PetJournal.SummonPetByGUID(ns.db.previousPet)
+		prevpet = ns.db.previousPet
 	end
 	ns.db.lastNewPetTime = GetTime()
-	lastSummonTime = ns.db.lastNewPetTime
+	ns:SafeSummon(prevpet)
 end
 
 
