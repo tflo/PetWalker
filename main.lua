@@ -367,12 +367,12 @@ SAFE-SUMMON: Used in the AutoSummon function, and currently also in the
 Manual Summon function
 ---------------------------------------------------------------------------]]--
 
--- TODO: What about Feign Death?!
 local excludedAuras = {
 	32612, -- Mage: Invisibility
 	110960, -- Mage: Greater Invisibility
 	131347, -- DH: Gliding
 	311796, -- Pet: Daisy as backpack (/beckon)
+	5384, -- Hunter: Feign Death (useful to avoid accidental summoning via keybind, or if we use a different event than PLAYER_STARTED_MOVING)
 } -- More exclusions in the Summon function itself
 
 local function OfflimitsAura(auras)
