@@ -34,6 +34,35 @@ function F76DE57DF_295D_40B4_B8CE_E45A3DF02C18()
 end
 
 --[[===========================================================================
+Some Variables
+===========================================================================]]--
+
+ns.petPool = {}
+ns.poolInitialized = false
+local petVerified = false
+local lastSummonTime = 0
+local lastAutoRestoreRunTime = 0
+local lastSavePetTime = 0
+local lastPoolMsgTime = 0
+local lastPlayerCastTime = 0
+
+--[[
+TODO: Maybe add the self-unsummoning pets, like the different Snowman
+(repeatedly auto-resummoning the Snowman during summer could be considered an
+act of barbarity :)
+]]
+local excludedSpecies = {
+	280, -- Guild Page, Alliance -- Pet is vendor and has CD
+	281, -- Guild Page, Horde -- Pet is vendor and has CD
+	282, -- Guild Herald, Alliance-- Pet is vendor and has CD
+	283, -- Guild Herald, Horde-- Pet is vendor and has CD
+-- 	214, -- Argent Squire -- Should be safe (Pony Bridle achiev: 3736)
+-- 	216, -- Argent Gruntling -- Should be safe
+-- 	2403, Dummy ID for debugging! Keep this out-commented!
+}
+
+
+--[[===========================================================================
 LOADING
 ===========================================================================]]--
 
@@ -73,11 +102,12 @@ Init
 	(which triggers a SavePet()). Also it doesn't find the variables from
 	the ns.db, if run too early. So, this is difficult to time, and also
 	depends on the load time of the char.
-	So, let's try with PLAYER_ENTERING_WORLD:
 	]]
---		self:RegisterEvent("PLAYER_ENTERING_WORLD")
---		self.PLAYER_ENTERING_WORLD = ns.LoginCheck
-	C_Timer.After(10, function() ns.LoginCheck() end)
+	ns.events:RegisterEvent("PLAYER_ENTERING_WORLD")
+	function ns.PLAYER_ENTERING_WORLD()
+		C_Timer.After(2, ns.LoginCheck)
+		ns:CFavsUpdate()
+	end
 
 
 	--[[
@@ -88,14 +118,12 @@ Init
 	--> This seems to work, so far!
 	]]
 	ns.events:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
--- 		ns.PET_JOURNAL_LIST_UPDATE = ns.InitializePool
 	function ns.PET_JOURNAL_LIST_UPDATE()
 		ns.poolInitialized = false
 		ns:debugprintL1("ns.PET_JOURNAL_LIST_UPDATE has run. ns.poolInitialized =="
 		.. tostring(ns.poolInitialized))
 	end
 
-	ns:CFavsUpdate()
 
 	if ns.dbc.eventAlt then
 		ns.events:RegisterEvent("PLAYER_STARTED_LOOKING")
@@ -109,15 +137,21 @@ Init
 		end
 	end
 
+--[[ What we are trying to do here ]]--[[
+COMPANION_UPDATE can be pretty spammy. So, we let it fire the function only if
+it comes very immediately after a UNIT_SPELLCAST_SUCCEEDED event by the player
+(which is the pet summon spell). Not sure if this is economic(?)
+]]
 
-	--[[
-	TODO: Does this fire too often? (see
-	https://wowpedia.fandom.com/wiki/COMPANION_UPDATE)
-	]]
+	ns.events:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
+	function ns:UNIT_SPELLCAST_SUCCEEDED()
+		if not UnitAffectingCombat("player") then lastPlayerCastTime = GetTime() end
+	end
+
 	ns.events:RegisterEvent("COMPANION_UPDATE")
 	function ns:COMPANION_UPDATE(what)
-		if what == "CRITTER" then
-		C_Timer.After(2, function() ns.SavePet() end)
+		if GetTime() - lastPlayerCastTime < 0.2 and what == "CRITTER" then
+		C_Timer.After(1, ns.SavePet)
 		end
 	end
 
@@ -150,43 +184,6 @@ Pet Journal
 		end
 	end)
 end
-
-
---[[===========================================================================
-Some Variables
-===========================================================================]]--
-
-ns.petPool = {}
-ns.poolInitialized = false
-local petVerified = false
-local lastSummonTime = 0
-local lastAutoRestoreRunTime = 0
-local lastSavePetTime = 0
-local lastPoolMsgTime = 0
-
---[[
-Guild Page and Herald don't have fix IDs, so we have to go by speciesID Nor
-sure what to do with the Argent Squire pet: CD activates only if we access the
-bank/mail/vendor, and it is also a valid pet for random favorite summons.
-But maybe we should just give him a guaranteed minimum live time of 3 min or so?
-
-Or just rely on the user intelligence to switch off auto-summoning when he
-accesses the bank? Or maybe test for the pony bridle achiev and not
-auto-unsummon him if present?
-
-TODO:
-- Maybe add the self-unsummoning pets, like the different Snowman (though, it
-  could be considered fun to auto-resummon the Snowman repeatedly :)
-]]
-local excludedSpecies = {
-	280, -- Guild Page, Alliance -- Pet is vendor and has CD
-	281, -- Guild Page, Horde -- Pet is vendor and has CD
-	282, -- Guild Herald, Alliance-- Pet is vendor and has CD
-	283, -- Guild Herald, Horde-- Pet is vendor and has CD
--- 	214, -- Argent Squire (Pony Bridle char achievement: 3736)
--- 	216, -- Argent Gruntling,
--- 	2403, --Dummy ID for debugging! Comment this out!
-}
 
 
 
@@ -288,7 +285,7 @@ function ns:NewPet(actpet)
 				newpet = ns.petPool[math.random(npool)]
 			until actpet ~= newpet
 		end
-		ns.MsgNewPetDone(actpet, newpet, npool)
+				ns.MsgNewPetDone(actpet, newpet, npool)
 		ns:SafeSummon(newpet)
 	end
 end
