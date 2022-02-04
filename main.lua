@@ -236,7 +236,8 @@ function ns.AutoAction()
 end
 
 --[[---------------------------------------------------------------------------
-RESTORE: Pet is lost --> restore it
+RESTORE: Pet is lost --> restore it.
+To be called only by AutoAction func!
 ---------------------------------------------------------------------------]]--
 
 function ns:RestorePet()
