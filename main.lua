@@ -548,7 +548,7 @@ function ns.CreateCfavsCheckBox(self)
 	end)
 	f:SetScript("OnEnter",function(self)
 		GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
-		GameTooltip:SetText("Toggle character-specific favorites", nil, nil, nil, nil, 1);
+		GameTooltip:SetText(addonName .. ": Select this to use per-character favorites. \nFor more info, enter '/pw' in the chat console.", nil, nil, nil, nil, 1);
 		GameTooltip:Show();
 	end)
 	label:SetText("Character favorites")
