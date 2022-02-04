@@ -56,17 +56,40 @@ function ns.MsgNoSavedPet()
 	ChatUserNotification(CO.bw .. "No 'current pet' has been saved yet" .. (ns.dbc.charFavsEnabled and " for " .. CO.e .. thisChar or "") .. " --> could not restore pet.")
 end
 
-function ns.MsgAutoRestoreDone(pet)
-	ChatUserNotification(CO.bn .. "Restored your last pet " .. ns.PetIDtoLink(pet))
-end
-
-function ns.MsgNewPetDone(ap, np, n)
-	ChatUserNotification(CO.bn .. "Summoned " .. (n >1 and "a new random" or "your only eligible random") .. " pet " .. ns.PetIDtoLink(np))
-end
-
 function ns.MsgOnlyFavIsActive(ap)
 	ChatUserNotification(CO.bn .. "Your only eligible random pet " .. ns.PetIDtoLink(ap) .. " is already active")
 end
+
+--[[---------------------------------------------------------------------------
+The main, success, message when a pet was summoned. Either by RestorePet or
+NewPet, or PreviousPet or the TransitionCheck.
+---------------------------------------------------------------------------]]--
+
+-- Called by the NewPet func
+function ns.SetSumMsgToNewPet(ap, np, n)
+	ns.msgPetSummonedContent = CO.bn .. "Summoned " .. (n >1 and "a new random" or "your only eligible random") .. " pet " .. ns.PetIDtoLink(np)
+end
+
+-- Called by the RestorePet func
+function ns.SetSumMsgToRestorePet(pet)
+	ns.msgPetSummonedContent = CO.bn .. "Restored your last pet " .. ns.PetIDtoLink(pet)
+end
+
+-- Called by the PreviousPet func
+function ns.SetSumMsgToPreviousPet(pet)
+	ns.msgPetSummonedContent = CO.bn .. "Summoned your previous pet " .. ns.PetIDtoLink(pet)
+end
+
+-- Called by the TransitionCheck func
+function ns.SetSumMsgToTransCheck(pet)
+	ns.msgPetSummonedContent = CO.bn .. "Summoned your last saved pet " .. ns.PetIDtoLink(pet)
+end
+
+-- Called by the SafeSummon func
+function ns.MsgPetSummoned()
+	ChatUserNotification(ns.msgPetSummonedContent)
+end
+
 
 --[[---------------------------------------------------------------------------
 Three big messages: Status, Low Pet Pool, and Help

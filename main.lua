@@ -45,6 +45,7 @@ local lastAutoRestoreRunTime = 0
 local lastSavePetTime = 0
 local lastPoolMsgTime = 0
 local lastPlayerCastTime = 0
+ns.msgPetSummonedContent = "• Something went wrong. You should never see this. •"
 
 --[[
 TODO: Maybe add the self-unsummoning pets, like the different Snowman
@@ -250,11 +251,7 @@ function ns:RestorePet()
 		return
 	end
 	ns:debugprintL1("AutoRestore() has run")
-	C_Timer.After(1, function()
-		if now - lastSummonTime < 1 then
-			ns.MsgAutoRestoreDone(currentpet)
-		end
-	end)
+	ns.SetSumMsgToRestorePet(currentpet)
 	ns:SafeSummon(currentpet)
 	lastAutoRestoreRunTime = now
 end
@@ -292,11 +289,7 @@ function ns:NewPet(actpet)
 				newpet = ns.petPool[math.random(npool)]
 			until actpet ~= newpet
 		end
-		C_Timer.After(1, function()
-			if now - lastSummonTime < 1 then
-				ns.MsgNewPetDone(actpet, newpet, npool)
-			end
-		end)
+		ns.SetSumMsgToNewPet(actpet, newpet, npool)
 		ns:SafeSummon(newpet)
 	end
 end
@@ -314,6 +307,7 @@ function ns.PreviousPet()
 		prevpet = ns.db.previousPet
 	end
 	ns.db.lastNewPetTime = GetTime()
+	ns.SetSumMsgToPreviousPet(prevpet)
 	ns:SafeSummon(prevpet)
 end
 
@@ -418,6 +412,7 @@ function ns:SafeSummon(pet)
 		and not InMythicKeystone()
 		and not InArena()
 	then
+		ns.MsgPetSummoned()
 		C_PetJournal.SummonPetByGUID(pet)
 		ns:debugprintL2("SafeSummon() has summoned \"" .. (ns.PetIDtoName(pet) or "-NONE-") .. "\" ")
 		lastSummonTime = GetTime()
