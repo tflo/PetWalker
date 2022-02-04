@@ -47,19 +47,23 @@ local lastPoolMsgTime = 0
 local lastPlayerCastTime = 0
 ns.msgPetSummonedContent = "• Something went wrong. You should never see this. •"
 
---[[
-TODO: Maybe add the self-unsummoning pets, like the different Snowman
-(repeatedly auto-resummoning the Snowman during summer could be considered an
-act of barbarity :)
-]]
 local excludedSpecies = {
-	280, -- Guild Page, Alliance -- Pet is vendor and has CD
-	281, -- Guild Page, Horde -- Pet is vendor and has CD
-	282, -- Guild Herald, Alliance-- Pet is vendor and has CD
-	283, -- Guild Herald, Horde-- Pet is vendor and has CD
--- 	214, -- Argent Squire -- Should be safe (Pony Bridle achiev: 3736)
--- 	216, -- Argent Gruntling -- Should be safe
--- 	2403, Dummy ID for debugging! Keep this out-commented!
+--[[  Pet is vendor and goes on CD when summoned ]]
+	280, -- Guild Page, Alliance
+	281, -- Guild Page, Horde
+	282, -- Guild Herald, Alliance
+	283, -- Guild Herald, Horde
+--[[ Pet is vendor/bank/mail, if the char has the Pony Bridle achiev (ID 3736).
+But it should be safe, bc CD starts only after activating the ability via dialog. ]]
+-- 	214, -- Argent Squire (Alliance)
+-- 	216, -- Argent Gruntling (Horde)
+--[[ Self-unspawns outside of Weinter Veil ]]
+	1349, -- Rotten Little Helper
+	117, -- Tiny Snowman
+	119, -- Father Winter's Helper
+	120, -- Winter's Little Helper
+--[[ Dummy ID for debugging! Keep this out-commented! ]]
+	-- 2403,
 }
 
 
