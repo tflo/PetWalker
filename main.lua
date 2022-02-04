@@ -104,10 +104,9 @@ Init
 	the ns.db, if run too early. So, this is difficult to time, and also
 	depends on the load time of the char.
 	]]
-	ns.events:RegisterEvent("PLAYER_ENTERING_WORLD")
-	function ns.PLAYER_ENTERING_WORLD()
-		C_Timer.After(2, ns.LoginCheck)
-		ns:CFavsUpdate()
+	ns.events:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+	function ns.ZONE_CHANGED_NEW_AREA()
+		C_Timer.After(2, ns.TransitionCheck)
 	end
 
 
@@ -184,6 +183,9 @@ Pet Journal
 			ns.CFavs_Button:Hide()
 		end
 	end)
+
+	ns:CFavsUpdate()
+
 end
 
 
@@ -235,7 +237,7 @@ RESTORE: Pet is lost --> restore it
 
 function ns:RestorePet()
 	local now = GetTime()
-	if now - lastSummonTime < 4 or now - lastAutoRestoreRunTime < 3 then return end
+	if now - lastSummonTime < 5 or now - lastAutoRestoreRunTime < 3 then return end
 	local currentpet
 	if ns.dbc.charFavsEnabled then
 		if ns.dbc.currentPet then
@@ -313,26 +315,33 @@ end
 
 
 --[[---------------------------------------------------------------------------
-One time action, somewhere AFTER LOGIN. Try to restore the same pat as the last
-logged-in char had active.
+One time action, after big transitions, like login, portals, entering instance,
+etc. Basically a standalone RestorePet func, with one difference:
+It checks not only for presence of a pet, but also against the saved pet.
+This makes sure that a newly logged toon gets the same pet as the previous
+toon had at logout.
 ---------------------------------------------------------------------------]]--
 
 -- Called by 1: ns:PLAYER_LOGIN()
 
-function ns.LoginCheck()
+function ns.TransitionCheck()
 	if not ns.db.autoEnabled then return end
+	local savedpet
 	petVerified = true
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	if ns.dbc.charFavsEnabled then
 		if not actpet or actpet ~= ns.dbc.currentPet then
-			ns:SafeSummon(ns.dbc.currentPet)
+			savedpet = ns.dbc.currentPet
 		end
 	else
 		if not actpet or actpet ~= ns.db.currentPet then
-			ns:SafeSummon(ns.db.currentPet)
+			savedpet = ns.db.currentPet
 		end
 	end
-	ns:debugprintL2("LoginCheck() has run")
+	lastAutoRestoreRunTime = GetTime()
+	ns.SetSumMsgToTransCheck(savedpet)
+	ns:SafeSummon(savedpet)
+	ns:debugprintL2("TransitionCheck() has run")
 end
 
 
