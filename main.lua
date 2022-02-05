@@ -91,7 +91,6 @@ Init
 		ns.dbc.dbVersion = ns.db.dbVersion
 		ns.db.autoEnabled = ns.db.autoEnabled == nil and true or ns.db.autoEnabled
 		ns.db.newPetTimer = ns.db.newPetTimer or 12
-		ns.db.lastNewPetTime = ns.db.lastNewPetTime or 0
 		ns.db.favsOnly = ns.db.favsOnly == nil and true or ns.db.favsOnly
 		ns.dbc.charFavsEnabled = ns.dbc.charFavsEnabled or false
 		ns.dbc.charFavs = ns.dbc.charFavs or {}
@@ -106,6 +105,8 @@ Init
 			table.wipe(ns.dbc)
 			ns.dbc.charFavs = tmpCharFavs
 		end
+
+		ns.lastNewPetTime = GetTime() - ns.db.newPetTimer * 60 / 2
 
 		--[[
 		PLAYER_ENTERING_WORLD comes pretty early, our TransitionCheck function
@@ -239,7 +240,7 @@ restore a (lost) pet, or summoning a new one (if the timer is set and due).
 function ns.AutoAction()
 	if not ns.db.autoEnabled or IsFlying() then return end
 	local actpet = C_PetJournal.GetSummonedPetGUID()
-	if ns.db.newPetTimer ~= 0 and ns.db.lastNewPetTime + ns.db.newPetTimer * 60 < GetTime() then
+	if ns.db.newPetTimer ~= 0 and ns.lastNewPetTime + ns.db.newPetTimer * 60 < GetTime() then
 		ns:debugprintL2("AutoAction() has run and decided for New Pet.")
 		ns:NewPet(actpet)
 	elseif not actpet then
@@ -284,8 +285,8 @@ NEW PET SUMMON: Runs when timer is due
 
 function ns:NewPet(actpet)
 	local now = GetTime()
-	if now - ns.db.lastNewPetTime < 1.5 then return end
-	ns.db.lastNewPetTime = now
+	if now - ns.lastNewPetTime < 1.5 then return end
+	ns.lastNewPetTime = now
 	debugflag = "NewPet" -- TODO: remove this and the flag in the func
 	if actpet and IsExcludedByPetID(actpet, debugflag) then return end
 	if not ns.poolInitialized then
@@ -326,7 +327,7 @@ function ns.PreviousPet()
 	else
 		prevpet = ns.db.previousPet
 	end
-	ns.db.lastNewPetTime = GetTime()
+	ns.lastNewPetTime = GetTime()
 	ns.SetSumMsgToPreviousPet(prevpet)
 	ns:SafeSummon(prevpet)
 end
@@ -342,7 +343,7 @@ We need more checks here than in RestorePet, bc RestorePet is "prefiltered" by
 AutoAction, and here we are not.
 ---------------------------------------------------------------------------]]--
 
--- Called by 1: ns:PLAYER_LOGIN()
+-- Called by 1: ns:ZONE_CHANGED_NEW_AREA(), or whatever we use as initial event
 
 function ns.TransitionCheck()
 	if not ns.db.autoEnabled or IsFlying() then return end
@@ -634,13 +635,12 @@ function ns.dump(o)
 end
 
 -- Seconds to minutes
-local function SecToMin(seconds)
+function ns.SecToMin(seconds)
 	local min, sec = tostring(math.floor(seconds / 60)), tostring(seconds % 60)
 	return string.format('%.0f:%02.0f', min, sec)
 end
 
 function ns.RemainingTimer()
-	local rem = ns.db.lastNewPetTime + ns.db.newPetTimer * 60 - GetTime()
-	rem = rem > 0 and rem or 0
-	return SecToMin(rem)
+	local rem = ns.lastNewPetTime + ns.db.newPetTimer * 60 - GetTime()
+	return rem > 0 and rem or 0
 end

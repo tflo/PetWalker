@@ -176,7 +176,7 @@ function ns.Status()
 		"is ",
 		CO.s .. (ns.db.newPetTimer > 0 and ns.db.newPetTimer .. CO.bn .. " minutes" or "disbled"),
 		" • Next random pet in ",
-		CO.e .. ns.RemainingTimer(),
+		CO.e .. ns.SecToMin(ns.RemainingTimer()),
 		CO.k .. "\n  Pet Pool ",
 		"is set to ",
 		CO.s .. (ns.db.favsOnly and "Favorites Only" or "All Pets"),
@@ -187,7 +187,7 @@ function ns.Status()
 		CO.s .. (ns.dbc.charFavsEnabled and "enabled" or "disabled"),
 		" for ",
 		CO.e .. thisChar,
-		"\n",
+		"\n ",
 		ns:ListCharFavs(),
 	}
 	local content = table.concat(content, CO.bn)
