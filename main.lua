@@ -38,6 +38,11 @@ Some Variables
 
 ns.petPool = {}
 ns.poolInitialized = false
+--[[ This prevents the "wrong" active pet from being saved. We get a "wrong" pet
+mainly after login, if the game summons the last active pet on this toon,
+instead of the last saved pet in our DB (which can be the last active pet of the
+alt we just logged out). Caution, to not lock out manually summoned pets from
+being saved. ]]
 local petVerified = false
 local lastSummonTime = 0
 local lastAutoRestoreRunTime = 0
@@ -103,11 +108,12 @@ Init
 		end
 
 	--[[
-		Is this needed?
-		Seems we also get - sometimes - a COMPANION_UPDATE event after login
-		(which triggers a SavePet()). Also it doesn't find the variables from
-		the ns.db, if run too early. So, this is difficult to time, and also
-		depends on the load time of the char.
+		PLAYER_ENTERING_WORLD comes pretty early, our TransitionCheck function
+		cannot run unless we put it into a C_Timer. However, the required delay
+		might depend on unpredictable things like loading duration.
+		ZONE_CHANGED_NEW_AREA comes quite a bit later and allows to run our
+		stuff without timer. But it fires also in situations where we do not
+		strictly need the TransitionCheck, eg just walking into a new area.
 		]]
 		ns.events:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 		function ns.ZONE_CHANGED_NEW_AREA()
@@ -212,7 +218,7 @@ local debugflag = "blank"
 local function IsExcludedBySpecies(spec, debugflag)
 	for _, e in pairs(excludedSpecies) do
 		if e == spec then
-			ns:debugprintL1("Excluded pet found while doing: " .. debugflag)
+-- 			ns:debugprintL1("Excluded pet found while doing: " .. debugflag)
 			return true
 		end
 	end
@@ -262,7 +268,7 @@ function ns:RestorePet()
 	lastAutoRestoreRunTime = now
 	if savedpet then
 		ns:debugprintL1("AutoRestore() is restoring saved pet")
-		ns.SetSumMsgToTransCheck(savedpet)
+		ns.SetSumMsgToRestorePet(savedpet)
 		ns:SafeSummon(savedpet)
 	else
 		ns:debugprintL1("AutoRestore() could not find saved pet --> summoning new pet")
@@ -359,7 +365,7 @@ function ns.TransitionCheck()
 	else
 		ns:debugprintL2("TransitionCheck() could not find saved pet --> summoning new pet")
 		ns.MsgNoSavedPet()
-		ns:NewPet(actpet)
+		ns:NewPet(actpet) -- A nil actpet here is acceptable
 	end
 end
 
