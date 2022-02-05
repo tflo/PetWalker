@@ -237,7 +237,7 @@ restore a (lost) pet, or summoning a new one (if the timer is set and due).
 ---------------------------------------------------------------------------]]--
 
 function ns.AutoAction()
-	if not ns.db.autoEnabled then return end
+	if not ns.db.autoEnabled or IsFlying() then return end
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	if ns.db.newPetTimer ~= 0 and ns.db.lastNewPetTime + ns.db.newPetTimer * 60 < GetTime() then
 		ns:debugprintL2("AutoAction() has run and decided for New Pet.")
@@ -345,7 +345,7 @@ AutoAction, and here we are not.
 -- Called by 1: ns:PLAYER_LOGIN()
 
 function ns.TransitionCheck()
-	if not ns.db.autoEnabled then return end
+	if not ns.db.autoEnabled or IsFlying() then return end
 	local savedpet
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	if ns.dbc.charFavsEnabled then
@@ -435,7 +435,9 @@ function ns:SafeSummon(pet)
 	if not pet then return end -- needed?
 	if not UnitAffectingCombat("player")
 --		and not IsMounted() -- TODO: test if this is needed
-		and not IsFlying()
+		--[[ It seems to be impossible to summon while flying. So, moving this
+		to top level, for early return from any action. ]]
+-- 		and not IsFlying()
 		and not OfflimitsAura(excludedAuras)
 		and not IsStealthed() -- Includes Hunter Camouflage
 		and not (UnitIsControlling("player") and UnitChannelInfo("player"))
