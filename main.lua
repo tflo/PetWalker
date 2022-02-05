@@ -110,7 +110,12 @@ Init
 	]]
 	ns.events:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 	function ns.ZONE_CHANGED_NEW_AREA()
-		C_Timer.After(2, ns.TransitionCheck)
+		--[[ TODO: Do we need that timer? ]]
+-- 		C_Timer.After(2, ns.TransitionCheck)
+		--[[ To prevent saving the wrong pet if we get an arbitrary COMPANION_UPDATE
+		before the TransitionCheck could run ]]
+		petVerified = false
+		ns.TransitionCheck()
 	end
 
 
