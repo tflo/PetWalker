@@ -252,22 +252,20 @@ function ns:RestorePet()
 	if now - lastSummonTime < 5 or now - lastAutoRestoreRunTime < 3 then return end
 	local savedpet
 	if ns.dbc.charFavsEnabled then
-		if ns.dbc.currentPet then
 		savedpet = ns.dbc.currentPet
 	else
-			ns.MsgNoSavedPet()
-			return
-		end
-	elseif ns.db.currentPet then
 		savedpet = ns.db.currentPet
-	else
-		ns.MsgNoSavedPet()
-		return
 	end
 	lastAutoRestoreRunTime = now
-	ns:debugprintL1("AutoRestore() has run")
-	ns.SetSumMsgToRestorePet(savedpet)
+	if savedpet then
+		ns:debugprintL1("AutoRestore() is restoring saved pet")
+		ns.SetSumMsgToTransCheck(savedpet)
 		ns:SafeSummon(savedpet)
+	else
+		ns:debugprintL1("AutoRestore() could not find saved pet --> summoning new pet")
+		ns.MsgNoSavedPet()
+		ns:NewPet(actpet)
+	end
 end
 
 
