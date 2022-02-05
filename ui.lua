@@ -319,4 +319,3 @@ function ns:ListCharFavs()
 	return CO.e .. thisChar .. CO.bn .. " has " .. CO.e .. count .. CO.bn ..
 	" character-specific favorite pets" .. (count > 0 and ":" or "") .. "\n" .. (favlinks or "")
 end
-

@@ -243,29 +243,31 @@ end
 --[[---------------------------------------------------------------------------
 RESTORE: Pet is lost --> restore it.
 To be called only by AutoAction func!
+No need to check against the current pet, since by definition, if we do have a
+pet out, then it must be the correct one.
 ---------------------------------------------------------------------------]]--
 
 function ns:RestorePet()
 	local now = GetTime()
 	if now - lastSummonTime < 5 or now - lastAutoRestoreRunTime < 3 then return end
-	local currentpet
+	local savedpet
 	if ns.dbc.charFavsEnabled then
 		if ns.dbc.currentPet then
-			currentpet = ns.dbc.currentPet
-		else
+		savedpet = ns.dbc.currentPet
+	else
 			ns.MsgNoSavedPet()
 			return
 		end
 	elseif ns.db.currentPet then
-		currentpet = ns.db.currentPet
+		savedpet = ns.db.currentPet
 	else
 		ns.MsgNoSavedPet()
 		return
 	end
-	ns:debugprintL1("AutoRestore() has run")
-	ns.SetSumMsgToRestorePet(currentpet)
-	ns:SafeSummon(currentpet)
 	lastAutoRestoreRunTime = now
+	ns:debugprintL1("AutoRestore() has run")
+	ns.SetSumMsgToRestorePet(savedpet)
+		ns:SafeSummon(savedpet)
 end
 
 
@@ -326,10 +328,12 @@ end
 
 --[[---------------------------------------------------------------------------
 One time action, after big transitions, like login, portals, entering instance,
-etc. Basically a standalone RestorePet func, with one difference:
-It checks not only for presence of a pet, but also against the saved pet.
+etc. Basically a standalone RestorePet func; in addition, it not only checks for
+presence of a pet, but also against the saved pet.
 This makes sure that a newly logged toon gets the same pet as the previous
 toon had at logout.
+We need more checks here than in RestorePet, bc RestorePet is "prefiltered" by
+AutoAction, and here we are not.
 ---------------------------------------------------------------------------]]--
 
 -- Called by 1: ns:PLAYER_LOGIN()
@@ -337,21 +341,19 @@ toon had at logout.
 function ns.TransitionCheck()
 	if not ns.db.autoEnabled then return end
 	local savedpet
-	petVerified = true
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	if ns.dbc.charFavsEnabled then
 		if not actpet or actpet ~= ns.dbc.currentPet then
 			savedpet = ns.dbc.currentPet
 		end
-	else
-		if not actpet or actpet ~= ns.db.currentPet then
-			savedpet = ns.db.currentPet
-		end
+	elseif not actpet or actpet ~= ns.db.currentPet then
+		savedpet = ns.db.currentPet
 	end
+	petVerified = true
 	lastAutoRestoreRunTime = GetTime()
-	ns.SetSumMsgToTransCheck(savedpet)
-	ns:SafeSummon(savedpet)
 	ns:debugprintL2("TransitionCheck() has run")
+		ns.SetSumMsgToTransCheck(savedpet)
+		ns:SafeSummon(savedpet)
 end
 
 
@@ -365,9 +367,9 @@ function ns.SavePet()
 	local now = GetTime()
 	debugflag = "SavePet" -- TODO: remove this and the flag in the func
 	if not actpet
-		or IsExcludedByPetID(actpet, debugflag)
+		or not petVerified
 		or now - lastSavePetTime < 3
-		or not petVerified then
+		or IsExcludedByPetID(actpet, debugflag) then
 		return
 	end
 	if ns.dbc.charFavsEnabled then
@@ -591,14 +593,16 @@ end
 
 -- without pet info
 function ns:debugprintL1(msg)
-if not ns.db.debugMode then return end
-	print("\n|cffFFA500### PETWALKER DEBUG: " .. (msg or "<nil>") .. " ###")
+	if ns.db.debugMode then
+		print("\n|cffFFA500### PETWALKER DEBUG: " .. (msg or "<nil>") .. " ###")
+	end
 end
 
 -- with pet info
 function ns:debugprintL2(msg)
-if not ns.db.debugMode then return end
-	print("\n|cffFFA500### PETWALKER DEBUG: " .. (msg or "<nil>") .. " ### Current DB pet: " .. (ns.PetIDtoName((ns.dbc.charFavs and ns.dbc.currentPet or ns.db.currentPet)) or "<nil>") .. " ###")
+	if ns.db.debugMode then
+		print("\n|cffFFA500### PETWALKER DEBUG: " .. (msg or "<nil>") .. " ### Current DB pet: " .. (ns.PetIDtoName((ns.dbc.charFavs and ns.dbc.currentPet or ns.db.currentPet)) or "<nil>") .. " ###")
+	end
 end
 
 -- Table dump
