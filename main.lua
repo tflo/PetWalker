@@ -11,8 +11,7 @@ ns.events:SetScript("OnEvent", function(self, event, ...)
 	end
 end)
 
--- ns.events:RegisterEvent("ADDON_LOADED")
-ns.events:RegisterEvent("PLAYER_LOGIN")
+ns.events:RegisterEvent("ADDON_LOADED")
 
 --[[---------------------------------------------------------------------------
 For the Bindings file
@@ -71,130 +70,134 @@ But it should be safe, bc CD starts only after activating the ability via dialog
 LOADING
 ===========================================================================]]--
 
-function ns:PLAYER_LOGIN()
+function ns.ADDON_LOADED(_, addon)
+
+	if addon == addonName then
 
 --[[---------------------------------------------------------------------------
 Init
 ---------------------------------------------------------------------------]]--
 
-	PetWalkerDB = PetWalkerDB or {}
-	PetWalkerPerCharDB = PetWalkerPerCharDB or {}
-	ns.db, ns.dbc = PetWalkerDB, PetWalkerPerCharDB
-	ns.db.dbVersion  = dbVersion
+		PetWalkerDB = PetWalkerDB or {}
+		PetWalkerPerCharDB = PetWalkerPerCharDB or {}
+		ns.db, ns.dbc = PetWalkerDB, PetWalkerPerCharDB
+		ns.db.dbVersion  = dbVersion
 
-	ns.dbc.dbVersion = ns.db.dbVersion
-	ns.db.autoEnabled = ns.db.autoEnabled == nil and true or ns.db.autoEnabled
-	ns.db.newPetTimer = ns.db.newPetTimer or 12
-	ns.db.lastNewPetTime = ns.db.lastNewPetTime or 0
-	ns.db.favsOnly = ns.db.favsOnly == nil and true or ns.db.favsOnly
-	ns.dbc.charFavsEnabled = ns.dbc.charFavsEnabled or false
-	ns.dbc.charFavs = ns.dbc.charFavs or {}
-	ns.dbc.eventAlt = ns.dbc.eventAlt or false
-	ns.db.debugMode = ns.db.debugMode or false
+		ns.dbc.dbVersion = ns.db.dbVersion
+		ns.db.autoEnabled = ns.db.autoEnabled == nil and true or ns.db.autoEnabled
+		ns.db.newPetTimer = ns.db.newPetTimer or 12
+		ns.db.lastNewPetTime = ns.db.lastNewPetTime or 0
+		ns.db.favsOnly = ns.db.favsOnly == nil and true or ns.db.favsOnly
+		ns.dbc.charFavsEnabled = ns.dbc.charFavsEnabled or false
+		ns.dbc.charFavs = ns.dbc.charFavs or {}
+		ns.dbc.eventAlt = ns.dbc.eventAlt or false
+		ns.db.debugMode = ns.db.debugMode or false
 
-	if not ns.db.dbVersion or ns.db.dbVersion ~= dbVersion then
-		table.wipe(ns.db)
-	end
-	if not ns.dbc.dbVersion or ns.dbc.dbVersion ~= dbVersion then
-		local tmpCharFavs = ns.dbc.charFavs -- charFavs
-		table.wipe(ns.dbc)
-		ns.dbc.charFavs = tmpCharFavs
-	end
-
---[[
-	Is this needed?
-	Seems we also get - sometimes - a COMPANION_UPDATE event after login
-	(which triggers a SavePet()). Also it doesn't find the variables from
-	the ns.db, if run too early. So, this is difficult to time, and also
-	depends on the load time of the char.
-	]]
-	ns.events:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-	function ns.ZONE_CHANGED_NEW_AREA()
-		--[[ TODO: Do we need that timer? ]]
--- 		C_Timer.After(2, ns.TransitionCheck)
-		--[[ To prevent saving the wrong pet if we get an arbitrary COMPANION_UPDATE
-		before the TransitionCheck could run ]]
-		petVerified = false
-		ns.TransitionCheck()
-	end
-
+		if not ns.db.dbVersion or ns.db.dbVersion ~= dbVersion then
+			table.wipe(ns.db)
+		end
+		if not ns.dbc.dbVersion or ns.dbc.dbVersion ~= dbVersion then
+			local tmpCharFavs = ns.dbc.charFavs -- charFavs
+			table.wipe(ns.dbc)
+			ns.dbc.charFavs = tmpCharFavs
+		end
 
 	--[[
-	This thing fires very often
-	Let's do a test:
-	Unset the 'isInitialized' var with that event, and initialize only when
-	needed, that is before selecting a random pet.
-	--> This seems to work, so far!
+		Is this needed?
+		Seems we also get - sometimes - a COMPANION_UPDATE event after login
+		(which triggers a SavePet()). Also it doesn't find the variables from
+		the ns.db, if run too early. So, this is difficult to time, and also
+		depends on the load time of the char.
+		]]
+		ns.events:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+		function ns.ZONE_CHANGED_NEW_AREA()
+			--[[ TODO: Do we need that timer? ]]
+	-- 		C_Timer.After(2, ns.TransitionCheck)
+			--[[ To prevent saving the wrong pet if we get an arbitrary COMPANION_UPDATE
+			before the TransitionCheck could run ]]
+			petVerified = false
+			ns.TransitionCheck()
+		end
+
+
+		--[[
+		This thing fires very often
+		Let's do a test:
+		Unset the 'isInitialized' var with that event, and initialize only when
+		needed, that is before selecting a random pet.
+		--> This seems to work, so far!
+		]]
+		ns.events:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
+		function ns.PET_JOURNAL_LIST_UPDATE()
+			ns.poolInitialized = false
+			ns:debugprintL1("ns.PET_JOURNAL_LIST_UPDATE has run. ns.poolInitialized =="
+			.. tostring(ns.poolInitialized))
+		end
+
+
+		if ns.dbc.eventAlt then
+			ns.events:RegisterEvent("PLAYER_STARTED_LOOKING")
+			function ns:PLAYER_STARTED_LOOKING()
+				ns.AutoAction()
+			end
+		else
+			ns.events:RegisterEvent("PLAYER_STARTED_MOVING")
+			function ns:PLAYER_STARTED_MOVING()
+				ns.AutoAction()
+			end
+		end
+
+	--[[ What we are trying to do here ]]--[[
+	COMPANION_UPDATE can be pretty spammy. So, we let it fire the function only if
+	it comes very immediately after a UNIT_SPELLCAST_SUCCEEDED event by the player
+	(which is the pet summon spell). Not sure if this is economic(?)
 	]]
-	ns.events:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
-	function ns.PET_JOURNAL_LIST_UPDATE()
-		ns.poolInitialized = false
-		ns:debugprintL1("ns.PET_JOURNAL_LIST_UPDATE has run. ns.poolInitialized =="
-		.. tostring(ns.poolInitialized))
-	end
 
-
-	if ns.dbc.eventAlt then
-		ns.events:RegisterEvent("PLAYER_STARTED_LOOKING")
-		function ns:PLAYER_STARTED_LOOKING()
-			ns.AutoAction()
+		ns.events:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
+		function ns:UNIT_SPELLCAST_SUCCEEDED()
+			if not UnitAffectingCombat("player") then lastPlayerCastTime = GetTime() end
 		end
-	else
-		ns.events:RegisterEvent("PLAYER_STARTED_MOVING")
-		function ns:PLAYER_STARTED_MOVING()
-			ns.AutoAction()
+
+		ns.events:RegisterEvent("COMPANION_UPDATE")
+		function ns:COMPANION_UPDATE(what)
+			if GetTime() - lastPlayerCastTime < 0.2 and what == "CRITTER" then
+			C_Timer.After(1, ns.SavePet)
+			end
 		end
-	end
 
---[[ What we are trying to do here ]]--[[
-COMPANION_UPDATE can be pretty spammy. So, we let it fire the function only if
-it comes very immediately after a UNIT_SPELLCAST_SUCCEEDED event by the player
-(which is the pet summon spell). Not sure if this is economic(?)
-]]
-
-	ns.events:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
-	function ns:UNIT_SPELLCAST_SUCCEEDED()
-		if not UnitAffectingCombat("player") then lastPlayerCastTime = GetTime() end
-	end
-
-	ns.events:RegisterEvent("COMPANION_UPDATE")
-	function ns:COMPANION_UPDATE(what)
-		if GetTime() - lastPlayerCastTime < 0.2 and what == "CRITTER" then
-		C_Timer.After(1, ns.SavePet)
-		end
-	end
-
-
+	elseif addon == "Blizzard_Collections" then
 --[[---------------------------------------------------------------------------
 Pet Journal
 ---------------------------------------------------------------------------]]--
 
--- TODO: the same for Rematch
-	for i, btn in ipairs(PetJournal.listScroll.buttons) do
-		btn:SetScript("OnClick",function(self, button)
-			if IsControlKeyDown() then
-				local isFavorite = C_PetJournal.PetIsFavorite(self.petID)
-				C_PetJournal.SetFavorite(self.petID, isFavorite and 0 or 1)
+	-- TODO: the same for Rematch
+		for i, btn in ipairs(PetJournal.listScroll.buttons) do
+			btn:SetScript("OnClick",function(self, button)
+				if IsControlKeyDown() then
+					local isFavorite = C_PetJournal.PetIsFavorite(self.petID)
+					C_PetJournal.SetFavorite(self.petID, isFavorite and 0 or 1)
+				else
+					return PetJournalListItem_OnClick(self,button)
+				end
+			end)
+		end
+
+		-- TODO: the same for Rematch
+		ns.CFavs_Button = ns:CreateCfavsCheckBox()
+		hooksecurefunc("CollectionsJournal_UpdateSelectedTab", function(self)
+			local selected = PanelTemplates_GetSelectedTab(self);
+			if selected == 2 then
+				ns.CFavs_Button:SetChecked(ns.dbc.charFavsEnabled)
+				ns.CFavs_Button:Show()
 			else
-				return PetJournalListItem_OnClick(self,button)
+				ns.CFavs_Button:Hide()
 			end
 		end)
+
+		ns:CFavsUpdate()
+
 	end
-
-	-- TODO: the same for Rematch
-	ns.CFavs_Button = ns:CreateCfavsCheckBox()
-	hooksecurefunc("CollectionsJournal_UpdateSelectedTab", function(self)
-		local selected = PanelTemplates_GetSelectedTab(self);
-		if selected == 2 then
-			ns.CFavs_Button:SetChecked(ns.dbc.charFavsEnabled)
-			ns.CFavs_Button:Show()
-		else
-			ns.CFavs_Button:Hide()
-		end
-	end)
-
-	ns:CFavsUpdate()
-
+	ns.events:UnregisterEvent("ADDON_LOADED")
 end
 
 
