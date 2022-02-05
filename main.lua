@@ -238,7 +238,6 @@ restore a (lost) pet, or summoning a new one (if the timer is set and due).
 
 function ns.AutoAction()
 	if not ns.db.autoEnabled then return end
-	petVerified = true
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	if ns.db.newPetTimer ~= 0 and ns.db.lastNewPetTime + ns.db.newPetTimer * 60 < GetTime() then
 		ns:debugprintL2("AutoAction() has run and decided for New Pet.")
@@ -356,7 +355,6 @@ function ns.TransitionCheck()
 	elseif not actpet or actpet ~= ns.db.currentPet then
 		savedpet = ns.db.currentPet
 	end
-	petVerified = true
 	lastAutoRestoreRunTime = GetTime()
 	if savedpet then
 		ns:debugprintL2("TransitionCheck() is restoring saved pet")
@@ -376,11 +374,11 @@ Should run with the COMPANION_UPDATE event.
 ---------------------------------------------------------------------------]]--
 
 function ns.SavePet()
+	if not petVerified then return end
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	local now = GetTime()
 	debugflag = "SavePet" -- TODO: remove this and the flag in the func
 	if not actpet
-		or not petVerified
 		or now - lastSavePetTime < 3
 		or IsExcludedByPetID(actpet, debugflag) then
 		return
@@ -446,6 +444,7 @@ function ns:SafeSummon(pet)
 		and not InMythicKeystone()
 		and not InArena()
 	then
+		petVerified = true
 		ns.MsgPetSummoned()
 		C_PetJournal.SummonPetByGUID(pet)
 		ns:debugprintL2("SafeSummon() has summoned \"" .. (ns.PetIDtoName(pet) or "-NONE-") .. "\" ")
