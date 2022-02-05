@@ -107,7 +107,7 @@ Init
 			ns.dbc.charFavs = tmpCharFavs
 		end
 
-	--[[
+		--[[
 		PLAYER_ENTERING_WORLD comes pretty early, our TransitionCheck function
 		cannot run unless we put it into a C_Timer. However, the required delay
 		might depend on unpredictable things like loading duration.
@@ -115,12 +115,12 @@ Init
 		stuff without timer. But it fires also in situations where we do not
 		strictly need the TransitionCheck, eg just walking into a new area.
 		]]
+-- 		ns.events:RegisterEvent("PLAYER_ENTERING_WORLD")
+-- 		function ns.PLAYER_ENTERING_WORLD()
+-- 			C_Timer.After(2, ns.TransitionCheck)
 		ns.events:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 		function ns.ZONE_CHANGED_NEW_AREA()
-			--[[ TODO: Do we need that timer? ]]
-	-- 		C_Timer.After(2, ns.TransitionCheck)
-			--[[ To prevent saving the wrong pet if we get an arbitrary COMPANION_UPDATE
-			before the TransitionCheck could run ]]
+		--[[ To prevent saving the wrong pet if we get an arbitrary COMPANION_UPDATE before the TransitionCheck could summon a pet ]]
 			petVerified = false
 			ns.TransitionCheck()
 		end
