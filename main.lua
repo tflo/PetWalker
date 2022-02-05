@@ -349,9 +349,15 @@ function ns.TransitionCheck()
 	end
 	petVerified = true
 	lastAutoRestoreRunTime = GetTime()
-	ns:debugprintL2("TransitionCheck() has run")
+	if savedpet then
+		ns:debugprintL2("TransitionCheck() is restoring saved pet")
 		ns.SetSumMsgToTransCheck(savedpet)
 		ns:SafeSummon(savedpet)
+	else
+		ns:debugprintL2("TransitionCheck() could not find saved pet --> summoning new pet")
+		ns.MsgNoSavedPet()
+		ns:NewPet(actpet)
+	end
 end
 
 
