@@ -86,8 +86,13 @@ function ns.SetSumMsgToTransCheck(pet)
 end
 
 -- Called by the SafeSummon func
-function ns.MsgPetSummoned()
+function ns.MsgPetSummonSuccess()
 	ChatUserNotification(ns.msgPetSummonedContent)
+end
+
+-- Called by the SafeSummon func
+function ns.MsgPetSummonFailed()
+	ChatUserNotification(CO.bw .. "You don't meet the conditions for summoning a pet right now.")
 end
 
 
@@ -139,7 +144,7 @@ function ns.HelpText()
 		"in minutes (",
 		CO.c .. "1 ",
 		"to ",
-		CO.c .. "999",
+		CO.c .. "1440",
 		"; ",
 		CO.c .. "0 ",
 		"to ",
@@ -297,12 +302,17 @@ function ns.DebugModeToggle() -- for slash command only
 	DEFAULT_CHAT_FRAME:AddMessage("Debug mode "..(ns.db.debugMode and "enabled" or "disabled"),0,1,0.7)
 end
 
+local function isAcceptableTimerValue(v)
+	return (v >= 1 and v <= 1440 or v == 0)
+end
+
 function ns:TimerSlashCmd(value)
 	value = tonumber(value)
-	if value >= 0 and value < 1000 then
+	if isAcceptableTimerValue(value) or ns.db.debugMode then
 		ns.db.newPetTimer = value * 60
-	--			ns.TimerEditBox:SetText(ns.db.newPetTimer) -- only needed for GUI edit box, which is currently disabled
-	DEFAULT_CHAT_FRAME:AddMessage(ns.db.newPetTimer == 0 and "Summon timer disabled" or "Summoning a new pet every " .. (ns.db.newPetTimer/60) .. " minutes",0,1,0.7)
+		DEFAULT_CHAT_FRAME:AddMessage(ns.db.newPetTimer == 0 and "Summon timer disabled" or "Summoning a new pet every " .. (ns.db.newPetTimer/60) .. " minutes",0,1,0.7)
+	else
+		DEFAULT_CHAT_FRAME:AddMessage("Not an acceptable timer value. Enter a number from 1 to 1440 for a timer in minutes, or 0 (zero) to disable the timer. Examples: '/pw 20' will summon a new pet every 20 minutes, '/pw 0' disables the timer. Note that there is a space between '/pw' and the number.",0,1,0.7)
 	end
 end
 

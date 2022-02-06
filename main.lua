@@ -44,11 +44,12 @@ instead of the last saved pet in our DB (which can be the last active pet of the
 alt we just logged out). Caution, to not lock out manually summoned pets from
 being saved. ]]
 local petVerified = false
-local lastSummonTime = 0
-local lastAutoRestoreRunTime = 0
-local lastSavePetTime = 0
-local lastPoolMsgTime = 0
-local lastPlayerCastTime = 0
+local timeSafeSummonFailed = 0
+--[[ Last time AutoRestore() was called. ]]
+local timeRestorePet = 0
+local timeSavePet = 0
+local timePoolMsg = 0
+local timePlayerCast = 0
 ns.msgPetSummonedContent = "• Something went wrong. You should never see this. •"
 
 local excludedSpecies = {
@@ -107,8 +108,7 @@ Init
 			ns.dbc.charFavs = tmpCharFavs
 		end
 
--- 		ns.lastNewPetTime = GetTime() - ns.db.newPetTimer * 60 / 2
-		ns.lastNewPetTime = GetTime() - (ns.db.newPetTimer - ns.db.remainingTimer)
+		ns.timeNewPetSuccess = GetTime() - (ns.db.newPetTimer - ns.db.remainingTimer)
 
 		--[[
 		PLAYER_ENTERING_WORLD comes pretty early, our TransitionCheck function
@@ -164,13 +164,15 @@ Init
 
 		ns.events:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
 		function ns:UNIT_SPELLCAST_SUCCEEDED()
-			if not UnitAffectingCombat("player") then lastPlayerCastTime = GetTime() end
+			if ns.db.autoEnabled and not UnitAffectingCombat("player") then
+				timePlayerCast = GetTime()
+			end
 		end
 
 		ns.events:RegisterEvent("COMPANION_UPDATE")
 		function ns:COMPANION_UPDATE(what)
-			if GetTime() - lastPlayerCastTime < 0.2 and what == "CRITTER" then
-			C_Timer.After(1, ns.SavePet)
+			if ns.db.autoEnabled and what == "CRITTER" and GetTime() - timePlayerCast < 0.2 then
+				C_Timer.After(1, ns.SavePet)
 			end
 		end
 
@@ -184,6 +186,8 @@ Init
 --[[---------------------------------------------------------------------------
 Pet Journal
 ---------------------------------------------------------------------------]]--
+
+		ns.events:UnregisterEvent("ADDON_LOADED")
 
 	-- TODO: the same for Rematch
 		for i, btn in ipairs(PetJournal.listScroll.buttons) do
@@ -210,7 +214,6 @@ Pet Journal
 		end)
 
 		ns:CFavsUpdate()
-		ns.events:UnregisterEvent("ADDON_LOADED")
 
 	end
 end
@@ -248,8 +251,8 @@ restore a (lost) pet, or summoning a new one (if the timer is set and due).
 function ns.AutoAction()
 	if not ns.db.autoEnabled or IsFlying() then return end
 	if ns.db.newPetTimer ~= 0 then
-		local now = GetTime(); ns.db.remainingTimer = ns.RemainingTimer(now)
-		if ns.db.remainingTimer == 0 then
+		local now = GetTime()
+		if ns.RemainingTimer(now) == 0 and now - timeSafeSummonFailed > 40 then
 			ns:debugprintL2("AutoAction() decided for NewPet.")
 			ns:NewPet(now)
 			return
@@ -271,18 +274,18 @@ pet out, then it must be the correct one.
 
 function ns:RestorePet()
 	local now = GetTime()
-	if now - lastSummonTime < 5 or now - lastAutoRestoreRunTime < 3 then return end
+	if now - timeSafeSummonFailed < 10 or now - timeRestorePet < 3 then return end
 	local savedpet
 	if ns.dbc.charFavsEnabled then
 		savedpet = ns.dbc.currentPet
 	else
 		savedpet = ns.db.currentPet
 	end
-	lastAutoRestoreRunTime = now
+	timeRestorePet = now
 	if savedpet then
 		ns:debugprintL1("AutoRestore() is restoring saved pet")
 		ns.SetSumMsgToRestorePet(savedpet)
-		ns:SafeSummon(savedpet)
+		ns:SafeSummon(savedpet, false)
 	else
 		ns:debugprintL1("AutoRestore() could not find saved pet --> summoning new pet")
 		ns.MsgNoSavedPet()
@@ -298,9 +301,7 @@ NEW PET SUMMON: Runs when timer is due
 
 function ns:NewPet(time)
 	local now = time or GetTime()
-	if now - ns.lastNewPetTime < 1.5 then return end
-	ns.lastNewPetTime = now
-	ns.db.remainingTimer = ns.db.newPetTimer
+	if now - ns.timeNewPetSuccess < 1.5 then return end
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	debugflag = "NewPet" -- TODO: remove this and the flag in the func
 	if actpet and IsExcludedByPetID(actpet, debugflag) then return end
@@ -326,7 +327,7 @@ function ns:NewPet(time)
 			until actpet ~= newpet
 		end
 		ns.SetSumMsgToNewPet(actpet, newpet, npool)
-		ns:SafeSummon(newpet)
+		ns:SafeSummon(newpet, true)
 	end
 end
 
@@ -342,9 +343,8 @@ function ns.PreviousPet()
 	else
 		prevpet = ns.db.previousPet
 	end
-	ns.lastNewPetTime = GetTime()
 	ns.SetSumMsgToPreviousPet(prevpet)
-	ns:SafeSummon(prevpet)
+	ns:SafeSummon(prevpet, true)
 end
 
 
@@ -371,12 +371,12 @@ function ns.TransitionCheck()
 	elseif not actpet or actpet ~= ns.db.currentPet then
 		savedpet = ns.db.currentPet
 	end
-	lastAutoRestoreRunTime = GetTime()
+	timeRestorePet = GetTime()
 	ns:debugprintL1("TransitionCheck() ...")
 	if savedpet then
 		ns:debugprintL1("TransitionCheck() is restoring saved pet")
 		ns.SetSumMsgToTransCheck(savedpet)
-		ns:SafeSummon(savedpet)
+		ns:SafeSummon(savedpet, false)
 	else
 		ns:debugprintL1("TransitionCheck() could not find saved pet --> summoning new pet")
 		ns.MsgNoSavedPet()
@@ -396,7 +396,7 @@ function ns.SavePet()
 	local now = GetTime()
 	debugflag = "SavePet" -- TODO: remove this and the flag in the func
 	if not actpet
-		or now - lastSavePetTime < 3
+		or now - timeSavePet < 3
 		or IsExcludedByPetID(actpet, debugflag) then
 		return
 	end
@@ -410,7 +410,7 @@ function ns.SavePet()
 		ns.db.currentPet = actpet
 	end
 	ns:debugprintL2("SavePet() has run")
-	lastSavePetTime = now
+	timeSavePet = now
 end
 
 
@@ -447,14 +447,19 @@ local function InArena()
 	return instanceType == "arena"
 end
 
--- Called by 3: ns:RestorePet, ns:NewPet, ns.ManualSummonNew
-function ns:SafeSummon(pet)
-	if not pet then return end -- needed?
+-- Called by: RestorePet, TransitionCheck, NewPet, PreviousPet
+function ns:SafeSummon(pet, resettimer)
+	if not pet then -- TODO: needed?
+		ns:debugprintL1("SafeSummon was called without 'pet' argument!")
+		return
+	end
+	local now = GetTime()
 	if not UnitAffectingCombat("player")
---		and not IsMounted() -- TODO: test if this is needed
-		--[[ It seems to be impossible to summon while flying. So, moving this
-		to top level, for early return from any action. ]]
--- 		and not IsFlying()
+--		and not IsMounted() -- Not needed
+		--[[ 'IsFlying()' is checked in AutoAction and TransitionCheck, for
+		early return from any event-triggered action. Since it seems to be
+		impossible to summon while flying, we don't need it here or in the
+		manual summon functions. ]]
 		and not OfflimitsAura(excludedAuras)
 		and not IsStealthed() -- Includes Hunter Camouflage
 		and not (UnitIsControlling("player") and UnitChannelInfo("player"))
@@ -463,11 +468,13 @@ function ns:SafeSummon(pet)
 		and not InMythicKeystone()
 		and not InArena()
 	then
-		petVerified = true
-		ns.MsgPetSummoned()
+		petVerified = true -- TODO: Why did I put this here?
+		if resettimer then ns.timeNewPetSuccess = now end
+		ns.MsgPetSummonSuccess()
 		C_PetJournal.SummonPetByGUID(pet)
-		ns:debugprintL2("SafeSummon() has summoned \"" .. (ns.PetIDtoName(pet) or "-NONE-") .. "\" ")
-		lastSummonTime = GetTime()
+	else
+		ns.MsgPetSummonFailed()
+		timeSafeSummonFailed = now
 	end
 end
 
@@ -504,9 +511,9 @@ function ns.InitializePool(self)
 	end
 	ns.poolInitialized = true -- Condition in ns:NewPet and ns.ManualSummonNew
 	local now = GetTime()
-	if #ns.petPool <= 1 and ns.db.newPetTimer ~= 0 and now - lastPoolMsgTime > 30 then
+	if #ns.petPool <= 1 and ns.db.newPetTimer ~= 0 and now - timePoolMsg > 30 then
 		ns.MsgLowPetPool(#ns.petPool)
-		lastPoolMsgTime = now
+		timePoolMsg = now
 	end
 end
 
@@ -651,7 +658,7 @@ function ns.dump(o)
 end
 
 function ns.RemainingTimer(time)
-	local rem = ns.lastNewPetTime + ns.db.newPetTimer - time
+	local rem = ns.timeNewPetSuccess + ns.db.newPetTimer - time
 	return rem > 0 and rem or 0
 end
 
@@ -662,7 +669,7 @@ local function SecToMin(seconds)
 end
 
 function ns.RemainingTimerForDisplay()
-	local rem = ns.lastNewPetTime + ns.db.newPetTimer - GetTime()
+	local rem = ns.timeNewPetSuccess + ns.db.newPetTimer - GetTime()
 	rem = rem > 0 and rem or 0
 	return SecToMin(rem)
 end
