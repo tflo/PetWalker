@@ -202,9 +202,9 @@ Pet Journal
 		end)
 
 		ns:CFavsUpdate()
+		ns.events:UnregisterEvent("ADDON_LOADED")
 
 	end
-	ns.events:UnregisterEvent("ADDON_LOADED")
 end
 
 
