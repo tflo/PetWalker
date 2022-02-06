@@ -139,8 +139,8 @@ Init
 		ns.events:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 		function ns.PET_JOURNAL_LIST_UPDATE()
 			ns.poolInitialized = false
-			ns:debugprintL1("ns.PET_JOURNAL_LIST_UPDATE has run. ns.poolInitialized =="
-			.. tostring(ns.poolInitialized))
+-- 			ns:debugprintL1("ns.PET_JOURNAL_LIST_UPDATE has run. ns.poolInitialized =="
+-- 			.. tostring(ns.poolInitialized))
 		end
 
 
@@ -372,12 +372,13 @@ function ns.TransitionCheck()
 		savedpet = ns.db.currentPet
 	end
 	lastAutoRestoreRunTime = GetTime()
+	ns:debugprintL1("TransitionCheck() ...")
 	if savedpet then
-		ns:debugprintL2("TransitionCheck() is restoring saved pet")
+		ns:debugprintL1("TransitionCheck() is restoring saved pet")
 		ns.SetSumMsgToTransCheck(savedpet)
 		ns:SafeSummon(savedpet)
 	else
-		ns:debugprintL2("TransitionCheck() could not find saved pet --> summoning new pet")
+		ns:debugprintL1("TransitionCheck() could not find saved pet --> summoning new pet")
 		ns.MsgNoSavedPet()
 		ns:NewPet()
 	end
@@ -624,14 +625,14 @@ end
 -- without pet info
 function ns:debugprintL1(msg)
 	if ns.db.debugMode then
-		print("\n|cffFFA500### PETWALKER DEBUG: " .. (msg or "<nil>") .. " ###")
+		print("\n|cff800080# PETWALKER DEBUG: " .. (msg or "<nil>") .. " #")
 	end
 end
 
 -- with pet info
 function ns:debugprintL2(msg)
 	if ns.db.debugMode then
-		print("\n|cffFFA500### PETWALKER DEBUG: " .. (msg or "<nil>") .. " ### Current DB pet: " .. (ns.PetIDtoName((ns.dbc.charFavs and ns.dbc.currentPet or ns.db.currentPet)) or "<nil>") .. " ###")
+		print("\n|cff800080# PETWALKER DEBUG: " .. (msg or "<nil>") .. " ### Current DB pet: " .. (ns.PetIDtoName((ns.dbc.charFavs and ns.dbc.currentPet or ns.db.currentPet)) or "<nil>") .. " #")
 	end
 end
 
