@@ -174,9 +174,9 @@ function ns.Status()
 		CO.s .. (ns.db.autoEnabled and "enabled" or "disabled"),
 		CO.k .. "\n  Summon Timer ",
 		"is ",
-		CO.s .. (ns.db.newPetTimer > 0 and ns.db.newPetTimer .. CO.bn .. " minutes" or "disbled"),
+		CO.s .. (ns.db.newPetTimer > 0 and (ns.db.newPetTimer/60) .. CO.bn .. " minutes" or "disbled"),
 		" • Next random pet in ",
-		CO.e .. ns.SecToMin(ns.RemainingTimer()),
+		CO.e .. ns.RemainingTimerForDisplay(),
 		CO.k .. "\n  Pet Pool ",
 		"is set to ",
 		CO.s .. (ns.db.favsOnly and "Favorites Only" or "All Pets"),
@@ -187,7 +187,7 @@ function ns.Status()
 		CO.s .. (ns.dbc.charFavsEnabled and "enabled" or "disabled"),
 		" for ",
 		CO.e .. thisChar,
-		"\n ",
+		"\n  ",
 		ns:ListCharFavs(),
 	}
 	local content = table.concat(content, CO.bn)
@@ -300,9 +300,9 @@ end
 function ns:TimerSlashCmd(value)
 	value = tonumber(value)
 	if value >= 0 and value < 1000 then
-		ns.db.newPetTimer = value
+		ns.db.newPetTimer = value * 60
 	--			ns.TimerEditBox:SetText(ns.db.newPetTimer) -- only needed for GUI edit box, which is currently disabled
-	DEFAULT_CHAT_FRAME:AddMessage(ns.db.newPetTimer == 0 and "Summon timer disabled" or "Summoning a new pet every " .. ns.db.newPetTimer .. " minutes",0,1,0.7)
+	DEFAULT_CHAT_FRAME:AddMessage(ns.db.newPetTimer == 0 and "Summon timer disabled" or "Summoning a new pet every " .. (ns.db.newPetTimer/60) .. " minutes",0,1,0.7)
 	end
 end
 

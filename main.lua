@@ -26,7 +26,7 @@ function F86D9DE5C_814D_4EEA_A84B_CB9BE07756BE()
 	ns:AutoToggle()
 end
 function F849A3D45_B1BD_4CA8_BA29_6DD2A8B78470()
-	ns:NewPet(C_PetJournal.GetSummonedPetGUID())
+	ns:NewPet()
 end
 function F76DE57DF_295D_40B4_B8CE_E45A3DF02C18()
 	ns:DismissAndDisable()
@@ -90,7 +90,8 @@ Init
 
 		ns.dbc.dbVersion = ns.db.dbVersion
 		ns.db.autoEnabled = ns.db.autoEnabled == nil and true or ns.db.autoEnabled
-		ns.db.newPetTimer = ns.db.newPetTimer or 12
+		ns.db.newPetTimer = ns.db.newPetTimer or 720
+		ns.db.remainingTimer = ns.db.remainingTimer or 360
 		ns.db.favsOnly = ns.db.favsOnly == nil and true or ns.db.favsOnly
 		ns.dbc.charFavsEnabled = ns.dbc.charFavsEnabled or false
 		ns.dbc.charFavs = ns.dbc.charFavs or {}
@@ -106,7 +107,8 @@ Init
 			ns.dbc.charFavs = tmpCharFavs
 		end
 
-		ns.lastNewPetTime = GetTime() - ns.db.newPetTimer * 60 / 2
+-- 		ns.lastNewPetTime = GetTime() - ns.db.newPetTimer * 60 / 2
+		ns.lastNewPetTime = GetTime() - (ns.db.newPetTimer - ns.db.remainingTimer)
 
 		--[[
 		PLAYER_ENTERING_WORLD comes pretty early, our TransitionCheck function
@@ -171,6 +173,12 @@ Init
 			C_Timer.After(1, ns.SavePet)
 			end
 		end
+
+		ns.events:RegisterEvent("PLAYER_LOGOUT")
+		function ns:PLAYER_LOGOUT()
+			ns.db.remainingTimer = ns.RemainingTimer(GetTime())
+		end
+
 
 	elseif addon == "Blizzard_Collections" then
 --[[---------------------------------------------------------------------------
@@ -239,12 +247,17 @@ restore a (lost) pet, or summoning a new one (if the timer is set and due).
 
 function ns.AutoAction()
 	if not ns.db.autoEnabled or IsFlying() then return end
+	if ns.db.newPetTimer ~= 0 then
+		local now = GetTime(); ns.db.remainingTimer = ns.RemainingTimer(now)
+		if ns.db.remainingTimer == 0 then
+			ns:debugprintL2("AutoAction() decided for NewPet.")
+			ns:NewPet(now)
+			return
+		end
+	end
 	local actpet = C_PetJournal.GetSummonedPetGUID()
-	if ns.db.newPetTimer ~= 0 and ns.lastNewPetTime + ns.db.newPetTimer * 60 < GetTime() then
-		ns:debugprintL2("AutoAction() has run and decided for New Pet.")
-		ns:NewPet(actpet)
-	elseif not actpet then
-		ns:debugprintL2("AutoAction() has run and decided to Restore Pet.")
+	if not actpet then
+		ns:debugprintL2("AutoAction() decided for RestorePet.")
 		ns:RestorePet()
 	end
 end
@@ -273,7 +286,7 @@ function ns:RestorePet()
 	else
 		ns:debugprintL1("AutoRestore() could not find saved pet --> summoning new pet")
 		ns.MsgNoSavedPet()
-		ns:NewPet(actpet)
+		ns:NewPet()
 	end
 end
 
@@ -281,12 +294,14 @@ end
 --[[---------------------------------------------------------------------------
 NEW PET SUMMON: Runs when timer is due
 ---------------------------------------------------------------------------]]--
--- Called by 3: ns.AutoAction, NewPet keybind, NewPet slash command
+-- Called by: ns.AutoAction, ns.TransitionCheck, NewPet keybind, NewPet slash command
 
-function ns:NewPet(actpet)
-	local now = GetTime()
+function ns:NewPet(time)
+	local now = time or GetTime()
 	if now - ns.lastNewPetTime < 1.5 then return end
 	ns.lastNewPetTime = now
+	ns.db.remainingTimer = ns.db.newPetTimer
+	local actpet = C_PetJournal.GetSummonedPetGUID()
 	debugflag = "NewPet" -- TODO: remove this and the flag in the func
 	if actpet and IsExcludedByPetID(actpet, debugflag) then return end
 	if not ns.poolInitialized then
@@ -364,7 +379,7 @@ function ns.TransitionCheck()
 	else
 		ns:debugprintL2("TransitionCheck() could not find saved pet --> summoning new pet")
 		ns.MsgNoSavedPet()
-		ns:NewPet(actpet) -- A nil actpet here is acceptable
+		ns:NewPet()
 	end
 end
 
@@ -634,13 +649,20 @@ function ns.dump(o)
 	end
 end
 
+function ns.RemainingTimer(time)
+	local rem = ns.lastNewPetTime + ns.db.newPetTimer - time
+	return rem > 0 and rem or 0
+end
+
 -- Seconds to minutes
-function ns.SecToMin(seconds)
+local function SecToMin(seconds)
 	local min, sec = tostring(math.floor(seconds / 60)), tostring(seconds % 60)
 	return string.format('%.0f:%02.0f', min, sec)
 end
 
-function ns.RemainingTimer()
-	local rem = ns.lastNewPetTime + ns.db.newPetTimer * 60 - GetTime()
-	return rem > 0 and rem or 0
+function ns.RemainingTimerForDisplay()
+	local rem = ns.lastNewPetTime + ns.db.newPetTimer - GetTime()
+	rem = rem > 0 and rem or 0
+	return SecToMin(rem)
 end
+
