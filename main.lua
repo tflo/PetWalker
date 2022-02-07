@@ -196,7 +196,9 @@ Pet Journal
 	-- TODO: the same for Rematch
 		for i, btn in ipairs(PetJournal.listScroll.buttons) do
 			btn:SetScript("OnClick",function(self, button)
-				if IsControlKeyDown() then
+				--[[ Windows is lacking the Cmd (Meta) key, so we need Ctrl too.
+				TODO: Find a way to detect the OS. ]]
+				if IsMetaKeyDown() or IsControlKeyDown() then
 					local isFavorite = C_PetJournal.PetIsFavorite(self.petID)
 					C_PetJournal.SetFavorite(self.petID, isFavorite and 0 or 1)
 				else
