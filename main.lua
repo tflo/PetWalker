@@ -622,24 +622,25 @@ end
 
 function ns:DebugDisplay()
 	ns.Status()
-	DEFAULT_CHAT_FRAME:AddMessage("Debug:\n  DB current pet: " ..
-	(ns.PetIDtoName(ns.db.currentPet) or "<nil>") ..
-	"\n  DB previous pet: " .. (ns.PetIDtoName(ns.db.previousPet) or "<nil>") ..
-	"\n  Char DB current pet: " .. (ns.PetIDtoName(ns.dbc.currentPet) or "<nil>") ..
-	"\n  Char DB previous pet: " .. (ns.PetIDtoName(ns.dbc.previousPet) or "<nil>") .. "\n" ,0,1,0.7)
+	print("|cffEE82EEDebug:\n  DB current pet: ",
+	(ns.PetIDtoName(ns.db.currentPet) or "<nil>"),
+	"\n  DB previous pet: ", (ns.PetIDtoName(ns.db.previousPet) or "<nil>"),
+	"\n  Char DB current pet: ", (ns.PetIDtoName(ns.dbc.currentPet) or "<nil>"),
+	"\n  Char DB previous pet: ", (ns.PetIDtoName(ns.dbc.previousPet) or "<nil>"),
+	"\n  petVerified: ", petVerified, "\n")
 end
 
 -- without pet info
 function ns:debugprintL1(msg)
 	if ns.db.debugMode then
-		print("\n|cff800080# PETWALKER DEBUG: " .. (msg or "<nil>") .. " #")
+		print("\n|cffEE82EE# PETWALKER DEBUG: " .. (msg or "<nil>") .. " #")
 	end
 end
 
 -- with pet info
 function ns:debugprintL2(msg)
 	if ns.db.debugMode then
-		print("\n|cff800080# PETWALKER DEBUG: " .. (msg or "<nil>") .. " ### Current DB pet: " .. (ns.PetIDtoName((ns.dbc.charFavs and ns.dbc.currentPet or ns.db.currentPet)) or "<nil>") .. " #")
+		print("\n|cffEE82EE# PETWALKER DEBUG: " .. (msg or "<nil>") .. " ### Current DB pet: " .. (ns.PetIDtoName((ns.dbc.charFavs and ns.dbc.currentPet or ns.db.currentPet)) or "<nil>") .. " #")
 	end
 end
 

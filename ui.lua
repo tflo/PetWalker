@@ -268,24 +268,24 @@ function ns:DismissAndDisable()
 	end
 	ns.db.autoEnabled = false
 	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.autoEnabled) end
-	DEFAULT_CHAT_FRAME:AddMessage("Pet dismissed and auto-summon " .. (ns.db.autoEnabled and "enabled" or "disabled"),0,1,0.7)
+	ChatUserNotification(CO.bn .. "Pet dismissed and auto-summon " .. (ns.db.autoEnabled and "enabled" or "disabled"))
 end
 
 function ns:AutoToggle()
 	ns.db.autoEnabled = not ns.db.autoEnabled
 	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.autoEnabled) end
-	DEFAULT_CHAT_FRAME:AddMessage("Pet auto-summon " .. (ns.db.autoEnabled and "enabled" or "disabled"),0,1,0.7)
+	ChatUserNotification(CO.bn .. "Pet auto-summon " .. (ns.db.autoEnabled and "enabled" or "disabled"))
 end
 
 function ns:EventAlt()
 	ns.dbc.eventAlt = not ns.dbc.eventAlt
-	DEFAULT_CHAT_FRAME:AddMessage("Listening to Event " .. (ns.dbc.eventAlt and "PLAYER_STARTED_LOOKING" or "PLAYER_STARTED_MOVING (default)") .. " # Requires reload",0,1,0.7)
+	ChatUserNotification(CO.bn .. "Listening to Event " .. (ns.dbc.eventAlt and "PLAYER_STARTED_LOOKING" or "PLAYER_STARTED_MOVING (default)") .. " # Requires reload")
 end
 
 function ns:FavsToggle()
 	ns.db.favsOnly = not ns.db.favsOnly
 	ns.poolInitialized = false
-	DEFAULT_CHAT_FRAME:AddMessage("Selection pool: " .. (ns.db.favsOnly and "favorites only" or "all pets"),0,1,0.7)
+	ChatUserNotification(CO.bn .. "Selection pool: " .. (ns.db.favsOnly and "favorites only" or "all pets"))
 end
 
 function ns.CharFavsSlashToggle() -- for slash command only
@@ -294,12 +294,12 @@ function ns.CharFavsSlashToggle() -- for slash command only
 	--[[ This is redundant, _if_ we leave the 'ns.poolInitialized = false' in the
 	PET_JOURNAL_LIST_UPDATE function, which gets called by the ns:CFavsUpdate above ]]
 	ns.poolInitialized = false
-	DEFAULT_CHAT_FRAME:AddMessage("Character-specific favorites "..(ns.dbc.charFavsEnabled and "enabled" or "disabled"),0,1,0.7)
+	ChatUserNotification(CO.bn .. "Character-specific favorites "..(ns.dbc.charFavsEnabled and "enabled" or "disabled"))
 end
 
 function ns.DebugModeToggle() -- for slash command only
 	ns.db.debugMode = not ns.db.debugMode
-	DEFAULT_CHAT_FRAME:AddMessage("Debug mode "..(ns.db.debugMode and "enabled" or "disabled"),0,1,0.7)
+	ChatUserNotification(CO.bn .. "Debug mode "..(ns.db.debugMode and "enabled" or "disabled"))
 end
 
 local function isAcceptableTimerValue(v)
@@ -310,9 +310,9 @@ function ns:TimerSlashCmd(value)
 	value = tonumber(value)
 	if isAcceptableTimerValue(value) or ns.db.debugMode then
 		ns.db.newPetTimer = value * 60
-		DEFAULT_CHAT_FRAME:AddMessage(ns.db.newPetTimer == 0 and "Summon timer disabled" or "Summoning a new pet every " .. (ns.db.newPetTimer/60) .. " minutes",0,1,0.7)
+		ChatUserNotification(CO.bn .. (ns.db.newPetTimer == 0 and "Summon timer disabled" or "Summoning a new pet every " .. ns.db.newPetTimer/60 .. " minutes"))
 	else
-		DEFAULT_CHAT_FRAME:AddMessage("Not an acceptable timer value. Enter a number from 1 to 1440 for a timer in minutes, or 0 (zero) to disable the timer. Examples: '/pw 20' will summon a new pet every 20 minutes, '/pw 0' disables the timer. Note that there is a space between '/pw' and the number.",0,1,0.7)
+		ChatUserNotification(CO.bw .. "Not an acceptable timer value. Enter a number from 1 to 1440 for a timer in minutes, or 0 (zero) to disable the timer. Examples: '/pw 20' will summon a new pet every 20 minutes, '/pw 0' disables the timer. Note that there is a space between '/pw' and the number.")
 	end
 end
 
