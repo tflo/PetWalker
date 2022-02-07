@@ -115,17 +115,21 @@ Init
 		cannot run unless we put it into a C_Timer. However, the required delay
 		might depend on unpredictable things like loading duration.
 		ZONE_CHANGED_NEW_AREA comes quite a bit later and allows to run our
-		stuff without timer. But it fires also in situations where we do not
-		strictly need the TransitionCheck, eg just walking into a new area.
+		stuff with a short timer pretty reliably. But ofc, it fires also in
+		situations where we do not strictly need the TransitionCheck, eg just
+		walking into a new area.
 		]]
 -- 		ns.events:RegisterEvent("PLAYER_ENTERING_WORLD")
 -- 		function ns.PLAYER_ENTERING_WORLD()
 -- 			C_Timer.After(2, ns.TransitionCheck)
 		ns.events:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 		function ns.ZONE_CHANGED_NEW_AREA()
-		--[[ To prevent saving the wrong pet if we get an arbitrary COMPANION_UPDATE before the TransitionCheck could summon a pet ]]
+			--[[ To prevent saving the wrong pet if we get an arbitrary
+			COMPANION_UPDATE before the TransitionCheck could summon a pet ]]
 			petVerified = false
-			ns.TransitionCheck()
+			--[[ We definitely must make sure to be out of the loading process
+			here, otherwise we'll unsummon our - not yet spawned - pet. ]]
+			C_Timer.After(2.5, ns.TransitionCheck)
 		end
 
 
@@ -258,6 +262,7 @@ function ns.AutoAction()
 			return
 		end
 	end
+	if not petVerified then ns.TransitionCheck() return end
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	if not actpet then
 		ns:debugprintL2("AutoAction() decided for RestorePet.")
@@ -362,6 +367,10 @@ AutoAction, and here we are not.
 
 function ns.TransitionCheck()
 	if not ns.db.autoEnabled or IsFlying() then return end
+	local now = GetTime()
+	--[[ If toon starts moving immediately after transition, then RestorePet
+	might come before us. ]]
+	if now - timeRestorePet < 3 then return end
 	local savedpet
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	if ns.dbc.charFavsEnabled then
@@ -371,17 +380,21 @@ function ns.TransitionCheck()
 	elseif not actpet or actpet ~= ns.db.currentPet then
 		savedpet = ns.db.currentPet
 	end
-	timeRestorePet = GetTime()
 	ns:debugprintL1("TransitionCheck() ...")
 	if savedpet then
 		ns:debugprintL1("TransitionCheck() is restoring saved pet")
 		ns.SetSumMsgToTransCheck(savedpet)
 		ns:SafeSummon(savedpet, false)
-	else
+	--[[ Should only come into play if savedpet is still nil due to a slow
+	loading process ]]
+	elseif not actpet then
 		ns:debugprintL1("TransitionCheck() could not find saved pet --> summoning new pet")
 		ns.MsgNoSavedPet()
 		ns:NewPet()
 	end
+	timeRestorePet = now
+	--[[ This is not 100% reliable here, but should do the trick most of the time. ]]
+	petVerified = true
 end
 
 
