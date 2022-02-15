@@ -368,7 +368,12 @@ AutoAction, and here we are not.
 -- Called by 1: ns:ZONE_CHANGED_NEW_AREA(), or whatever we use as initial event
 
 function ns.TransitionCheck()
-	if not ns.db.autoEnabled or IsFlying() then return end
+	if not ns.db.autoEnabled
+		or ns.petVerified
+		or IsFlying() then
+		ns:debugprintL1("TransitionCheck() returned early")
+		return
+	end
 	local now = GetTime()
 	--[[ If toon starts moving immediately after transition, then RestorePet
 	might come before us. ]]
@@ -382,7 +387,6 @@ function ns.TransitionCheck()
 	elseif not actpet or actpet ~= ns.db.currentPet then
 		savedpet = ns.db.currentPet
 	end
-	ns:debugprintL1("TransitionCheck() ...")
 	if savedpet then
 		ns:debugprintL1("TransitionCheck() is restoring saved pet")
 		ns.SetSumMsgToTransCheck(savedpet)
@@ -397,6 +401,7 @@ function ns.TransitionCheck()
 	timeRestorePet = now
 	--[[ This is not 100% reliable here, but should do the trick most of the time. ]]
 	petVerified = true
+	ns:debugprintL1("TransitionCheck() complete")
 end
 
 
