@@ -504,12 +504,12 @@ function ns:SafeSummon(pet, resettimer)
 		and not InMythicKeystone()
 		and not InArena()
 	then
-		ns.petVerified = true -- TODO: Why did I put this here?
+		ns.petVerified = true
 		if resettimer then ns.timeNewPetSuccess = now end
 		ns.MsgPetSummonSuccess()
 		C_PetJournal.SummonPetByGUID(pet)
 	else
-		ns.MsgPetSummonFailed()
+-- 		ns.MsgPetSummonFailed() -- Too spammy, remove that
 		timeSafeSummonFailed = now
 	end
 end
