@@ -44,7 +44,7 @@ Messages
 ===========================================================================]]--
 
 local function ChatUserNotification(msg)
-	DEFAULT_CHAT_FRAME:AddMessage(CO.an .. addonName .. ": " .. msg)
+	print(CO.an, addonName, ": ", msg)
 end
 
 -- TODO: Do we need a warning at 1 selectable pet? Or should this be considered a valid use-case? (User manually summons a pet from Journal, but wants to get back his (only) fav pet when the timer is due.)
@@ -57,7 +57,7 @@ function ns.MsgNoSavedPet()
 end
 
 function ns.MsgOnlyFavIsActive(ap)
-	ChatUserNotification(CO.bn .. "Your only eligible random pet " .. ns.PetIDtoLink(ap) .. " is already active")
+	ChatUserNotification(CO.bn .. "Your only eligible random pet " .. (ns.PetIDtoLink(ap) or "nil") .. " is already active")
 end
 
 --[[---------------------------------------------------------------------------
@@ -72,17 +72,17 @@ end
 
 -- Called by the RestorePet func
 function ns.SetSumMsgToRestorePet(pet)
-	ns.msgPetSummonedContent = CO.bn .. "Restored your last pet " .. ns.PetIDtoLink(pet)
+	ns.msgPetSummonedContent = CO.bn .. "Restored your last pet " .. (ns.PetIDtoLink(pet) or "nil")
 end
 
 -- Called by the PreviousPet func
 function ns.SetSumMsgToPreviousPet(pet)
-	ns.msgPetSummonedContent = CO.bn .. "Summoned your previous pet " .. ns.PetIDtoLink(pet)
+	ns.msgPetSummonedContent = CO.bn .. "Summoned your previous pet " .. (ns.PetIDtoLink(pet) or "nil")
 end
 
 -- Called by the TransitionCheck func
 function ns.SetSumMsgToTransCheck(pet)
-	ns.msgPetSummonedContent = CO.bn .. "Summoned your last saved pet " .. ns.PetIDtoLink(pet)
+	ns.msgPetSummonedContent = CO.bn .. "Summoned your last saved pet " ..( ns.PetIDtoLink(pet) or "nil")
 end
 
 -- Called by the SafeSummon func
@@ -284,7 +284,8 @@ end
 
 function ns:FavsToggle()
 	ns.db.favsOnly = not ns.db.favsOnly
-	ns.poolInitialized = false
+	ns.poolInitialized, ns.petVerified = false, false
+	if ns.db.autoEnabled then ns:NewPet() end
 	ChatUserNotification(CO.bn .. "Selection pool: " .. (ns.db.favsOnly and "favorites only" or "all pets"))
 end
 
@@ -293,7 +294,10 @@ function ns.CharFavsSlashToggle() -- for slash command only
 	ns:CFavsUpdate()
 	--[[ This is redundant, _if_ we leave the 'ns.poolInitialized = false' in the
 	PET_JOURNAL_LIST_UPDATE function, which gets called by the ns:CFavsUpdate above ]]
-	ns.poolInitialized = false
+	ns.poolInitialized, ns.petVerified = false, false
+	--[[ Since we are changing from one saved-pet table to another, we prefer to
+	restore the pet from the new list, rather than doing NewPet like in the FavsToggle. ]]
+	if ns.db.autoEnabled then ns.TransitionCheck() end
 	ChatUserNotification(CO.bn .. "Character-specific favorites "..(ns.dbc.charFavsEnabled and "enabled" or "disabled"))
 end
 

@@ -292,11 +292,11 @@ function ns:RestorePet()
 	end
 	timeRestorePet = now
 	if savedpet then
-		ns:debugprintL1("AutoRestore() is restoring saved pet")
+		ns:debugprintL1("RestorePet() is restoring saved pet")
 		ns.SetSumMsgToRestorePet(savedpet)
 		ns:SafeSummon(savedpet, false)
 	else
-		ns:debugprintL1("AutoRestore() could not find saved pet --> summoning new pet")
+		ns:debugprintL1("RestorePet() could not find saved pet --> summoning new pet")
 		ns.MsgNoSavedPet()
 		ns:NewPet()
 	end
