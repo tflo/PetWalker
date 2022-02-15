@@ -43,7 +43,7 @@ mainly after login, if the game summons the last active pet on this toon,
 instead of the last saved pet in our DB (which can be the last active pet of the
 alt we just logged out). Caution, to not lock out manually summoned pets from
 being saved. ]]
-local petVerified = false
+ns.petVerified = false
 local timeSafeSummonFailed = 0
 --[[ Last time AutoRestore() was called. ]]
 local timeRestorePet = 0
@@ -126,7 +126,7 @@ Init
 		function ns.ZONE_CHANGED_NEW_AREA()
 			--[[ To prevent saving the wrong pet if we get an arbitrary
 			COMPANION_UPDATE before the TransitionCheck could summon a pet ]]
-			petVerified = false
+			ns.petVerified = false
 			--[[ We definitely must make sure to be out of the loading process
 			here, otherwise we'll unsummon our - not yet spawned - pet. ]]
 			C_Timer.After(2.5, ns.TransitionCheck)
@@ -264,7 +264,7 @@ function ns.AutoAction()
 			return
 		end
 	end
-	if not petVerified then ns.TransitionCheck() return end
+	if not ns.petVerified then ns.TransitionCheck() return end
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	if not actpet then
 		ns:debugprintL2("AutoAction() decided for RestorePet.")
@@ -400,7 +400,7 @@ function ns.TransitionCheck()
 	end
 	timeRestorePet = now
 	--[[ This is not 100% reliable here, but should do the trick most of the time. ]]
-	petVerified = true
+	ns.petVerified = true
 	ns:debugprintL1("TransitionCheck() complete")
 end
 
@@ -502,7 +502,7 @@ function ns:SafeSummon(pet, resettimer)
 		and not InMythicKeystone()
 		and not InArena()
 	then
-		petVerified = true -- TODO: Why did I put this here?
+		ns.petVerified = true -- TODO: Why did I put this here?
 		if resettimer then ns.timeNewPetSuccess = now end
 		ns.MsgPetSummonSuccess()
 		C_PetJournal.SummonPetByGUID(pet)
@@ -661,7 +661,7 @@ function ns:DebugDisplay()
 	"\n  DB previous pet: ", (ns.PetIDtoName(ns.db.previousPet) or "<nil>"),
 	"\n  Char DB current pet: ", (ns.PetIDtoName(ns.dbc.currentPet) or "<nil>"),
 	"\n  Char DB previous pet: ", (ns.PetIDtoName(ns.dbc.previousPet) or "<nil>"),
-	"\n  petVerified: ", petVerified, "\n")
+	"\n  ns.petVerified: ", ns.petVerified, "\n")
 end
 
 -- without pet info
