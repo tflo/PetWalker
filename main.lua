@@ -405,13 +405,27 @@ SAVING: Save a newly summoned pet, no matter how it was summoned.
 Should run with the COMPANION_UPDATE event.
 ---------------------------------------------------------------------------]]--
 
+--[[ TODO: Issue here: When loading a team via Rematch and Rematch's option
+"restore pet that was active before selecting activating a team" is selected,
+then we need to do this:
+Do not save the wrong pet (summoned by selecting a team.
+Do save the pet resummoned by Rematch.
+Since it seems impossible to distinguish the pet summoning due to a team
+selection from any normal pet summoning, we have to save both pets, hence a CD
+for SavePet is detrimental.
+Deselecting Rematch's restore option would make things not better. Unlesss: We
+can determine if a pet was selected thru teams. It seems Rematch can do this.
+Check the code.
+
+So, for the moment: Trying without SavePet CD. Also check the C_Timer at the event.
+]]
 function ns.SavePet()
-	if not petVerified then return end
+	if not ns.petVerified then return end
 	local actpet = C_PetJournal.GetSummonedPetGUID()
-	local now = GetTime()
+-- 	local now = GetTime()
 	debugflag = "SavePet" -- TODO: remove this and the flag in the func
 	if not actpet
-		or now - timeSavePet < 3
+-- 		or now - timeSavePet < 3
 		or IsExcludedByPetID(actpet, debugflag) then
 		return
 	end
@@ -425,7 +439,7 @@ function ns.SavePet()
 		ns.db.currentPet = actpet
 	end
 	ns:debugprintL2("SavePet() has run")
-	timeSavePet = now
+-- 	timeSavePet = now
 end
 
 
