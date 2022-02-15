@@ -119,17 +119,18 @@ Init
 		situations where we do not strictly need the TransitionCheck, eg just
 		walking into a new area.
 		]]
--- 		ns.events:RegisterEvent("PLAYER_ENTERING_WORLD")
--- 		function ns.PLAYER_ENTERING_WORLD()
--- 			C_Timer.After(2, ns.TransitionCheck)
-		ns.events:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-		function ns.ZONE_CHANGED_NEW_AREA()
+		ns.events:RegisterEvent("PLAYER_ENTERING_WORLD")
+		function ns.PLAYER_ENTERING_WORLD()
+-- 		ns.events:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+-- 		function ns.ZONE_CHANGED_NEW_AREA()
 			--[[ To prevent saving the wrong pet if we get an arbitrary
 			COMPANION_UPDATE before the TransitionCheck could summon a pet ]]
 			ns.petVerified = false
+-- 			ns.TransitionCheck()
 			--[[ We definitely must make sure to be out of the loading process
 			here, otherwise we'll unsummon our - not yet spawned - pet. ]]
-			C_Timer.After(2.5, ns.TransitionCheck)
+-- 			C_Timer.After(2, function() C_Timer.After(2, ns.TransitionCheck) end)
+			C_Timer.After(5, ns.TransitionCheck)
 		end
 
 
