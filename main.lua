@@ -177,7 +177,8 @@ Init
 		ns.events:RegisterEvent("COMPANION_UPDATE")
 		function ns:COMPANION_UPDATE(what)
 			if ns.db.autoEnabled and what == "CRITTER" and GetTime() - timePlayerCast < 0.2 then
-				C_Timer.After(1, ns.SavePet)
+				ns.SavePet()
+-- 				C_Timer.After(1, ns.SavePet)
 			end
 		end
 
