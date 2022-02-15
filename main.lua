@@ -283,7 +283,7 @@ function ns:RestorePet()
 	local now = GetTime()
 	if now - timeSafeSummonFailed < 10 or now - timeRestorePet < 3 then return end
 	local savedpet
-	if ns.dbc.charFavsEnabled then
+	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
 		savedpet = ns.dbc.currentPet
 	else
 		savedpet = ns.db.currentPet
@@ -375,7 +375,7 @@ function ns.TransitionCheck()
 	if now - timeRestorePet < 3 then return end
 	local savedpet
 	local actpet = C_PetJournal.GetSummonedPetGUID()
-	if ns.dbc.charFavsEnabled then
+	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
 		if not actpet or actpet ~= ns.dbc.currentPet then
 			savedpet = ns.dbc.currentPet
 		end
@@ -415,7 +415,7 @@ function ns.SavePet()
 		or IsExcludedByPetID(actpet, debugflag) then
 		return
 	end
-	if ns.dbc.charFavsEnabled then
+	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
 		if ns.dbc.currentPet == actpet then return end
 		ns.dbc.previousPet = ns.dbc.currentPet
 		ns.dbc.currentPet = actpet
@@ -655,7 +655,7 @@ end
 -- with pet info
 function ns:debugprintL2(msg)
 	if ns.db.debugMode then
-		print("\n|cffEE82EE# PETWALKER DEBUG: " .. (msg or "<nil>") .. " ### Current DB pet: " .. (ns.PetIDtoName((ns.dbc.charFavs and ns.dbc.currentPet or ns.db.currentPet)) or "<nil>") .. " #")
+		print("\n|cffEE82EE# PETWALKER DEBUG: " .. (msg or "<nil>") .. " ### Current DB pet: " .. (ns.PetIDtoName(((ns.dbc.charFavs and ns.db.favsOnly) and ns.dbc.currentPet or ns.db.currentPet)) or "<nil>") .. " #")
 	end
 end
 
