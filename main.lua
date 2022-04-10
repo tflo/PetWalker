@@ -62,7 +62,7 @@ local excludedSpecies = {
 But it should be safe, bc CD starts only after activating the ability via dialog. ]]
 -- 	214, -- Argent Squire (Alliance)
 -- 	216, -- Argent Gruntling (Horde)
---[[ Self-unspawns outside of Weinter Veil ]]
+--[[ Self-unspawns outside of Weinter Veil. Makes no sense summoning these. ]]
 	1349, -- Rotten Little Helper
 	117, -- Tiny Snowman
 	119, -- Father Winter's Helper
@@ -460,7 +460,8 @@ local excludedAuras = {
 	110960, -- Mage: Greater Invisibility
 	131347, -- DH: Gliding
 	311796, -- Pet: Daisy as backpack (/beckon)
-	5384, -- Hunter: Feign Death (useful to avoid accidental summoning via keybind, or if we use a different event than PLAYER_STARTED_MOVING)
+	312993, -- Carrying Forbidden Tomes (Scrivener Lenua event, Revendreth)
+	5384, -- Hunter: Feign Death (only useful to avoid accidental summoning via keybind, or if we use a different event than PLAYER_STARTED_MOVING)
 } -- More exclusions in the Summon function itself
 
 local function OfflimitsAura(auras)
