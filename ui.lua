@@ -44,7 +44,7 @@ Messages
 ===========================================================================]]--
 
 local function ChatUserNotification(msg)
-	print(CO.an, addonName, ": ", msg)
+	print(CO.an .. addonName .. ":", msg)
 end
 
 -- TODO: Do we need a warning at 1 selectable pet? Or should this be considered a valid use-case? (User manually summons a pet from Journal, but wants to get back his (only) fav pet when the timer is due.)

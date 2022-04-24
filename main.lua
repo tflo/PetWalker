@@ -50,6 +50,7 @@ local timeRestorePet = 0
 local timeSavePet = 0
 local timePoolMsg = 0
 local timePlayerCast = 0
+local timeTransitionCheck = 0
 ns.msgPetSummonedContent = "• Something went wrong. You should never see this. •"
 
 local excludedSpecies = {
@@ -67,8 +68,11 @@ But it should be safe, bc CD starts only after activating the ability via dialog
 	117, -- Tiny Snowman
 	119, -- Father Winter's Helper
 	120, -- Winter's Little Helper
---[[ Dummy ID for debugging! Keep this out-commented! ]]
-	-- 2403,
+--[[ Pocopoc is special: he cannot be summoned in Zereth Mortis (1970)).
+See the extra checks in IsExcludedBySpecies() and TransitionCheck(). ]]
+	3247, -- Pocopoc
+--[[ Dummy ID for debugging! Keep this commented out! ]]
+-- 2403,
 }
 
 
@@ -111,14 +115,15 @@ Init
 		ns.timeNewPetSuccess = GetTime() - (ns.db.newPetTimer - ns.db.remainingTimer)
 
 		--[[
-		PLAYER_ENTERING_WORLD comes pretty early, our TransitionCheck function
-		cannot run unless we put it into a C_Timer. However, the required delay
-		might depend on unpredictable things like loading duration.
-		ZONE_CHANGED_NEW_AREA comes quite a bit later and allows to run our
-		stuff with a short timer pretty reliably. But ofc, it fires also in
-		situations where we do not strictly need the TransitionCheck, eg just
-		walking into a new area.
+		To consider: PLAYER_ENTERING_WORLD comes pretty early, our
+		TransitionCheck function cannot run unless we put it into a C_Timer.
+		However, the required delay might depend on unpredictable things like
+		loading duration. ZONE_CHANGED_NEW_AREA comes quite a bit later and
+		allows to run our stuff with a short timer pretty reliably. But ofc, it
+		fires also in situations where we do not strictly need the
+		TransitionCheck, eg just walking into a new area.
 		]]
+		--[=[ Testing if we can live without this event
 		ns.events:RegisterEvent("PLAYER_ENTERING_WORLD")
 		function ns.PLAYER_ENTERING_WORLD()
 -- 		ns.events:RegisterEvent("ZONE_CHANGED_NEW_AREA")
@@ -132,12 +137,22 @@ Init
 -- 			C_Timer.After(2, function() C_Timer.After(2, ns.TransitionCheck) end)
 			C_Timer.After(5, ns.TransitionCheck)
 		end
+		]=]
+
+		--[[ In search for an economic solution to the Pocopoc issues, now trying with *both* events as trigger for TransitionCheck. But also without these issues, it might be a good idea. ]]
+		ns.events:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+		function ns.ZONE_CHANGED_NEW_AREA()
+			--[[ To prevent saving the wrong pet if we get an arbitrary
+			COMPANION_UPDATE before the TransitionCheck could summon a pet ]]
+			ns.petVerified = false
+			C_Timer.After(2, ns.TransitionCheck)
+		end
 
 
 		--[[
 		This thing fires very often
 		Let's do a test:
-		Unset the 'isInitialized' var with that event, and initialize only when
+		Unset the 'poolInitialized' var with that event, and initialize only when
 		needed, that is before selecting a random pet.
 		--> This seems to work, so far!
 		]]
@@ -238,8 +253,10 @@ local debugflag = "blank"
 local function IsExcludedBySpecies(spec, debugflag)
 	for _, e in pairs(excludedSpecies) do
 		if e == spec then
--- 			ns:debugprintL1("Excluded pet found while doing: " .. debugflag)
-			return true
+			if e ~= 3247 or ns.currentZone == 1970 then -- Pocopoc
+-- 				ns:debugprintL1("Excluded pet found while doing: " .. debugflag)
+				return true
+			end
 		end
 	end
 	return false
@@ -257,7 +274,7 @@ restore a (lost) pet, or summoning a new one (if the timer is set and due).
 ---------------------------------------------------------------------------]]--
 
 function ns.AutoAction()
-	if not ns.db.autoEnabled or IsFlying() then return end
+	if not ns.db.autoEnabled or IsMounted() then return end -- was: IsFlying
 	if ns.db.newPetTimer ~= 0 then
 		local now = GetTime()
 		if ns.RemainingTimer(now) == 0 and now - timeSafeSummonFailed > 40 then
@@ -378,8 +395,10 @@ function ns.TransitionCheck()
 	end
 	local now = GetTime()
 	--[[ If toon starts moving immediately after transition, then RestorePet
-	might come before us. ]]
-	if now - timeRestorePet < 3 then return end
+	might come before us. Also prevents redundant run if we have both events
+	NEW_AREA and ENTERING_WORLD. ]]
+	if now - timeRestorePet < 6 then return end
+	ns.currentZone = C_Map.GetBestMapForUnit("player")
 	local savedpet
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
@@ -388,6 +407,11 @@ function ns.TransitionCheck()
 		end
 	elseif not actpet or actpet ~= ns.db.currentPet then
 		savedpet = ns.db.currentPet
+	end
+	if ns.currentZone == 1970 then -- Pocopoc issue
+		if ns.PetIDtoSpecies(savedpet) == 3247 or ns.PetIDtoSpecies(actpet) == 3247 then
+			savedpet = ns.db.previousPet
+		end
 	end
 	if savedpet then
 		ns:debugprintL1("TransitionCheck() is restoring saved pet")
@@ -648,6 +672,12 @@ if not id then return "<nil> from PetIDtoName" end
 -- 	local id, name = '"'..id..'"', select(8, C_PetJournal.GetPetInfoByPetID(id))
 	local name = select(8, C_PetJournal.GetPetInfoByPetID(id))
 	return name
+end
+
+function ns.PetIDtoSpecies(id)
+if not id then return "<nil> from PetIDtoSpecies" end
+	local spec = C_PetJournal.GetPetInfoByPetID(id)
+	return spec
 end
 
 function ns.PetIDtoLink(id)
