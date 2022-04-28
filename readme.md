@@ -2,13 +2,21 @@
 
 An add-on for World of Warcraft (WoW) Retail. Probably/maybe works also with the Classic variants (untested).
 
+## Source 
+
+https://github.com/tflo/PetWalker
+
+## Download
+
+https://github.com/tflo/PetWalker/releases
+
 # Purpose
 
 The add-on helps you to always have a pet out (summoned). Optionally it can summon a random pet (from a configurable pool) every n minutes.
 
 ## Notes
 
-This add-on started out as an improved version of [NugMiniPet](https://www.curseforge.com/wow/addons/nugminipet), but in the meantime not much of the original code is left. Currently, only the approach for marking char-specific pets is shamelessly copied from NugMiniPet. Will be improved soon.
+This add-on started out as an improved version of [NugMiniPet](https://www.curseforge.com/wow/addons/nugminipet), but in the meantime not much of the original code is left. Currently, only the approach for marking char-specific favorite pets is shamelessly copied from NugMiniPet. Will be improved soon.
 Credits for the idea, and for some of the coding to [d87_](https://www.curseforge.com/members/d87_/projects), the author of NugMiniPets and [all the other “Nug” add-ons](https://www.curseforge.com/members/d87_/projects).
 
 # Features
