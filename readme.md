@@ -31,7 +31,7 @@ Credits for the idea, and for some of the coding to [d87_](https://www.curseforg
 
 ## Functionality
 
-* 'Last summoned pet' is saved across chars. So, if you log out with a given pet on your Hunter, then login with your Warlock, you should see the same pet summoned, right from the login.
+* 'Last summoned pet' is saved across chars. So, if you log out with a given pet on your Mage, then login with your Dracthyr Evoker, you should see the same pet summoned, right from the login.
 * Takes care to not not disturb various activities/circumstances: M+, Arena, Stealthed, In Combat, and more.
 * The pool of eligible pets to be summoned can be char-specific or account-wide. You can change this setting at any time and as often as you want, the char-specific list (if created) will be preserved.
 * Easy switch between 'random-summoning new pet' and 'just keep my pet out'. ('/pw 0', see Usage)
@@ -40,13 +40,20 @@ Credits for the idea, and for some of the coding to [d87_](https://www.curseforg
 
 /pw a: Toggle automatic summoning of pets  
 /pw d: Dismiss current pet and disable auto-summoning  
+/pw n: Summon new pet (from the active pet pool: Favs or All, see commands explained below)  
 /pw \<n\>: Interval [minutes] for summoning a new pet. n has to be a number. '0' disables summoning of new pets, though the pet-restore functionality is still active (use '/pw a' to disable it).  
 /pw f: Toggle the random-summon pool between Favorites and All Pets. When set to All Pets, the currently active filters of the Pet Journal still apply.  
 /pw c: Toggle char-specific favorites list. (Only applies if set to Favorites via '/pw f'.)    
 /pw h: Help text  
 /pw s: Status report  
 
-Also check the Key Bindings section of your client. You'll find three bindable commands for PetWalker there.
+If '/pw' is conflicting with any of your other add-ons' commands, then use '/petw' instead.  
+
+Also check the Key Bindings section of your client. You'll find three bindable commands for PetWalker there:
+* Dismiss current pet and disable auto-summoning (equal to '/pw d')
+* Toggle automatic summoning of pets (equal to '/pw a')
+* Summon new pet (equal to '/pw n')   
+
 
 A more detailed description is in work!
 
