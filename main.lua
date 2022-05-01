@@ -389,7 +389,8 @@ AutoAction, and here we are not.
 function ns.TransitionCheck()
 	if not ns.db.autoEnabled
 		or ns.petVerified
-		or IsFlying() then
+		or IsFlying()
+		or UnitOnTaxi("player") then
 		ns:debugprintL1("TransitionCheck() returned early")
 		return
 	end

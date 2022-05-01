@@ -1,3 +1,9 @@
+### 1.0.4 (2022-05-01)
+* Added UnitOnTaxi check
+
+### 1.0.3 (2022-04-30)
+* Improved description
+
 ### 1.0.2 (2022-04-29)
 * Improved description
 
@@ -5,6 +11,6 @@
 * Improved description
 
 ### 1.0.0 (2022-04-28)
-*Initial public release
+* Initial public release
 
 
