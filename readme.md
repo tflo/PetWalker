@@ -68,6 +68,7 @@ Also check the Key Bindings section of your client. You’ll find three bindable
 * Toggle automatic summoning of pets (same as ‘/pw a’)
 * Summon new pet (same as ‘/pw n’)   
 
+
 ***
 
 # FAQ
@@ -75,9 +76,11 @@ Also check the Key Bindings section of your client. You’ll find three bindable
 ## How to set char-specific favorite pets?
 
 1. Set PetWalker to ‘char-specific favorites’ (command ‘/pw c’)
-2. Mark your favorites as usual in Rematch / Pet Journal
+2. Set your favorites as usual in the Pet Journal (or Rematch)
 
-Unlike the “normal” favorites, these char-specific favorites will not be visually flagged with a star in the pet list. However, you can display a list of your current char-specific favorites in the chat console by entering ‘/pw s’.
+In the Pet Journal, they will be visually flagged with the fav star only when you are in char-specific-favorites mode; in normal-favorites mode you will see your normal (global) favorites star-flagged. (In Rematch, they are never visually flagged. Though you can set/unset them there via right-click just as in the Pet Journal.)
+
+Unlike the global favorites, these char-specific favorites will not be sorted at top of the Pet Journal list. However, you can display a list of your current char-specific favorites in the chat console by entering ‘/pw s’. This makes it easier to identify them, for example if you want to remove a pet from the favorites.
 
 ## I do not want to summon a new pet every n minutes, I just want to keep my pet.
 
