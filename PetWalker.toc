@@ -1,11 +1,12 @@
-## Interface: 90200
+## Interface: 90205
 ## Title: PetWalker
 ## Notes: Automatically re-summons your lost companion pet, or auto-summons a random or a favorite one.
-## Author: Tom
+## Author: Mot
 ## SavedVariables: PetWalkerDB
 ## SavedVariablesPerCharacter: PetWalkerPerCharDB
-## Version: 0.0.5
+## Version: 1.0.4
 
+## X-Wago-ID: qv63aZGb
 # X-WoWI-ID: 
 # X-Curse-Project-ID: 
 
