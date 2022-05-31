@@ -115,39 +115,24 @@ Init
 		ns.timeNewPetSuccess = GetTime() - (ns.db.newPetTimer - ns.db.remainingTimer)
 
 		--[[
-		To consider: PLAYER_ENTERING_WORLD comes pretty early, our
-		TransitionCheck function cannot run unless we put it into a C_Timer.
-		However, the required delay might depend on unpredictable things like
-		loading duration. ZONE_CHANGED_NEW_AREA comes quite a bit later and
-		allows to run our stuff with a short timer pretty reliably. But ofc, it
-		fires also in situations where we do not strictly need the
-		TransitionCheck, eg just walking into a new area.
+		Two suitable events here:
+		1) PLAYER_ENTERING_WORLD and 2) ZONE_CHANGED_NEW_AREA
+		Still not sure which one is better:
+		1) needs a significant delay (min 8s timer), due to unpredictable rest
+		load time at login (after the event).
+		2) fires later (which is good), but also fires when we do not really
+		need it, and it does _not_ fire in all cases where 1) is fired (bad). 2
+		or 3s timer is OK.
+		In any case, we should make sure to be out of the loading process here,
+		otherwise we might unsummon our - not yet spawned - pet.
 		]]
-		--[=[ Testing if we can live without this event
 		ns.events:RegisterEvent("PLAYER_ENTERING_WORLD")
 		function ns.PLAYER_ENTERING_WORLD()
--- 		ns.events:RegisterEvent("ZONE_CHANGED_NEW_AREA")
--- 		function ns.ZONE_CHANGED_NEW_AREA()
 			--[[ To prevent saving the wrong pet if we get an arbitrary
 			COMPANION_UPDATE before the TransitionCheck could summon a pet ]]
 			ns.petVerified = false
--- 			ns.TransitionCheck()
-			--[[ We definitely must make sure to be out of the loading process
-			here, otherwise we'll unsummon our - not yet spawned - pet. ]]
--- 			C_Timer.After(2, function() C_Timer.After(2, ns.TransitionCheck) end)
-			C_Timer.After(5, ns.TransitionCheck)
+			C_Timer.After(10, ns.TransitionCheck)
 		end
-		]=]
-
-		--[[ In search for an economic solution to the Pocopoc issues, now trying with *both* events as trigger for TransitionCheck. But also without these issues, it might be a good idea. ]]
-		ns.events:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-		function ns.ZONE_CHANGED_NEW_AREA()
-			--[[ To prevent saving the wrong pet if we get an arbitrary
-			COMPANION_UPDATE before the TransitionCheck could summon a pet ]]
-			ns.petVerified = false
-			C_Timer.After(2, ns.TransitionCheck)
-		end
-
 
 		--[[
 		This thing fires very often

@@ -47,7 +47,7 @@ https://github.com/tflo/PetWalker/wiki
 * Takes care to not not disturb during various activities/circumstances: Higher M+, Arena, Stealthed, In Combat, and more.
 * The pool of eligible pets to be summoned can be char-specific or account-wide. You can change this setting at any time and as often as you want, the char-specific list (if created) will be preserved.
 * Easy switch between ‘random-summoning new pet’ and ‘just keep my pet out’. (‘/pw 0’, see Usage)
-* Does not try to summon pets that can/should not be summoned, e.g. Pocopoc in Zereth Mortis, the Winter Veil pets, or the vendor pets with CD like Guild Herald.
+* Does not try to summon pets that can/should not be summoned, e.g. Pocopoc pet in Zereth Mortis, the Winter Veil pets, or the vendor pets with CD like Guild Herald.
 
 # Usage basics
 
@@ -97,6 +97,6 @@ This is a very frequent event, yes. I have experimented with various other event
 
 In rare occasions, PetWalker’s summoning might interfere with other casts, notably with Druids shapeshifting immediately after starting to move. But, since PetWalker does nothing in combat situations (and other critical situations), it should be pretty safe.  
 
-Other noteworthy events PetWalker is listening to are: ZONE_CHANGED_NEW_AREA, PET_JOURNAL_LIST_UPDATE, UNIT_SPELLCAST_SUCCEEDED, COMPANION_UPDATE.
+Other noteworthy events PetWalker is listening to are: PLAYER_ENTERING_WORLD, PET_JOURNAL_LIST_UPDATE, UNIT_SPELLCAST_SUCCEEDED, COMPANION_UPDATE.
 
 
