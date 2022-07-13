@@ -622,7 +622,7 @@ function ns.CreateCheckBoxBase(self)
 		GameTooltip:Hide();
 	end)
 
-	local label	 =	f:CreateFontString(nil, "OVERLAY")
+	local label = f:CreateFontString(nil, "OVERLAY")
 	label:SetFontObject("GameFontNormal")
 	label:SetPoint("LEFT",f,"RIGHT",0,0)
 
