@@ -154,6 +154,12 @@ function ns.HelpText()
 		": ",
 		"Summon ",
 		CO.k .. "previous pet ",
+		CO.c .. "\n  v",
+		": ",
+		"Verbosity (chat) ",
+		CO.k .. "silent (only errors and alike are printed). ",
+		CO.c .. "vv ",
+		"for normal mode.",
 		CO.c .. "\n  s",
 		": ",
 		"Display current ",
@@ -230,6 +236,12 @@ function SlashCmdList.PetWalker(cmd)
 		ns:DebugDisplay()
 	elseif cmd == 'dm' or cmd == 'debm' then
 		ns.DebugModeToggle()
+	elseif cmd == 'v' then
+		ns.VerbositySilent()
+	elseif cmd == 'vv' then
+		ns.VerbosityNormal()
+	elseif cmd == 'v0' then
+		ns.VerbosityMute()
 	elseif cmd == 'a' or cmd == 'auto' then
 		ns:AutoToggle()
 	elseif cmd == 'n' or cmd == 'new' then
