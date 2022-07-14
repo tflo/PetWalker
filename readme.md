@@ -90,7 +90,7 @@ Simply make sure that the Summon New Pet timer is set to ‘0’ (zero). You can
 
 Almost never. The most difficult situation is when you select a team for a pet battle. If you are using Rematch, you should select the “Keep Companion” option (in “Miscellaneous Options”). This will definitely help, but it is not 100% assured that, after the pet battle, you have the same pet out as before.
 
-## Which are the events PetWalker is reacting to?
+## What are the events PetWalker is reacting to?
 
 The main event that makes PetWalker check for the pet and summon it if necessary, is PLAYER_STARTED_MOVING.  
 This is a very frequent event, yes. I have experimented with various other events, but this one turned out to be best. (After all, the goal of PetWalker is to assure that your pet is *always* out, not that it’s out every once in a while.)  
@@ -99,4 +99,13 @@ In rare occasions, PetWalker’s summoning might interfere with other casts, not
 
 Other noteworthy events PetWalker is listening to are: PLAYER_ENTERING_WORLD, PET_JOURNAL_LIST_UPDATE, UNIT_SPELLCAST_SUCCEEDED, COMPANION_UPDATE.
 
+***
+
+# Known Issues / To Do (not yet implemented)
+
+* User-settable verbosity level that allows to suppress the regular “restored \<pet\>” or “summoned \<pet\>” chat messages.
+
+* Remove erroneous “summoned” messages in situations where actually no pet was summoned (eg flying, probably vehicle UI).
+
+Feel free to post suggestions or bug reports in the Issues section of the repo!
 
