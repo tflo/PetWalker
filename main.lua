@@ -51,7 +51,7 @@ local timeSavePet = 0
 local timePoolMsg = 0
 local timePlayerCast = 0
 local timeTransitionCheck = 0
-ns.msgPetSummonedContent = "• Something went wrong. You should never see this. •"
+ns.msgPetSummonedContent = ""
 
 local excludedSpecies = {
 --[[  Pet is vendor and goes on CD when summoned ]]
