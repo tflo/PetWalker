@@ -51,7 +51,6 @@ local timeSavePet = 0
 local timePoolMsg = 0
 local timePlayerCast = 0
 local timeTransitionCheck = 0
-ns.msgPetSummonedContent = ""
 
 local excludedSpecies = {
 --[[  Pet is vendor and goes on CD when summoned ]]
@@ -102,7 +101,7 @@ Init
 		ns.dbc.charFavs = ns.dbc.charFavs or {}
 		ns.dbc.eventAlt = ns.dbc.eventAlt or false
 		ns.db.debugMode = ns.db.debugMode or false
-		ns.db.verbosityLevel = ns.db.verbosityLevel or 2
+		ns.db.verbosityLevel = ns.db.verbosityLevel or 3
 
 		if not ns.db.dbVersion or ns.db.dbVersion ~= dbVersion then
 			table.wipe(ns.db)

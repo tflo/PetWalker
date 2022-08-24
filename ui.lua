@@ -53,11 +53,13 @@ end
 -- end
 
 function ns.MsgNoSavedPet()
+	if ns.db.verbosityLevel < 0 then return end
 	ChatUserNotification(CO.bw .. "No 'current pet' has been saved yet" .. (ns.dbc.charFavsEnabled and " for " .. CO.e .. thisChar or "") .. " --> could not restore pet.")
 end
 
 function ns.MsgOnlyFavIsActive(ap)
-	ChatUserNotification(CO.bn .. "Your only eligible random pet " .. (ns.PetIDtoLink(ap) or "nil") .. " is already active")
+	if ns.db.verbosityLevel < 1 then return end
+	ChatUserNotification(CO.bn .. "Your only eligible random pet " .. (ns.PetIDtoLink(ap) or "???") .. " is already active")
 end
 
 --[[---------------------------------------------------------------------------
@@ -67,31 +69,34 @@ NewPet, or PreviousPet or the TransitionCheck.
 
 -- Called by the NewPet func
 function ns.SetSumMsgToNewPet(ap, np, n)
-	ns.msgPetSummonedContent = CO.bn .. "Summoned " .. (n >1 and "a new random" or "your only eligible random") .. " pet " .. ns.PetIDtoLink(np)
+	ns.msgPetSummonedContent = ns.db.verbosityLevel >= 2 and CO.bn .. "Summoned " .. (n > 1 and "a new random" or "your only eligible random") .. " pet " .. ns.PetIDtoLink(np) or nil
 end
 
 -- Called by the RestorePet func
 function ns.SetSumMsgToRestorePet(pet)
-	ns.msgPetSummonedContent = CO.bn .. "Restored your last pet " .. (ns.PetIDtoLink(pet) or "nil")
+	ns.msgPetSummonedContent = ns.db.verbosityLevel >= 3 and CO.bn .. "Restored your last pet " .. (ns.PetIDtoLink(pet) or "???") or nil
 end
 
 -- Called by the PreviousPet func
 function ns.SetSumMsgToPreviousPet(pet)
-	ns.msgPetSummonedContent = CO.bn .. "Summoned your previous pet " .. (ns.PetIDtoLink(pet) or "nil")
+	ns.msgPetSummonedContent = ns.db.verbosityLevel >= 2 and CO.bn .. "Summoned your previous pet " .. (ns.PetIDtoLink(pet) or "???") or nil
 end
 
 -- Called by the TransitionCheck func
 function ns.SetSumMsgToTransCheck(pet)
-	ns.msgPetSummonedContent = CO.bn .. "Summoned your last saved pet " ..( ns.PetIDtoLink(pet) or "nil")
+	ns.msgPetSummonedContent = ns.db.verbosityLevel >= 3 and CO.bn .. "Summoned your last saved pet " ..( ns.PetIDtoLink(pet) or "???") or nil
 end
 
 -- Called by the SafeSummon func
 function ns.MsgPetSummonSuccess()
-	ChatUserNotification(ns.msgPetSummonedContent)
+	if ns.msgPetSummonedContent then
+		ChatUserNotification(ns.msgPetSummonedContent)
+	end
 end
 
 -- Called by the SafeSummon func
 function ns.MsgPetSummonFailed()
+	if ns.db.verbosityLevel < 1 then return end
 	ChatUserNotification(CO.bw .. "You don't meet the conditions for summoning a pet right now.")
 end
 
@@ -207,6 +212,7 @@ end
 
 
 function ns.MsgLowPetPool(nPool)
+	if ns.db.verbosityLevel < 0 then return end
 	local R = CO.bw
 	local content = {
 		(nPool < 1 and CO.e .. "0 (zero) " ..R.. " pets " or R.. "Only " ..CO.e .. "1 " ..R.. "pet "),
@@ -236,10 +242,12 @@ function SlashCmdList.PetWalker(cmd)
 		ns:DebugDisplay()
 	elseif cmd == 'dm' or cmd == 'debm' then
 		ns.DebugModeToggle()
+	elseif cmd == 'vvv' then
+		ns.VerbosityFull()
+	elseif cmd == 'vv' then
+		ns.VerbosityMedium()
 	elseif cmd == 'v' then
 		ns.VerbositySilent()
-	elseif cmd == 'vv' then
-		ns.VerbosityNormal()
 	elseif cmd == 'v0' then
 		ns.VerbosityMute()
 	elseif cmd == 'a' or cmd == 'auto' then
@@ -281,6 +289,26 @@ function ns:DismissAndDisable()
 	ns.db.autoEnabled = false
 	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.autoEnabled) end
 	ChatUserNotification(CO.bn .. "Pet dismissed and auto-summon " .. (ns.db.autoEnabled and "enabled" or "disabled"))
+end
+
+function ns.VerbosityFull()
+	ns.db.verbosityLevel = 3
+	ChatUserNotification(CO.bn .. "Verbosity: full (3)")
+end
+
+function ns.VerbosityMedium()
+	ns.db.verbosityLevel = 2
+	ChatUserNotification(CO.bn .. "Verbosity: medium (2)")
+end
+
+function ns.VerbositySilent()
+	ns.db.verbosityLevel = 1
+	ChatUserNotification(CO.bn .. "Verbosity: silent (1)")
+end
+
+function ns.VerbosityMute()
+	ns.db.verbosityLevel = 0
+	ChatUserNotification(CO.bn .. "Verbosity: Mute (0)")
 end
 
 function ns:AutoToggle()
