@@ -159,7 +159,7 @@ function ns.HelpText()
 		"Verbosity (chat) ",
 		CO.k .. "silent (only errors and alike are printed). ",
 		CO.c .. "vv ",
-		"for normal mode.",
+		"for normal mode. -- Not yet implemented",
 		CO.c .. "\n  s",
 		": ",
 		"Display current ",
