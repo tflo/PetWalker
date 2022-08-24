@@ -43,8 +43,21 @@ local CO = SetColors(colSchemeGreen)
 Messages
 ===========================================================================]]--
 
+local sep = "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
+
 local function ChatUserNotification(msg)
 	print(CO.an .. addonName .. ":", msg)
+end
+
+local function ChatUserNotificationBlock(msg)
+	print("\n" .. CO.an .. sep .. "\n" .. addonName .. ":", msg, "\n" .. CO.an .. sep , "\n ")
+end
+
+local function ChatUserNotificationLarge(first, second, third, last)
+	print("\n" .. CO.an .. sep .. "\n" .. addonName .. ":", first)
+	if second then print(second) end
+	if third then print(third) end
+	print(last, "\n" .. CO.an .. sep)
 end
 
 -- TODO: Do we need a warning at 1 selectable pet? Or should this be considered a valid use-case? (User manually summons a pet from Journal, but wants to get back his (only) fav pet when the timer is due.)
@@ -106,108 +119,62 @@ Three big messages: Status, Low Pet Pool, and Help
 ---------------------------------------------------------------------------]]--
 
 function ns.HelpText()
-	local content = {
+
+	local header = {
 		CO.bn .. "Help: ",
-		CO.c .. "\n/pw ",
-		"or ",
-		CO.c .. "/petw ",
-		"supports these commands: ",
-		CO.c .. "\n  d",
-		": ",
-		CO.k .. "Dismiss ",
-		"current pet and ",
-		CO.k .. "disable auto-summon ",
-		"(new pet / restore)",
-		CO.c .. "\n  a",
-		": ",
-		"Toggle ",
-		CO.k .. "auto-summon ",
-		"(new pet / restore)",
-		CO.c .. "\n  n",
-		": ",
-		"Summon ",
-		CO.k .. "new pet ",
-		"from pool",
-		CO.c .. "\n  f",
-		": ",
-		"Toggle ",
-		CO.k .. "pet pool: ",
-		CO.s .. "Favorites Only",
-		", or ",
-		CO.s .. "All Pets",
-		CO.c .. "\n  c",
-		": ",
-		"Toggle ",
-		CO.k .. "favorites: ",
-		CO.s .. "Per-character",
-		", or ",
-		CO.s .. "Global Favorites",
-		CO.c .. "\n  <number>",
-		": ",
-		"Set ",
-		CO.k .. "Summon Timer ",
-		"in minutes (",
-		CO.c .. "1 ",
-		"to ",
-		CO.c .. "1440",
-		"; ",
-		CO.c .. "0 ",
-		"to ",
-		CO.k .. "disable",
-		")",
-		CO.c .. "\n  p",
-		": ",
-		"Summon ",
-		CO.k .. "previous pet ",
-		CO.c .. "\n  v",
-		": ",
-		"Verbosity (chat) ",
-		CO.k .. "silent (only errors and alike are printed). ",
-		CO.c .. "vv ",
-		"for normal mode. -- Not yet implemented",
-		CO.c .. "\n  s",
-		": ",
-		"Display current ",
-		CO.k .. "status/settings",
-		CO.c .. "\n  h",
-		": ",
-		"This help text",
-		"\nIn ",
-		"Key Bindigs > AddOns ",
-		"you can directly bind some commands",
+		CO.c .. "\n/pw ", "or ", CO.c .. "/petw ", "supports these commands: ",
 	}
-	local content = table.concat(content, CO.bn)
-	ChatUserNotification(content)
+	
+	local body = {
+		CO.c .. "\nd", ": ", CO.k .. "Dismiss ", "current pet and ", CO.k .. "disable auto-summon ", "(new pet / restore).",
+		CO.c .. "\na", ": ", "Toggle ", CO.k .. "auto-summon ", "(new pet / restore).",
+		CO.c .. "\nn", ": ", "Summon ", CO.k .. "new pet ", "from pool.",
+		CO.c .. "\nf", ": ", "Toggle ", CO.k .. "pet pool: ", CO.s .. "Favorites Only", ", or ", CO.s .. "All Pets", ".",
+		CO.c .. "\nc", ": ", "Toggle ", CO.k .. "favorites: ", CO.s .. "Per-character", ", or ", CO.s .. "Global Favorites", ".",
+		CO.c .. "\n<number>", ": ", "Set ", CO.k .. "Summon Timer ", "in minutes (", CO.c .. "1 ", "to ", CO.c .. "1440", "; ", CO.c .. "0 ", "to ", CO.k .. "disable", ").",
+		CO.c .. "\np", ": ", "Summon ", CO.k .. "previous pet ", ".",
+		CO.c .. "\nv", ": ", CO.k .. "Verbosity: ", CO.s .. "silent ", "(only failures and warnings are printed to chat). ", CO.c .. "vv ", "for ", CO.s .. "medium ", CO.k .. "verbosity ", "(new summons), ", CO.c .. "vvv ", "for ", CO.s .. "full ", CO.k .. "verbosity ", "(also restored pets).",
+		CO.c .. "\ns", ": ", "Display current ", CO.k .. "status/settings.",
+		CO.c .. "\nh", ": ", "This help text.",
+	}
+	
+	local footer = {
+		CO.bn .. "\nExamples: ", CO.c .. "/pw a", " disables auto-summon/restore, or enables it if disabled. ", CO.c .. "/pw 20", " sets the new-pet summon timer to 20 minutes.",
+		"\nIn 'Key Bindigs > AddOns' you can directly bind some commands.",
+	}
+	
+	header = table.concat(header, CO.bn)
+	body = table.concat(body, CO.bn)
+	footer = table.concat(footer, CO.bn)
+	
+	ChatUserNotificationLarge(header, body, nil, footer)
 end
+
+
 
 
 function ns.Status()
 	if not ns.poolInitialized then ns.InitializePool() end
-	local content = {
+	local header = {
 		CO.bn .. "Status & Settings:",
-		CO.k .."\n  Automatic Random-summon / Restore ",
-		"is ",
-		CO.s .. (ns.db.autoEnabled and "enabled" or "disabled"),
-		CO.k .. "\n  Summon Timer ",
-		"is ",
-		CO.s .. (ns.db.newPetTimer > 0 and (ns.db.newPetTimer/60) .. CO.bn .. " minutes" or "disbled"),
-		" • Next random pet in ",
-		CO.e .. ns.RemainingTimerForDisplay(),
-		CO.k .. "\n  Pet Pool ",
-		"is set to ",
-		CO.s .. (ns.db.favsOnly and "Favorites Only" or "All Pets"),
-		" • Eligible pets: ",
-		CO.e .. #ns.petPool,
-		CO.k .. "\n  Per-character Favorites ",
-		"are ",
-		CO.s .. (ns.dbc.charFavsEnabled and "enabled" or "disabled"),
-		" for ",
-		CO.e .. thisChar,
-		"\n  ",
-		ns:ListCharFavs(),
 	}
-	local content = table.concat(content, CO.bn)
-	ChatUserNotification(content)
+	local body = {
+		CO.k .."\nAutomatic Random-summon / Restore ", "is ", CO.s .. (ns.db.autoEnabled and "enabled" or "disabled"), ".",
+		CO.k .. "\nSummon Timer ", "is ", CO.s .. (ns.db.newPetTimer > 0 and (ns.db.newPetTimer/60) .. CO.bn .. " minutes" or "disabled"), ". Next random pet in ", CO.e .. ns.RemainingTimerForDisplay(), ".",
+		CO.k .. "\nVerbosity ", "level of messages: ", CO.s .. ns.db.verbosityLevel, " (of 3).",
+		CO.k .. "\nPet Pool ", "is set to ", CO.s .. (ns.db.favsOnly and "Favorites Only" or "All Pets"), ". Eligible pets: ", CO.e .. #ns.petPool, ".",
+		CO.k .. "\nPer-character Favorites ", "are ", CO.s .. (ns.dbc.charFavsEnabled and "enabled" or "disabled"), " for ", CO.e .. thisChar, ".",
+	}
+	-- Separating this bc it might be a longish list
+	local charfavlist = {
+		"\n", ns:ListCharFavs(),
+	}
+	
+	header = table.concat(header, CO.bn)
+	body = table.concat(body, CO.bn)
+	charfavlist = table.concat(charfavlist, CO.bn)
+	
+	ChatUserNotificationLarge(header, body, nil, charfavlist)
 end
 
 
@@ -371,5 +338,5 @@ function ns:ListCharFavs()
 	end
 	favlinks = table.concat(favlinks, ' ')
 	return CO.e .. thisChar .. CO.bn .. " has " .. CO.e .. count .. CO.bn ..
-	" character-specific favorite pets" .. (count > 0 and ":" or "") .. "\n" .. (favlinks or "")
+	" character-specific favorite pets" .. (count > 0 and ":\n" or ".") .. favlinks
 end
