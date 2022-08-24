@@ -221,7 +221,7 @@ function SlashCmdList.PetWalker(cmd)
 		ns:AutoToggle()
 	elseif cmd == 'n' or cmd == 'new' then
 		local actpet = C_PetJournal.GetSummonedPetGUID()
-		ns:NewPet(actpet)
+		ns:NewPet()
 	elseif cmd == 'f' or cmd == 'fav' then
 		ns:FavsToggle()
 	elseif cmd == 'e' or cmd == 'eve' then
