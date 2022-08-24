@@ -16,7 +16,7 @@ local colSchemeGreen = {
 		addonname = '7CFC00',
 		quote = '808000',
 		emphasis = 'ADFF2F',
-		keyword = '00FA9A',
+		keyword = '00FA9A', -- TODO: heading? (see below)
 		state = '32CD32',
 		command = 'FF00FF',
 	}
@@ -240,7 +240,7 @@ function SlashCmdList.PetWalker(cmd)
 		ns.Status()
 		ns.HelpText()
 	else
-		DEFAULT_CHAT_FRAME:AddMessage("ns: Invalid command or/and arguments. Enter '/pk help' for a list of commands.", 0,1,0.7)
+		DEFAULT_CHAT_FRAME:AddMessage("ns: Invalid command or/and arguments. Enter '/pw help' for a list of commands.", 0,1,0.7)
 	end
 end
 

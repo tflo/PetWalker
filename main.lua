@@ -381,7 +381,7 @@ function ns.TransitionCheck()
 	end
 	local now = GetTime()
 	--[[ If toon starts moving immediately after transition, then RestorePet
-	might come before us. Also prevents redundant run if we have both events
+	might come before us. Also prevents redundant run in case we use both events
 	NEW_AREA and ENTERING_WORLD. ]]
 	if now - timeRestorePet < 6 then return end
 	ns.currentZone = C_Map.GetBestMapForUnit("player")
