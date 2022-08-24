@@ -1,6 +1,6 @@
 # What is this?
 
-An add-on for World of Warcraft (WoW) Retail. Probably/maybe works also with the Classic variants (untested).
+An add-on for World of Warcraft (WoW) Retail. 
 
 # Purpose
 
@@ -10,10 +10,13 @@ The add-on helps you to always have a companion pet out (summoned). You can choo
 
 # Notes
 
-This add-on started out as an improved version of [NugMiniPet](https://www.curseforge.com/wow/addons/nugminipet), but in the meantime not much of the original code is left. Currently, only the approach for char-specific favorite pets is shamelessly copied from NugMiniPet. Will be improved soon.
-Credits for the idea, and for some of the coding to [d87_](https://www.curseforge.com/members/d87_/projects), the author of NugMiniPet.
+This add-on started out as an improved version of [NugMiniPet](https://www.curseforge.com/wow/addons/nugminipet), but in the meantime not much of the original code is left. 
+Credits for the concept and for the original code base to the [author](https://www.curseforge.com/members/d87_/projects) of NugMiniPet.
 
 ## Sources
+
+### Download:
+You can find this add-on on [Wago](https://addons.wago.io/addons/petwalker) and [WoWUpHub](https://wowup.io/addons/1772457) (Github). There are no plans to make it available on Overwolf's CurseForge.
 
 ### Repo:
 https://github.com/tflo/PetWalker
@@ -23,10 +26,6 @@ https://github.com/tflo/PetWalker/releases
 
 ### Issues/suggestions/praise/discussion:
 https://github.com/tflo/PetWalker/issues
-
-### Wiki (NYI):
-https://github.com/tflo/PetWalker/wiki
-
 
 # Features
 
@@ -42,7 +41,7 @@ https://github.com/tflo/PetWalker/wiki
 
 ## Functionality
 
-* Re-summons your pet when it got lost due to game flaws/bugs: using portals or teleports, mounting/dismounting, end of combat, resurrection, nuclear fallout, etc.
+* Re-summons your pet when it has been unsummoned due to flawed game mechanics: using portals or teleports, mounting/dismounting, end of combat, resurrection, entering/leaving instances, etc.
 * ‘Last summoned pet’ is saved across chars. So, if you log out with a given pet on your Mage, then login with your Dracthyr Evoker, you should see the same pet summoned, right from the login.
 * Takes care to not not disturb during various activities/circumstances: Higher M+, Arena, Stealthed, In Combat, and more.
 * The pool of eligible pets to be summoned can be char-specific or account-wide. You can change this setting at any time and as often as you want, the char-specific list (if created) will be preserved.
@@ -88,7 +87,7 @@ Simply make sure that the Summon New Pet timer is set to ‘0’ (zero). You can
 
 ## Where/when does PetWalker fail to keep my pet out?
 
-Almost never. The most difficult situation is when you select a team for a pet battle. If you are using Rematch, you should select the “Keep Companion” option (in “Miscellaneous Options”). This will definitely help, but it is not 100% assured that, after the pet battle, you have the same pet out as before.
+The most difficult situation is when you select a team for a pet battle. If you are using Rematch, you should select the “Keep Companion” option (in “Miscellaneous Options”). This will definitely help, but it is not 100% assured that, after the pet battle, you have the same pet out as before.
 
 ## What are the events PetWalker is reacting to?
 
@@ -107,5 +106,10 @@ Other noteworthy events PetWalker is listening to are: PLAYER_ENTERING_WORLD, PE
 
 * Remove erroneous “summoned” messages in situations where actually no pet was summoned (eg flying, probably vehicle UI).
 
+* As mentioned in the FAQ, there is a chance that after a pet battle your previous companion does not get re-summoned.
+
 Feel free to post suggestions or bug reports in the Issues section of the repo!
 
+***
+
+This ReadMe was last updated 2022-08-24.
