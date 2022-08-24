@@ -1,0 +1,5 @@
+manual-changelog:
+ filename: changelog.md
+ markup-type: markdown
+ 
+# changelog-title: Petwalker – Changelog
