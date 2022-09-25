@@ -471,6 +471,8 @@ local excludedAuras = {
 	131347, -- DH: Gliding
 	311796, -- Pet: Daisy as backpack (/beckon)
 	312993, -- Carrying Forbidden Tomes (Scrivener Lenua event, Revendreth)
+	43880, -- Ramstein's Swift Work Ram (Brewfest daily; important bc the quest cannot be restarted if messed up)
+	43883, -- Rental Racing Ram (Brewfest daily)
 	5384, -- Hunter: Feign Death (only useful to avoid accidental summoning via keybind, or if we use a different event than PLAYER_STARTED_MOVING)
 } -- More exclusions in the Summon function itself
 

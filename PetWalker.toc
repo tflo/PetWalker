@@ -1,6 +1,6 @@
 ## Interface: 90207
 ## Title: PetWalker
-## Version: 1.1.0
+## Version: 1.1.1
 ## Notes: Automatically re-summons your lost companion pet, or auto-summons a random or a favorite one.
 ## Author: Mot
 ## SavedVariables: PetWalkerDB
@@ -18,7 +18,7 @@ ui.lua
 
 
 # License ======================================================================
-# 
+#
 # Copyright © 2022 Thomas Floeren
 #
 # This program is free software: you can redistribute it and/or modify it under
@@ -32,5 +32,5 @@ ui.lua
 #
 # You should have received a copy of the GNU General Public License along with
 # this program. If not, see <https://www.gnu.org/licenses/>.
-# 
+#
 # ==============================================================================

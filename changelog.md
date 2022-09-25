@@ -1,5 +1,9 @@
 ## PetWalker – Changes
 
+### 1.1.1 (2022-09-25)
+- Fix for Brewfest: No pet summoning allowed while we are riding a Ram for the daily quests
+    - Summoning attempts could cancel the Ram aura (43880 and 43883)
+
 ### 1.1.0 (2022-08-24)
 - Squished `/pw n` bug
 - Help and Status message (`/pw h` and `/pw s`): added examples, fixed punctuation; split into chunks for better scrolling.
