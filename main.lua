@@ -196,18 +196,18 @@ Pet Journal
 		ns.events:UnregisterEvent("ADDON_LOADED")
 
 	-- TODO: the same for Rematch
-		for i, btn in ipairs(PetJournal.listScroll.buttons) do
-			btn:SetScript("OnClick",function(self, button)
-				--[[ Windows is lacking the Cmd (Meta) key, so we need Ctrl too.
-				TODO: Find a way to detect the OS. ]]
-				if IsMetaKeyDown() or IsControlKeyDown() then
-					local isFavorite = C_PetJournal.PetIsFavorite(self.petID)
-					C_PetJournal.SetFavorite(self.petID, isFavorite and 0 or 1)
-				else
-					return PetJournalListItem_OnClick(self,button)
-				end
-			end)
-		end
+-- 	Currently disabled due to DF changes
+-- 		for i, btn in ipairs(PetJournal.listScroll.buttons) do
+-- 		for i, btn in ipairs(PetJournal.ScrollBox.ScrollTarget) do
+-- 			btn:SetScript("OnClick",function(self, button)
+-- 				if IsMetaKeyDown() or IsControlKeyDown() then
+-- 					local isFavorite = C_PetJournal.PetIsFavorite(self.petID)
+-- 					C_PetJournal.SetFavorite(self.petID, isFavorite and 0 or 1)
+-- 				else
+-- 					return PetJournalListItem_OnClick(self,button)
+-- 				end
+-- 			end)
+-- 		end
 
 		-- TODO: the same for Rematch
 		ns.CFavs_Button = ns:CreateCfavsCheckBox()
@@ -478,7 +478,7 @@ local excludedAuras = {
 
 local function OfflimitsAura(auras)
 	for _, a in pairs(auras) do
-		if GetPlayerAuraBySpellID(a) then
+		if C_UnitAuras.GetPlayerAuraBySpellID(a) then
 			ns:debugprintL1("Excluded Aura found!")
 			return true
 		end
