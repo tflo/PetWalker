@@ -1,9 +1,14 @@
 ## PetWalker – Changes
 
+### 1.1.3 (2022-11-17)
+- Added PetWalker category for the keybinds panel (free of taint, tested), as Blizz has broken the display of headers in the AddOn category.
+- Other, minor, changes in the binding system. You'll have to rebind your PetWalker hotkeys though. Sorry for that!
+- toc: Updated for 10.0.2.
+
 ### 1.1.2 (2022-10-26)
 - Adapted the aura check to the new DF unit aura API.
 - For the moment disabled the possibility to Cmd/Ctrl-click a pet in the Pet Journal list to make it a favorite. (Due to DF changes.)
-- toc: Updated for 10.0.0
+- toc: Updated for 10.0.0.
 - TODO (non-critical): Add a check for orphaned pet GUIDs in the char favorites table, and remove them.
 
 ### 1.1.1 (2022-09-25)
@@ -16,8 +21,8 @@
 - Added many infos to the ReadMe.
 - New setting: verbosity level for messages:
     - `/pw v`: silent; only important messages (missing favorites, failed summons, etc.) are printed to chat.
-    - `/pw vv`: medium; message when a new pet is summoned.
-    - `/pw vvv`: full; all messages, also when a lost pet is restored, which happens quite often.
+    - `/pw vv`: medium; message when a new pet is summoned (via timer or via keybind / slash command).
+    - `/pw vvv`: full; all messages, also when a lost pet is auto-restored, which happens quite often.
     
 ### 1.0.4.1 (2022-08-24)
 - Meta changes for packager.
