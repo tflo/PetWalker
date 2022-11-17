@@ -1,11 +1,19 @@
 <Bindings>
-	<Binding name="AUTO" header="THISADDON" category="ADDONS">
-        F86D9DE5C_814D_4EEA_A84B_CB9BE07756BE()
+	<Binding name="PETWALKER_TOGGLE_AUTO" category="PetWalker ">
+        petwalker_binding_toggle_autosummon()
     </Binding>
-    <Binding name="NEW" category="ADDONS">
-		 F849A3D45_B1BD_4CA8_BA29_6DD2A8B78470()
+    <Binding name="PETWALKER_NEW_PET" category="PetWalker ">
+		 petwalker_binding_new_pet()
     </Binding>
-    <Binding name="DISMISS" category="ADDONS">
-        F76DE57DF_295D_40B4_B8CE_E45A3DF02C18()
+    <Binding name="PETWALKER_DISMISS_PET" category="PetWalker ">
+        petwalker_binding_dismiss_and_disable()
     </Binding>
 </Bindings>
+
+<!-- 
+Note on the category: 
+
+As of now (Nov 2022, client 100002), using a variable for the category produces taint. Hence the string. The space at the end should ensure that it doesn't resolve to a global `PetWalker` namespace, should I introduce one in the future.
+
+More info: https://us.forums.blizzard.com/en/wow/t/bindingsxml-taint-and-other-issues/1394681/8
+ -->

@@ -17,18 +17,18 @@ ns.events:RegisterEvent("ADDON_LOADED")
 For the Bindings file
 ---------------------------------------------------------------------------]]--
 
-BINDING_HEADER_THISADDON = addonName
-BINDING_NAME_AUTO = "Toggle Auto-summon"
-BINDING_NAME_NEW = "Summon New Pet"
-BINDING_NAME_DISMISS = "Dismiss Pet & Disable Auto-summon"
+-- BINDING_HEADER_PETWALKER = "PetWalker  "
+BINDING_NAME_PETWALKER_TOGGLE_AUTO = "Toggle Auto-Summoning"
+BINDING_NAME_PETWALKER_NEW_PET = "Summon New Pet"
+BINDING_NAME_PETWALKER_DISMISS_PET = "Dismiss Pet & Disable Auto-Summoning"
 
-function F86D9DE5C_814D_4EEA_A84B_CB9BE07756BE()
+function petwalker_binding_toggle_autosummon()
 	ns:AutoToggle()
 end
-function F849A3D45_B1BD_4CA8_BA29_6DD2A8B78470()
+function petwalker_binding_new_pet()
 	ns:NewPet()
 end
-function F76DE57DF_295D_40B4_B8CE_E45A3DF02C18()
+function petwalker_binding_dismiss_and_disable()
 	ns:DismissAndDisable()
 end
 
