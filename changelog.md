@@ -1,5 +1,9 @@
 ## PetWalker – Changes
 
+### 1.1.4 (2022-12-31)
+- Added Curseforge project ID.
+- Adapted ReadMe for Curseforge's broken Markdown parser.
+
 ### 1.1.3 (2022-11-17)
 - Added PetWalker category for the keybinds panel (free of taint, tested), as Blizz has broken the display of headers in the AddOn category.
 - Other, minor, changes in the binding system. You'll have to rebind your PetWalker hotkeys though. Sorry for that!

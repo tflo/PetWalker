@@ -1,23 +1,18 @@
-# What is this?
+This is an addon for Modern World of Warcraft (“Retail”).
 
-An addon for World of Warcraft (WoW) Retail. 
-
-# Purpose
+# Summary
 
 The addon helps you to always have a companion pet out (summoned). You can choose between two operating modes:
-- *Auto Restore only:* Whenever your pet is lost – for whatever reason –, it will be restored. This works across logouts and characters.
-- *Random Summon:* Automatically summons a random pet (from a configurable pool) every n minutes, or via keybind or slash command. This pet will be auto-restored whenever it is lost, until a new one is summoned.
+
+- __Auto Restore only:__ Whenever your pet is lost – for whatever reason –, it will be restored. This works across logouts and characters.
+- __Random Summon:__ Automatically summons a random pet (from a configurable pool) every n minutes, or via keybind or slash command. This pet will be auto-restored whenever it is lost, until a new one is summoned.
 
 # Notes
 
-This addon started out as an improved version of [NugMiniPet](https://www.curseforge.com/wow/addons/nugminipet), but in the meantime not much of the original code is left. 
-Credits for the concept and for the original code base to the [author](https://www.curseforge.com/members/d87_/projects) of NugMiniPet.
+In early 2022 this project started out as an improved version of [NugMiniPet](https://www.curseforge.com/wow/addons/nugminipet), but in the meantime not much of the original code is left. 
+Credits for the concept, the inspiration and for the initial code base though to the [author](https://www.curseforge.com/members/d87_/projects) of NugMiniPet.
 
-## Download
-
-You can find this addon on [Wago](https://addons.wago.io/addons/petwalker) and [Github](https://github.com/tflo/PetWalker).
-
-More links: [Repo](https://github.com/tflo/PetWalker), [All releases](https://github.com/tflo/PetWalker/releases), [Issues/suggestions](https://github.com/tflo/PetWalker/issues).
+PetWalker was first published on [Github](https://github.com/tflo/PetWalker) and [Wago](https://addons.wago.io/addons/petwalker) in April 2022; starting with version 1.1.4 (Dec 2022) now also available on [Curseforge](https://www.curseforge.com/wow/addons/petwalker).
 
 # Features
 
@@ -45,21 +40,21 @@ More links: [Repo](https://github.com/tflo/PetWalker), [All releases](https://gi
 
 # Usage
 
-- **`/pw a`**: Toggle automatic summoning of pets. (Basically enabling/disabling the addon.)  
-- **`/pw d`**: Dismiss current pet and disable auto-summoning. A kind of emergency command, if you want to get rid of your pet immediately and prevent any automatic summoning.   
-- **`/pw <number>`**: Interval [minutes] for summoning a new pet. ‘0’ disables summoning of new pets, though the pet-*restore* functionality is still active (use `/pw a` to disable it).
-- **`/pw f`**: Toggle the random-summon pool between Favorites and All Pets. 
+- __`/pw a`__: Toggle automatic summoning of pets. (Basically enabling/disabling the addon.)  
+- __`/pw d`__: Dismiss current pet and disable auto-summoning. A kind of emergency command, if you want to get rid of your pet immediately and prevent any automatic summoning.   
+- __`/pw <number>`__: Interval [minutes] for summoning a new pet. ‘0’ disables summoning of new pets, though the pet-_restore_ functionality is still active (use `/pw a` to disable it).
+- __`/pw f`__: Toggle the random-summon pool between Favorites and All Pets. 
     - With the All Pets setting, the currently active filters of the Pet Journal apply (Pet Family and Sources). Since these filters can be combined, this offers quite some possibilities to create varied pools for random summoning, without the need to select favorites.
     - Note that this works only with the filters set in Blizz’s Pet Journal, not the filters in Rematch.
-- **`/pw c`**: Toggle char-specific favorites list. (Only applies if set to Favorites via `/pw f`.)      
-- **`/pw n`**: Summon new pet (from the active pet pool: Favs or All, see commands explained above). Summoning a pet with `/pw n` (or the keybind) resets your current auto-summon timer.
-- **`/pw p`**: Summon previous pet. By ‘previous’ we don‘t mean a pet you just lost (this is covered by the core functionality of the addon), but the one before that. For example, if your auto-summon timer gives you a new pet, but you actually liked the last one, you can quickly get it back with this command.
-- **`/pw v[vv]`**: Verbosity level for messages:
-    - `/pw v`: *silent*: only important messages (missing favorites, failed summons, etc.) are printed to the chat.
-    - `/pw vv`: *medium*: you get a message when a *new* pet is summoned (either via auto-timer or manually via `/pw n` or keybind).
-    - `/pw vvv`: *full*: all messages; you get a message also when a lost pet is restored, which happens quite often.
-- **`/pw h`**: Display the Help text in the console. (Also `/pw help` or just `/pw`.) 
-- **`/pw s`**: Display the Status & Settings report in the console, with these infos:
+- __`/pw c`__: Toggle char-specific favorites list. (Only applies if set to Favorites via `/pw f`.)      
+- __`/pw n`__: Summon new pet (from the active pet pool: Favs or All, see commands explained above). Summoning a pet with `/pw n` (or the keybind) resets your current auto-summon timer.
+- __`/pw p`__: Summon previous pet. By ‘previous’ we don‘t mean a pet you just lost (this is covered by the core functionality of the addon), but the one before that. For example, if your auto-summon timer gives you a new pet, but you actually liked the last one, you can quickly get it back with this command.
+- __`/pw v[vv]`__: Verbosity level for messages:
+    - `/pw v`: _silent_: only important messages (missing favorites, failed summons, etc.) are printed to the chat.
+    - `/pw vv`: _medium_: you get a message when a _new_ pet is summoned (either via auto-timer or manually via `/pw n` or keybind).
+    - `/pw vvv`: _full_: all messages; you get a message also when a lost pet is restored, which happens quite often.
+- __`/pw h`__: Display the Help text in the console. (Also `/pw help` or just `/pw`.) 
+- __`/pw s`__: Display the Status & Settings report in the console, with these infos:
     - If the addon is active (auto-summoning/restore enabled or disabled).
     - The summon timer interval and the remaining time (that is, when you will get the next new pet).
     - Verbosity level of messages.
@@ -78,7 +73,7 @@ Also check the Key Bindings section of your client. You’ll find three bindable
 - Summon new pet (same as `/pw n`)   
 
 
-***
+---
 
 # FAQ
 
@@ -93,7 +88,7 @@ Unlike the global favorites, these char-specific favorites will not be sorted at
 
 ## I do not want to summon a new pet every `n` minutes, I just want to keep my current pet out!
 
-Simply set the Summon New Pet timer to ‘0’ (zero). You can set it to 0 with the command `/pw 0`. With this setting, the addon will never give you a new pet, and will do its best to keep your current pet out, until *you* decide to summon a different one. *How* the pet is summoned, is irrelevant: it can be summoned via Pet Journal, or via PetWalker keybind, or whatever. PetWalker will remember it, treat is as your “valid” current pet and will try to re-summon it whenever it is lost.
+Simply set the Summon New Pet timer to ‘0’ (zero). You can set it to 0 with the command `/pw 0`. With this setting, the addon will never give you a new pet, and will do its best to keep your current pet out, until _you_ decide to summon a different one. _How_ the pet is summoned, is irrelevant: it can be summoned via Pet Journal, or via PetWalker keybind, or whatever. PetWalker will remember it, treat is as your “valid” current pet and will try to re-summon it whenever it is lost.
 
 ## Where/when does PetWalker fail to keep my pet out?
 
@@ -102,21 +97,21 @@ The most difficult situation is when you select a team for a pet battle. If you 
 ## What are the events PetWalker is reacting to?
 
 The main event that makes PetWalker check for the pet and summon it if necessary, is `PLAYER_STARTED_MOVING`.  
-This is a very frequent event, yes. I have experimented with various other events, but this one turned out to be best. (After all, the goal of PetWalker is to assure that your pet is *always* out, not that it’s out every once in a while.)  
+This is a very frequent event, yes. I have experimented with various other events, but this one turned out to be best. (After all, the goal of PetWalker is to assure that your pet is _always_ out, not that it’s out every once in a while.)  
 
 In rare occasions, PetWalker’s summoning might interfere with other casts, notably with Druids shapeshifting immediately after starting to move. But, since PetWalker does nothing in combat situations (and other critical situations), it should be pretty safe.  
 
-Other noteworthy events PetWalker is listening to are: `PLAYER_ENTERING_WORLD`, `PLAYER_LOGOUT`, `PET_JOURNAL_LIST_UPDATE`, `UNIT_SPELLCAST_SUCCEEDED`, `COMPANION_UPDATE`.
-
-***
+---
 
 # Known Issues / To Do 
 
-- Remove erroneous “summoned” messages in situations where actually no pet was summoned (eg flying, probably vehicle UI).
-- As mentioned in the FAQ, there is a chance that after a pet battle your previous companion does not get re-summoned.
+- Remove erroneous “summoned” messages in a few situations where actually no pet was summoned (eg flying, probably vehicle UI).
+- As mentioned in the FAQ, there is a chance that after a pet battle your previous companion does not get re-summoned. This needs to be improved.
+- Check for and remove orphaned pet GUIDs from the char-specific favorites table. (Not sure if this was an issue just in the Dragonflight prepatch phase, or if it still happens.)
 
-Feel free to post suggestions or bug reports in the [Issues](https://github.com/tflo/PetWalker/issues) section of the repo!
+Feel free to post suggestions or issues in the [Github Issues](https://github.com/tflo/PetWalker/issues) of the repo!
+__Please do not post issues or suggestions in the comments on Curseforge.__
 
-***
+___
 
-This ReadMe was last updated 2022-11-17.
+This ReadMe was last updated 2022-12-31.

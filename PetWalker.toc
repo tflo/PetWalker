@@ -1,12 +1,20 @@
 ## Interface: 100002
 ## Title: PetWalker
-## Version: 1.1.3
+## Version: 1.1.4
 ## Notes: Automatically re-summons your lost companion pet, or auto-summons a random or a favorite one.
 ## Author: Mot
+
+## DefaultState: enabled
+# Dependencies:
+# OptionalDeps:
+# LoadWith:
+# LoadOnDemand:
+
+## X-Wago-ID: qv63aZGb
+## X-Curse-Project-ID: 784734
+
 ## SavedVariables: PetWalkerDB
 ## SavedVariablesPerCharacter: PetWalkerPerCharDB
-## X-Wago-ID: qv63aZGb
-# X-Curse-Project-ID:
 
 main.lua
 ui.lua
