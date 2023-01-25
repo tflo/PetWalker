@@ -5,6 +5,9 @@
     <Binding name="PETWALKER_NEW_PET" category="PetWalker ">
 		 petwalker_binding_new_pet()
     </Binding>
+    <Binding name="PETWALKER_TARGET_PET" category="PetWalker ">
+		 petwalker_binding_target_pet()
+    </Binding>
     <Binding name="PETWALKER_DISMISS_PET" category="PetWalker ">
         petwalker_binding_dismiss_and_disable()
     </Binding>

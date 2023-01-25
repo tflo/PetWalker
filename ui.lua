@@ -124,7 +124,7 @@ function ns.HelpText()
 		CO.bn .. "Help: ",
 		CO.c .. "\n/pw ", "or ", CO.c .. "/petw ", "supports these commands: ",
 	}
-	
+
 	local body = {
 		CO.c .. "\nd", ": ", CO.k .. "Dismiss ", "current pet and ", CO.k .. "disable auto-summon ", "(new pet / restore).",
 		CO.c .. "\na", ": ", "Toggle ", CO.k .. "auto-summon ", "(new pet / restore).",
@@ -137,16 +137,16 @@ function ns.HelpText()
 		CO.c .. "\ns", ": ", "Display current ", CO.k .. "status/settings.",
 		CO.c .. "\nh", ": ", "This help text.",
 	}
-	
+
 	local footer = {
 		CO.bn .. "\nExamples: ", CO.c .. "/pw a", " disables auto-summon/restore, or enables it if disabled. ", CO.c .. "/pw 20", " sets the new-pet summon timer to 20 minutes.",
 		"\nIn 'Key Bindigs > AddOns' you can directly bind some commands.",
 	}
-	
+
 	header = table.concat(header, CO.bn)
 	body = table.concat(body, CO.bn)
 	footer = table.concat(footer, CO.bn)
-	
+
 	ChatUserNotificationLarge(header, body, nil, footer)
 end
 
@@ -169,11 +169,11 @@ function ns.Status()
 	local charfavlist = {
 		"\n", ns:ListCharFavs(),
 	}
-	
+
 	header = table.concat(header, CO.bn)
 	body = table.concat(body, CO.bn)
 	charfavlist = table.concat(charfavlist, CO.bn)
-	
+
 	ChatUserNotificationLarge(header, body, nil, charfavlist)
 end
 
@@ -234,6 +234,8 @@ function SlashCmdList.PetWalker(cmd)
 		ns.Status()
 	elseif tonumber(cmd) then
 		ns:TimerSlashCmd(cmd)
+	elseif cmd == 't' or cmd == 'target' then
+		ns.SummonTargetPet()
 	elseif cmd == 'h' or cmd == 'help' then
 		ns.HelpText()
 	elseif cmd == '' then

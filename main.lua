@@ -20,6 +20,7 @@ For the Bindings file
 -- BINDING_HEADER_PETWALKER = "PetWalker  "
 BINDING_NAME_PETWALKER_TOGGLE_AUTO = "Toggle Auto-Summoning"
 BINDING_NAME_PETWALKER_NEW_PET = "Summon New Pet"
+BINDING_NAME_PETWALKER_TARGET_PET = "Try to Summon Same Pet as Target"
 BINDING_NAME_PETWALKER_DISMISS_PET = "Dismiss Pet & Disable Auto-Summoning"
 
 function petwalker_binding_toggle_autosummon()
@@ -27,6 +28,9 @@ function petwalker_binding_toggle_autosummon()
 end
 function petwalker_binding_new_pet()
 	ns:NewPet()
+end
+function petwalker_binding_target_pet()
+	ns:SummonTargetPet()
 end
 function petwalker_binding_dismiss_and_disable()
 	ns:DismissAndDisable()
@@ -357,6 +361,43 @@ function ns.PreviousPet()
 	ns.SetSumMsgToPreviousPet(prevpet)
 	ns:SafeSummon(prevpet, true)
 end
+
+--[[---------------------------------------------------------------------------
+TRY TO SUMMON the targeted pet
+---------------------------------------------------------------------------]]--
+
+function ns.SummonTargetPet()
+	if not UnitIsBattlePet 'target' then
+		print '[PW BETA:] The target is not a battle pet.'
+		return
+	end
+
+	local targetSpeciesID = UnitBattlePetSpeciesID 'target'
+	local targetPetName = C_PetJournal.GetPetInfoBySpeciesID(targetSpeciesID)
+	local _, tarpet = C_PetJournal.FindPetIDByName(targetPetName)
+	local targetPetLink = tarpet and C_PetJournal.GetBattlePetLink(tarpet)
+
+	if not C_PetJournal.GetOwnedBattlePetString(targetSpeciesID) then
+		if not UnitIsBattlePetCompanion 'target' then
+			print('[PW BETA:] Target "' ..  targetPetName .. '" is a battle pet, but not a companion battle pet (not in your collection and unlikely to be collectible at all).') -- https://www.wowhead.com/search?q=Anubisath+Idol
+			if tarpet then print 'Pet GUID found! This is weird.' end -- for testing if there exists maybe a non-companion pet with a corresponding *collectible* species.
+		else
+			print('[PW BETA:] ' .. targetPetLink .. ' is not in your collection.')
+			--https://www.warcraftpets.com/search/?q=Anubisath+Idol
+		end
+		return
+	end
+
+	local currentPet = C_PetJournal.GetSummonedPetGUID()
+
+	if not currentPet or C_PetJournal.GetPetInfoByPetID(currentPet) ~= targetSpeciesID then
+		ns:SafeSummon(tarpet, true)
+		print('[PW BETA:] Target pet ' .. targetPetLink .. ' summoned.') -- should this obey to verbosity rules? probably not
+	else
+		print('[PW BETA:] Target pet ' .. targetPetLink .. ' is the same pet as you currently have summened.') -- should this obey to verbosity rules? probably not
+	end
+end
+
 
 
 --[[---------------------------------------------------------------------------
