@@ -1,6 +1,6 @@
 ## Interface: 100005
 ## Title: PetWalker
-## Version: 1.1.5
+## Version: 1.1.6-beta1
 ## Notes: Automatically re-summons your lost companion pet, or auto-summons a random or a favorite one.
 ## Author: Mot
 

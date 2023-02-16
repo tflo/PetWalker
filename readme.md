@@ -46,8 +46,9 @@ PetWalker has a rich chat console interface:
 - __`/pw d`__: Dismiss current pet and disable auto-summoning. A kind of emergency command, if you want to get rid of your pet immediately and prevent any automatic summoning.   
 - __`/pw <number>`__: Interval [minutes] for summoning a new pet. ‘0’ disables summoning of new pets, though the pet-_restore_ functionality is still active (use `/pw a` to disable it).
 - __`/pw f`__: Toggle the random-summon pool between Favorites and All Pets. 
-    - With the All Pets setting, the currently active filters of the Pet Journal apply (Pet Family and Sources). Since these filters can be combined, this offers quite some possibilities to create varied pools for random summoning, without the need to select favorites.
-    - Note that this works only with the filters set in Blizz’s Pet Journal, not the filters in Rematch.
+    - With the All Pets setting, the currently active filters of the Pet Journal still apply (Pet Family and Sources). Since these filters can be combined, this offers quite some possibilities to create varied pools for random summoning, without the need to select favorites.
+    - Note that this works only with the filters set in Blizz’s Pet Journal, not the filters in Rematch. 
+    - If you set the pool to Favorites, make sure that your favorites are not excluded by the Pet Journal filters.
 - __`/pw c`__: Toggle char-specific favorites list. (Only applies if set to Favorites via `/pw f`.)      
 - __`/pw n`__: Summon new pet (from the active pet pool: Favs or All, see commands explained above). Summoning a pet with `/pw n` (or the keybind) resets your current auto-summon timer.
 - __`/pw p`__: Summon previous pet. By ‘previous’ we don‘t mean a pet you just lost (this is covered by the core functionality of the addon), but the one before that. For example, if your auto-summon timer gives you a new pet, but you actually liked the last one, you can quickly get it back with this command.

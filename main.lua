@@ -427,6 +427,7 @@ function ns.TransitionCheck()
 	if now - timeRestorePet < 6 then return end
 	ns.currentZone = C_Map.GetBestMapForUnit("player")
 	local savedpet
+	ns:CFavsUpdate()
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
 		if not actpet or actpet ~= ns.dbc.currentPet then

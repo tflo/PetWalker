@@ -300,7 +300,7 @@ end
 
 function ns.CharFavsSlashToggle() -- for slash command only
 	ns.dbc.charFavsEnabled = not ns.dbc.charFavsEnabled
-	ns:CFavsUpdate()
+-- 	ns:CFavsUpdate() -- Added this to TransitionCheck()
 	--[[ This is redundant, _if_ we leave the 'ns.poolInitialized = false' in the
 	PET_JOURNAL_LIST_UPDATE function, which gets called by the ns:CFavsUpdate above ]]
 	ns.poolInitialized, ns.petVerified = false, false

@@ -1,3 +1,6 @@
+#### 1.1.5-1-beta (2023-02-16)
+-  Attempt #1 to prevent that charfavs are not correctly intitialized in some situations ([#5](https://github.com/tflo/PetWalker/issues/5)
+
 #### 1.1.5 (2023-01-25)
 - toc: Updated for 10.0.5.
 - New (beta) feature: Summon same pet as targeted pet:
