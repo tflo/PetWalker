@@ -55,6 +55,7 @@ local timeSavePet = 0
 local timePoolMsg = 0
 local timePlayerCast = 0
 local timeTransitionCheck = 0
+local delayLoad
 
 local excludedSpecies = {
 --[[  Pet is vendor and goes on CD when summoned ]]
@@ -131,11 +132,18 @@ Init
 		otherwise we might unsummon our - not yet spawned - pet.
 		]]
 		ns.events:RegisterEvent("PLAYER_ENTERING_WORLD")
-		function ns.PLAYER_ENTERING_WORLD()
+		function ns.PLAYER_ENTERING_WORLD(_, isLogin, isReload)
 			--[[ To prevent saving the wrong pet if we get an arbitrary
 			COMPANION_UPDATE before the TransitionCheck could summon a pet ]]
+			if isLogin then
+				delayLoad = 12
+			elseif isReload then
+				delayLoad = 8
+			else
+				delayLoad = 5 -- TODO: Find out if we really need the TransitionCheck here
+			end
 			ns.petVerified = false
-			C_Timer.After(10, ns.TransitionCheck)
+			C_Timer.After(delayLoad, ns.TransitionCheck)
 		end
 
 		--[[
