@@ -1,5 +1,8 @@
-#### 1.1.5-1-beta (2023-02-16)
--  Attempt #1 to prevent that charfavs are not correctly intitialized in some situations ([#5](https://github.com/tflo/PetWalker/issues/5)
+#### 1.1.6 (2023-02-17)
+- Attempt to prevent that char favs are not correctly intitialized in some situations ([#5](https://github.com/tflo/PetWalker/issues/5))
+- Adaptive delays for the initial check after login/reload/other
+- Some additions to the ReadMe, mainly concerning Pet Journal filters and search box
+- Added a PDF version of the ReadMe (description) to the addon folder. This is mainly due to CurseForge's broken Markdown parser, but may be useful in other ways as well.
 
 #### 1.1.5 (2023-01-25)
 - toc: Updated for 10.0.5.

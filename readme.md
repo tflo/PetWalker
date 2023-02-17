@@ -1,4 +1,6 @@
-This is an addon for Modern World of Warcraft (“Retail”).
+# PetWalker
+
+Never lose your pet again.
 
 ## Summary
 
@@ -13,6 +15,8 @@ In early 2022 this project started out as an improved version of [NugMiniPet](ht
 Credits for the concept, the inspiration and for the initial code base though to the [author](https://www.curseforge.com/members/d87_/projects) of NugMiniPet.
 
 PetWalker was first published on [GitHub](https://github.com/tflo/PetWalker) and [Wago](https://addons.wago.io/addons/petwalker) in April 2022; starting with version 1.1.4 (Dec 2022) now also available on [Curseforge](https://www.curseforge.com/wow/addons/petwalker).
+
+__Important: _If you are reading this description on CurseForge, be aware that Curse's Markdown parser is quite broken! For a more readable version, please go [here](https://addons.wago.io/addons/petwalker), or open the readme.pdf inside the addon folder.___
 
 ## Features
 
@@ -47,8 +51,9 @@ PetWalker has a rich chat console interface:
 - __`/pw <number>`__: Interval [minutes] for summoning a new pet. ‘0’ disables summoning of new pets, though the pet-_restore_ functionality is still active (use `/pw a` to disable it).
 - __`/pw f`__: Toggle the random-summon pool between Favorites and All Pets. 
     - With the All Pets setting, the currently active filters of the Pet Journal still apply (Pet Family and Sources). Since these filters can be combined, this offers quite some possibilities to create varied pools for random summoning, without the need to select favorites.
-    - Note that this works only with the filters set in Blizz’s Pet Journal, not the filters in Rematch. 
-    - If you set the pool to Favorites, make sure that your favorites are not excluded by the Pet Journal filters.
+    - Hint: You can also use the search box of the Pet Journal as filter: If your summon pool is set to All Pets and the search box contains "rabbit", PetWalker will only summon pets with "rabbit" in their name.
+    - Note that this works only with the filters or search box in Blizz’s Pet Journal, not in Rematch. 
+    - If you set the pool to Favorites, make sure that your favorites are not excluded by the Pet Journal filters or search string.
 - __`/pw c`__: Toggle char-specific favorites list. (Only applies if set to Favorites via `/pw f`.)      
 - __`/pw n`__: Summon new pet (from the active pet pool: Favs or All, see commands explained above). Summoning a pet with `/pw n` (or the keybind) resets your current auto-summon timer.
 - __`/pw p`__: Summon previous pet. By ‘previous’ we don‘t mean a pet you just lost (this is covered by the core functionality of the addon), but the one before that. For example, if your auto-summon timer gives you a new pet, but you actually liked the last one, you can quickly get it back with this command.
@@ -118,6 +123,8 @@ In rare occasions, PetWalker’s summoning might interfere with other casts, not
 - Remove erroneous “summoned” messages in a few situations where actually no pet was summoned (eg flying, probably vehicle UI).
 - As mentioned in the FAQ, there is a chance that after a pet battle your previous companion does not get re-summoned. This needs to be improved.
 - Check for and remove orphaned pet GUIDs from the char-specific favorites table. (Not sure if this was an issue just in the Dragonflight prepatch phase, or if it still happens.)
+- Automatically disable random summoning if the pool has less than 2 pets.
+- Add an optional login message.
 
 Feel free to post suggestions or issues in the [GitHub Issues](https://github.com/tflo/PetWalker/issues) of the repo!
 __Please do not post issues or suggestions in the comments on Curseforge.__
