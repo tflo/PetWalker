@@ -385,7 +385,7 @@ TRY TO SUMMON the targeted pet
 
 function ns.SummonTargetPet()
 	if not UnitIsBattlePet 'target' then
-		print '[PW BETA:] The target is not a battle pet.'
+		ns.MsgTargetIsNotBattlePet()
 		return
 	end
 
@@ -396,11 +396,10 @@ function ns.SummonTargetPet()
 
 	if not C_PetJournal.GetOwnedBattlePetString(targetSpeciesID) then
 		if not UnitIsBattlePetCompanion 'target' then
-			print('[PW BETA:] Target "' ..  targetPetName .. '" is a battle pet, but not a companion battle pet (not in your collection and unlikely to be collectible at all).') -- https://www.wowhead.com/search?q=Anubisath+Idol
-			if tarpet then print 'Pet GUID found! This is weird.' end -- for testing if there exists maybe a non-companion pet with a corresponding *collectible* species.
+			ns.MsgTargetIsNotCompanionBattlePet(targetPetName)
+			if tarpet then ChatUserNotification(CO.bn .. 'Not a companion battle pet, but we have found a GUID! This is weird.') end -- for testing if there exists maybe a non-companion pet with a corresponding *collectible* species.
 		else
-			print('[PW BETA:] ' .. targetPetLink .. ' is not in your collection.')
-			--https://www.warcraftpets.com/search/?q=Anubisath+Idol
+			ns.MsgTargetNotInCollection(targetPetLink, targetPetName)
 		end
 		return
 	end
@@ -409,9 +408,10 @@ function ns.SummonTargetPet()
 
 	if not currentPet or C_PetJournal.GetPetInfoByPetID(currentPet) ~= targetSpeciesID then
 		ns:SafeSummon(tarpet, true)
-		print('[PW BETA:] Target pet ' .. targetPetLink .. ' summoned.') -- should this obey to verbosity rules? probably not
+		ns.MsgTargetSummoned(targetPetLink)
 	else
-		print('[PW BETA:] Target pet ' .. targetPetLink .. ' is the same pet as you currently have summened.') -- should this obey to verbosity rules? probably not
+		ns.MsgTargetIsSame(targetPetLink) -- Without web link
+-- 		ns.MsgTargetIsSame(targetPetLink, targetPetName) -- With web link
 	end
 end
 

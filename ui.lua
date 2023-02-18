@@ -75,6 +75,40 @@ function ns.MsgOnlyFavIsActive(ap)
 	ChatUserNotification(CO.bn .. "Your only eligible random pet " .. (ns.PetIDtoLink(ap) or "???") .. " is already active")
 end
 
+
+-- Summon Target Pet messages
+
+function ns.MsgTargetSummoned(link)
+	if ns.db.verbosityLevel < 1 then return end
+	ChatUserNotification(format('%sTarget pet %s summoned.', CO.bn, link))
+end
+
+function ns.MsgTargetIsSame(link) -- Without web link
+	if ns.db.verbosityLevel < 1 then return end
+	ChatUserNotification(format("%sTarget pet %s is the same pet as you currently have summened.", CO.bn, link))
+end
+
+-- function ns.MsgTargetIsSame(link, name) -- With web link
+-- 	if ns.db.verbosityLevel < 1 then return end
+-- 	ChatUserNotification(format('%sTarget pet %s is the same pet as you currently have summened: \nhttps://www.warcraftpets.com/search?q=%s', CO.bn, link, name:gsub("[ ']", {[" "] = "%20", ["'"] = "%27"})))
+-- end
+
+function ns.MsgTargetNotInCollection(link, name)
+	if ns.db.verbosityLevel < 1 then return end
+	ChatUserNotification(format('%sUnfortunately, the target pet %s is not in your collection: \nhttps://www.warcraftpets.com/search?q=%s', CO.bn, link, name:gsub("[ ']", {[" "] = "%20", ["'"] = "%27"})))
+end
+
+function ns.MsgTargetIsNotBattlePet()
+	if ns.db.verbosityLevel < 1 then return end
+	ChatUserNotification(format('%sThe target is not a battle pet!', CO.bn))
+end
+
+function ns.MsgTargetIsNotCompanionBattlePet(name)
+	if ns.db.verbosityLevel < 1 then return end
+	ChatUserNotification(format('%sTarget pet "%s" is a battle pet, but not a companion battle pet. (Not in your collection and unlikely to be collectible at all.): \nhttps://www.wowhead.com/search?q=%s', CO.bn, name, name:gsub("[ ']", {[" "] = "%20", ["'"] = "%27"})))
+end
+
+
 --[[---------------------------------------------------------------------------
 The main, success, message when a pet was summoned. Either by RestorePet or
 NewPet, or PreviousPet or the TransitionCheck.
