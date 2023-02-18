@@ -27,7 +27,7 @@ function petwalker_binding_toggle_autosummon()
 	ns:AutoToggle()
 end
 function petwalker_binding_new_pet()
-	ns:NewPet()
+	ns:NewPet(nil, true)
 end
 function petwalker_binding_target_pet()
 	ns:SummonTargetPet()
@@ -56,6 +56,7 @@ local timePoolMsg = 0
 local timePlayerCast = 0
 local timeTransitionCheck = 0
 local delayLoad
+local msgOnlyFavIsActiveAlreadyDisplayed = false
 
 local excludedSpecies = {
 --[[  Pet is vendor and goes on CD when summoned ]]
@@ -327,7 +328,7 @@ NEW PET SUMMON: Runs when timer is due
 ---------------------------------------------------------------------------]]--
 -- Called by: ns.AutoAction, ns.TransitionCheck, NewPet keybind, NewPet slash command
 
-function ns:NewPet(time)
+function ns:NewPet(time, viaHotkey)
 	local now = time or GetTime()
 	if now - ns.timeNewPetSuccess < 1.5 then return end
 	local actpet = C_PetJournal.GetSummonedPetGUID()
@@ -346,7 +347,10 @@ function ns:NewPet(time)
 		if npool == 1 then
 			newpet = ns.petPool[1]
 			if actpet == newpet then
-				ns.MsgOnlyFavIsActive(actpet)
+				if not msgOnlyFavIsActiveAlreadyDisplayed or viaHotkey then
+					ns.MsgOnlyFavIsActive(actpet)
+					msgOnlyFavIsActiveAlreadyDisplayed = true
+				end
 				return
 			end
 		else
@@ -615,7 +619,7 @@ function ns.InitializePool(self)
 	end
 	ns.poolInitialized = true -- Condition in ns:NewPet and ns.ManualSummonNew
 	local now = GetTime()
-	if #ns.petPool <= 1 and ns.db.newPetTimer ~= 0 and now - timePoolMsg > 30 then
+	if #ns.petPool <= 0 and ns.db.newPetTimer ~= 0 and now - timePoolMsg > 30 then
 		ns.MsgLowPetPool(#ns.petPool)
 		timePoolMsg = now
 	end
