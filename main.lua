@@ -743,14 +743,14 @@ end
 -- without pet info
 function ns:debugprintL1(msg)
 	if ns.db.debugMode then
-		print("\n|cffEE82EE# PETWALKER DEBUG: " .. (msg or "<nil>") .. " #")
+		print("|cffEE82EE# PETWALKER DEBUG: " .. (msg or "<nil>") .. " #")
 	end
 end
 
 -- with pet info
 function ns:debugprintL2(msg)
 	if ns.db.debugMode then
-		print("\n|cffEE82EE# PETWALKER DEBUG: " .. (msg or "<nil>") .. " ### Current DB pet: " .. (ns.PetIDtoName(((ns.dbc.charFavs and ns.db.favsOnly) and ns.dbc.currentPet or ns.db.currentPet)) or "<nil>") .. " #")
+		print("|cffEE82EE# PETWALKER DEBUG: " .. (msg or "<nil>") .. " ### Current DB pet: " .. (ns.PetIDtoName(((ns.dbc.charFavs and ns.db.favsOnly) and ns.dbc.currentPet or ns.db.currentPet)) or "<nil>") .. " #")
 	end
 end
 
