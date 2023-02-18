@@ -242,7 +242,7 @@ function SlashCmdList.PetWalker(cmd)
 		ns.Status()
 		ns.HelpText()
 	else
-		DEFAULT_CHAT_FRAME:AddMessage("ns: Invalid command or/and arguments. Enter '/pw help' for a list of commands.", 0,1,0.7)
+		ChatUserNotification(format("%sInvalid command or arguments. Enter %s/pw help %sfor a list of commands.", CO.bw, CO.c, CO.bw))
 	end
 end
 
