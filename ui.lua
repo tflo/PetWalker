@@ -122,7 +122,7 @@ function ns.HelpText()
 
 	local header = {
 		CO.bn .. "Help: ",
-		CO.c .. "\n/pw ", "or ", CO.c .. "/petw ", "supports these commands: ",
+		CO.c .. "\n/pw ", "or ", CO.c .. "/petwalker ", "supports these commands: ",
 	}
 
 	local body = {
@@ -201,7 +201,7 @@ end
 Slash UI
 ===========================================================================]]--
 
-SLASH_PetWalker1, SLASH_PetWalker2 = '/pw', '/petw'
+SLASH_PetWalker1, SLASH_PetWalker2 = '/pw', '/petwalker'
 function SlashCmdList.PetWalker(cmd)
 	if cmd == 'd' or cmd == 'dis' then
 		ns:DismissAndDisable()
