@@ -224,7 +224,7 @@ function SlashCmdList.PetWalker(cmd)
 		ns:NewPet()
 	elseif cmd == 'f' or cmd == 'fav' then
 		ns:FavsToggle()
-	elseif cmd == 'e' or cmd == 'eve' then
+	elseif cmd == 'e' or cmd == 'eve' then -- Not meant for the user; undocumented
 		ns:EventAlt()
 	elseif cmd == 'c' or cmd == 'char' then
 		ns.CharFavsSlashToggle()
@@ -287,8 +287,8 @@ function ns:AutoToggle()
 end
 
 function ns:EventAlt()
-	ns.dbc.eventAlt = not ns.dbc.eventAlt
-	ChatUserNotification(CO.bn .. "Listening to Event " .. (ns.dbc.eventAlt and "PLAYER_STARTED_LOOKING" or "PLAYER_STARTED_MOVING (default)") .. " # Requires reload")
+	ns.db.eventAlt = not ns.db.eventAlt
+	ChatUserNotification(CO.bn .. (ns.db.eventAlt and "Alternative event(s) activated." or "Default event activated (PLAYER_STARTED_MOVING).") .. " # Requires reload #")
 end
 
 function ns:FavsToggle()

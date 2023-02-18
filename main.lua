@@ -104,7 +104,7 @@ Init
 		ns.db.favsOnly = ns.db.favsOnly == nil and true or ns.db.favsOnly
 		ns.dbc.charFavsEnabled = ns.dbc.charFavsEnabled or false
 		ns.dbc.charFavs = ns.dbc.charFavs or {}
-		ns.dbc.eventAlt = ns.dbc.eventAlt or false
+		ns.db.eventAlt = ns.db.eventAlt or false
 		ns.db.debugMode = ns.db.debugMode or false
 		ns.db.verbosityLevel = ns.db.verbosityLevel or 3
 
@@ -161,9 +161,13 @@ Init
 		end
 
 
-		if ns.dbc.eventAlt then
-			ns.events:RegisterEvent("PLAYER_STARTED_LOOKING")
-			function ns:PLAYER_STARTED_LOOKING()
+		if ns.db.eventAlt then
+			ns.events:RegisterEvent("ZONE_CHANGED")
+			function ns:ZONE_CHANGED()
+				ns.AutoAction()
+			end
+			ns.events:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
+			function ns:PLAYER_MOUNT_DISPLAY_CHANGED()
 				ns.AutoAction()
 			end
 		else
@@ -233,6 +237,7 @@ Pet Journal
 			end
 		end)
 
+		-- TODO: This should be redundant here, since we do this now in the TransitionCheck (v1.1.6)
 		ns:CFavsUpdate()
 
 	end
