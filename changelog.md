@@ -1,3 +1,11 @@
+#### 1.1.7 (2023-02-19)
+- New message logic for pools of only one pet: You can now have only a single pet in the "random" summon pool (e.g. only one favorite pet or only one char-specific favorite pet) without getting spammed with warnings. Thanks to Syrusel for his constructive input in [#5](https://github.com/tflo/PetWalker/issues/5).
+- Finished implementation of the new Summon Target Pet feature. Trying to summon an uncollected target pet gives you a link to the pet's page on warcraftpets.com now, or on wowhead.com if it's not collectible.
+- Changed 2nd slash command to `/petwalker` (formerly `/petw`). This should be more intuitive for new users. The short command `/pw` remains unchanged, of course.
+- Fixed prefix of the 'invalid command' message and punctuation/formatting of some other messages.
+- Changes to some debug functionalities.
+- ReadMe/description updated.
+
 #### 1.1.6 (2023-02-17)
 - Attempt to prevent that char favs are not correctly intitialized in some situations ([#5](https://github.com/tflo/PetWalker/issues/5))
 - Adaptive delays for the initial check after login/reload/other

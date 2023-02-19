@@ -16,26 +16,26 @@ Credits for the concept, the inspiration and for the initial code base though to
 
 PetWalker was first published on [GitHub](https://github.com/tflo/PetWalker) and [Wago](https://addons.wago.io/addons/petwalker) in April 2022; starting with version 1.1.4 (Dec 2022) now also available on [Curseforge](https://www.curseforge.com/wow/addons/petwalker).
 
-__Important: _If you are reading this description on CurseForge, be aware that Curse's Markdown parser is quite broken! For a more readable version, please go [here](https://addons.wago.io/addons/petwalker), or open the readme.pdf inside the addon folder.___
+___If you are reading this description on CurseForge, be aware that Curse's Markdown parser is quite broken. For a correctly rendered and more readable description, please go [here](https://addons.wago.io/addons/petwalker), or open the readme.pdf inside the addon folder.___
 
 ## Features
 
 ### Main Features
 
-- Re-summons (restores) your pet when it has “disappeared”. Most of the time this happens due to flawed game mechanics: using portals or teleports, mounting/dismounting, end of combat, resurrection, entering/leaving instances, etc.
-- You can set a repeating timer to auto-summon a new pet from a configurable random pool every n minutes (or hours).
+- Resummon (restore) your pet if it has "disappeared". Most of the time this happens due to faulty game mechanics: using portals or teleports, mounting/dismounting, end of combat, entering or exiting instances, and other seemingly random occasions.
+- You can set a repeating timer to auto-summon a new pet from a configurable random pool every n minutes.
 - You can manually summon a new pet from a configurable random pool via keybind or slash command.
-- Your ‘current pet’ is saved across chars. So, if you log out with a given pet on toon A, then login with your toon B, you should see the same pet summoned, right at (or very shortly after) login. (You can exclude a toon from that by setting him to char-specific favorites.)
-- Also your remaining auto-summon timer is saved at logout and re-applied when you log in again (on any toon). So, if you have set your timer to two hours, you will see a new pet every two hours of gaming time, no matter how often you log out/in or for how long you have been offline. You can see the current remaining timer in the Status report (command `/pw s`, see Usage).
-- The addon does its best not to interfere with various activities/circumstances: Higher M+, Arena, Stealthed, In Combat, and more.
-- The pool of favorite pets to be summoned can be char-specific or account-wide. You can change this setting at any time: the char-specific list (if created) will be preserved even if you switch from char-specific to global favorites.
-- Easy switch between ‘random-summoning new pet’ and ‘just keep my pet out’. (`/pw 0` to disable the auto-timer, see Usage)
+- Your ‘current pet’ is saved across chars. So, if you log out with a given pet on toon A, then login with your toon B, you should see the same pet summoned, right at (or very shortly after) login. (You can exclude a toon from that by setting it to char-specific favorites.)
+- Your remaining auto-summon timer is saved at logout and re-applied when you log in again (on any toon). So, if you have set your timer to two hours, you will see a new pet every two hours of gaming time, no matter how often you log out/in or for how long you have been offline. You can see the current remaining timer in the Status report (command `/pw s`, see Usage).
+- The addon does its best not to interfere with various activities/circumstances: M+ keys, Arena, Stealthed, In Combat, and more.
+- The pool of favorite pets to summon can be char-specific or account-wide. You can change this on a per-char basis at any time, and your char-specific list will be retained for later if you switch from char-specific to global favourites.
+- Easy switching between ‘random-summoning of new pets’ and ‘just keep my pet out’. (`/pw 0` to disable the auto-timer, see Usage)
 - The addon knows about special pets and does not try to summon pets that can or should not be summoned, e.g. the Pocopoc pet in Zereth Mortis, the Winter Veil pets, or the vendor pets with CD like Guild Herald.
 
 ### Other Features / Notes
 
 - No GUI settings. Basically it’s a set-and-forget addon.
-- No nasty Minimap button, and thus no conflicts with LeatrixPlus or other minimap mods.
+- No nasty Minimap button, and thus no conflicts minimap mods.
 - 100% standalone, no libraries or other dependencies.
 - Resource friendly in terms of CPU and memory usage. 
 - Alt friendly: All settings are account wide (except for char-specific favorite pets, ofc).
@@ -73,20 +73,21 @@ PetWalker has a rich chat console interface:
     - A list of character-specific favorite pets (if you have set any).
         - A list of global favorites is not displayed because you can easily get that list by sorting the Pet Journal or Rematch by favorites.
 
-If `/pw` is conflicting with any of your other addons’ commands, then use `/petw` instead.  
+If `/pw` is conflicting with another addon's command, then use the long form `/petwalker` instead.  
 
 Also check the Key Bindings section of your client. You’ll find three bindable commands for PetWalker there:
+
 - Toggle automatic summoning of pets (same as `/pw a`)
 - Dismiss current pet and disable auto-summoning (same as `/pw d`)
 - Summon new pet (same as `/pw n`)   
 
-### New (beta) feature in version 1.1.5: Summon same pet as targeted pet:
+### New feature since version 1.1.5: Summon same pet as targeted pet
 
-1. Target a summoned pet of another player
-2. Enter `/pw t` or `/pw target` or set and use the new keybind in the Keybinding section
-3. If the targeted pet is in your collection, it should be summoned
+1. Target a summoned pet of another player.
+2. Enter `/pw t` or `/pw target` or set and use the new keybind in the Keybinding section.
+3. If the targeted pet is in your collection, it should be summoned.
 
-This is still an "unofficial" and beta feature. It works but has not been thoroughly tested.
+If the target pet is not in your collection, you get a weblink to the pet's page on warcraftpets.com, or on wowhead.com if it's not collectible.
 
 ---
 
@@ -94,12 +95,12 @@ This is still an "unofficial" and beta feature. It works but has not been thorou
 
 ### How to set char-specific favorite pets?
 
-1. Set PetWalker to ‘char-specific favorites’ (command `/pw c`)
-2. Set your favorites as usual in the Pet Journal (or Rematch)
+1. Set PetWalker to ‘char-specific favorites’ (toggle command: `/pw c`).
+2. Set your favorites as usual in the Pet Journal (or Rematch).
 
-In the Pet Journal, they will be visually flagged with the fav star only when you are in char-specific-favorites mode; in normal-favorites mode you will see your normal (global) favorites star-flagged. (In Rematch, they are never visually flagged. Though you can set/unset them there via right-click just as in the Pet Journal.)
+In the Pet Journal, char-specific favorites are only visually marked with the fav star when you are in char-specific favorites mode; in normal favorites mode, your normal (global) favourites are marked with a star. (In Rematch, they are never visually marked. However, you can set/unset them there using the context menu (right-click), just like in the Pet Journal).
 
-Unlike the global favorites, these char-specific favorites will not be sorted at top of the Pet Journal list. However, the Status message (command `/pw s`) shows you a list of your current char-specific favorites. This makes it easier to identify them, for example if you want to remove a pet from the favorites.
+Unlike the global favorites, these char-specific favorites are not sorted at the top of the Pet Journal list. However, the Status display (`/pw s` command) will show you a list of your current char-specific favorites. This makes them easier to identify, for example if you want to remove a pet from your favorites.
 
 ### I do not want to summon a new pet every `n` minutes, I just want to keep my current pet out!
 
@@ -109,22 +110,22 @@ Simply set the Summon New Pet timer to ‘0’ (zero). You can set it to 0 with 
 
 The most difficult situation is when you select a team for a pet battle. If you are using Rematch, you should select the “Keep Companion” option (in “Miscellaneous Options”). This will definitely help, but it is not guaranteed that, after the pet battle, you have the same pet out as before.
 
-### What are the events PetWalker is reacting to?
+### What events does PetWalker respond to?
 
-The main event that makes PetWalker check for the pet and summon it if necessary, is `PLAYER_STARTED_MOVING`.  
-This is a very frequent event, yes. I have experimented with various other events, but this one turned out to be best. (After all, the goal of PetWalker is to assure that your pet is _always_ out, not that it’s out every once in a while.)  
+The main event that causes PetWalker to check for the pet and summon it if necessary is `PLAYER_STARTED_MOVING`.  
+This is a fairly common event. I have experimented with several other events, but overall I have found that this one gives the best results. (After all, the aim of PetWalker is to ensure that your pet is _always_ out, not that it's out from time to time).
 
-In rare occasions, PetWalker’s summoning might interfere with other casts, notably with Druids shapeshifting immediately after starting to move. But, since PetWalker does nothing in combat situations (and other critical situations), it should be pretty safe.  
+On rare occasions, a summoning action can interfere with other casts, e.g. Druids who shape-shift immediately after they start moving. But since PetWalker does nothing in combat (and other sensitive situations), it should be pretty safe. 
 
 ---
 
 ## Known Issues / To Do 
 
 - Remove erroneous “summoned” messages in a few situations where actually no pet was summoned (eg flying, probably vehicle UI).
-- As mentioned in the FAQ, there is a chance that after a pet battle your previous companion does not get re-summoned. This needs to be improved.
+- As mentioned in the FAQ, there is a chance that after a pet battle your previous companion is not re-summoned. This needs to be improved.
 - Check for and remove orphaned pet GUIDs from the char-specific favorites table. (Not sure if this was an issue just in the Dragonflight prepatch phase, or if it still happens.)
-- Automatically disable random summoning if the pool has less than 2 pets.
 - Add an optional login message.
+- Try to completely unregister all events if the addon is disabled via `/pw a`.
 
 Feel free to post suggestions or issues in the [GitHub Issues](https://github.com/tflo/PetWalker/issues) of the repo!
 __Please do not post issues or suggestions in the comments on Curseforge.__
