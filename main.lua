@@ -165,16 +165,27 @@ Init
 		if ns.db.eventAlt then -- Experimental events
 			ns.events:RegisterEvent("ZONE_CHANGED")
 			function ns:ZONE_CHANGED()
+				if not ns.db.autoEnabled or UnitAffectingCombat("player") or IsFlying() then return end
 				ns.AutoAction()
 			end
 			ns.events:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
 			function ns:PLAYER_MOUNT_DISPLAY_CHANGED()
+				if not ns.db.autoEnabled or UnitAffectingCombat("player") or IsFlying() then return end
 				ns.AutoAction()
 			end
 		else -- Regular main event
 			ns.events:RegisterEvent("PLAYER_STARTED_MOVING")
 			function ns:PLAYER_STARTED_MOVING()
-				ns.AutoAction()
+				if not ns.db.autoEnabled or UnitAffectingCombat("player") or IsFlying() then return end
+				if not IsMounted() then
+					ns.AutoAction()
+				else
+					--[[ To minimize the risk of spellcast conflicts when the player lifts off on a DR mount. If this doesn't work as intended:
+					  - Test for a DR mount and do nothing if true (for the code see Dragonriding.lua in WA source)
+					  - Do nothing when mounted, no matter if DR mount or normal (as before this version)
+					Or should we better use a timer for all situations, also not mounted? ]]
+					C_Timer.After(2, ns.AutoAction)
+				end
 			end
 		end
 
@@ -276,7 +287,8 @@ restore a (lost) pet, or summoning a new one (if the timer is set and due).
 ---------------------------------------------------------------------------]]--
 
 function ns.AutoAction()
-	if not ns.db.autoEnabled or IsMounted() then return end -- was: IsFlying
+-- 	Moved this to the event, because we use a C_Timer now if the player is mounted
+-- 	if not ns.db.autoEnabled or UnitAffectingCombat("player") then return end
 	if ns.db.newPetTimer ~= 0 then
 		local now = GetTime()
 		if ns.RemainingTimer(now) == 0 and now - timeSafeSummonFailed > 40 then
@@ -431,6 +443,7 @@ AutoAction, and here we are not.
 function ns.TransitionCheck()
 	if not ns.db.autoEnabled
 		or ns.petVerified
+		or UnitAffectingCombat("player")
 		or IsFlying()
 		or UnitOnTaxi("player") then
 		ns:debugprintL1("TransitionCheck() returned early")
