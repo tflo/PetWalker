@@ -162,7 +162,7 @@ Init
 		end
 
 
-		if ns.db.eventAlt then
+		if ns.db.eventAlt then -- Experimental events
 			ns.events:RegisterEvent("ZONE_CHANGED")
 			function ns:ZONE_CHANGED()
 				ns.AutoAction()
@@ -171,18 +171,17 @@ Init
 			function ns:PLAYER_MOUNT_DISPLAY_CHANGED()
 				ns.AutoAction()
 			end
-		else
+		else -- Regular main event
 			ns.events:RegisterEvent("PLAYER_STARTED_MOVING")
 			function ns:PLAYER_STARTED_MOVING()
 				ns.AutoAction()
 			end
 		end
 
-	--[[ What we are trying to do here ]]--[[
-	COMPANION_UPDATE can be pretty spammy. So, we let it fire the function only if
-	it comes very immediately after a UNIT_SPELLCAST_SUCCEEDED event by the player
-	(which is the pet summon spell). Not sure if this is economic(?)
-	]]
+		--[[ What we are trying to do here ]]--[[ We assume that a
+		UNIT_SPELLCAST_SUCCEEDED event by the player, immediately followed by
+		COMPANION_UPDATE was a pet-summoning by the player, hence we save the pet.
+		]]
 
 		ns.events:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
 		function ns:UNIT_SPELLCAST_SUCCEEDED()
@@ -427,7 +426,7 @@ We need more checks here than in RestorePet, bc RestorePet is "prefiltered" by
 AutoAction, and here we are not.
 ---------------------------------------------------------------------------]]--
 
--- Called by 1: ns:ZONE_CHANGED_NEW_AREA(), or whatever we use as initial event
+-- Called by 2: ns:PLAYER_ENTERING_WORLD, AutoAction
 
 function ns.TransitionCheck()
 	if not ns.db.autoEnabled
