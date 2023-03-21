@@ -1,3 +1,8 @@
+#### 1.1.8 (2023-03-21)
+- Pet summoning can now occur while mounted (not flying).
+  - Exception: Dragonflying zones. The GCD triggered by pet summoning is clashing too often with the Lift Off or Skyward Ascent ability, namely when landing and quickly lifting off again. Currently experimenting with different timers, but this needs more testing.
+- toc updated for 10.0.7.
+
 #### 1.1.7 (2023-02-19)
 - New message logic for pools of only one pet: You can now have only a single pet in the "random" summon pool (e.g. only one favorite pet or only one char-specific favorite pet) without getting spammed with warnings. Thanks to Syrusel for his constructive input in [#5](https://github.com/tflo/PetWalker/issues/5).
 - Finished implementation of the new Summon Target Pet feature. Trying to summon an uncollected target pet gives you a link to the pet's page on warcraftpets.com now, or on wowhead.com if it's not collectible.
