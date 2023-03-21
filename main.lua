@@ -177,14 +177,18 @@ Init
 			ns.events:RegisterEvent("PLAYER_STARTED_MOVING")
 			function ns:PLAYER_STARTED_MOVING()
 				if not ns.db.autoEnabled or UnitAffectingCombat("player") or IsFlying() then return end
-				if not IsMounted() then
+-- 				ns.AutoAction()
+				if not IsMounted() or not IsAdvancedFlyableArea() then
 					ns.AutoAction()
-				else
-					--[[ To minimize the risk of spellcast conflicts when the player lifts off on a DR mount. If this doesn't work as intended:
-					  - Test for a DR mount and do nothing if true (for the code see Dragonriding.lua in WA source)
-					  - Do nothing when mounted, no matter if DR mount or normal (as before this version)
-					Or should we better use a timer for all situations, also not mounted? ]]
-					C_Timer.After(2, ns.AutoAction)
+-- 				else
+-- 					--[[ WIP as of 1.1.8:
+-- 					To minimize the risk of spellcast conflicts when the player lifts off on a DR mount.
+-- 					If this doesn't work as intended:
+-- 					  - Test for a DR mount and do nothing if true (for the code see Dragonriding.lua in WA source)
+-- 					  - Simpler variant: Test for IsAdvancedFlyableArea() and do nothing
+-- 					  - Do nothing when mounted, no matter if DR mount or normal (as before this version)
+-- 					Or should we better use a timer for all situations, also not mounted? ]]
+-- 					C_Timer.After(2, ns.AutoAction)
 				end
 			end
 		end
