@@ -1,7 +1,16 @@
-#### 1.1.8 (2023-03-21)
-- Pet summoning can now occur while mounted (not flying).
-  - Exception: Dragonflying zones. The GCD triggered by pet summoning is clashing too often with the Lift Off or Skyward Ascent ability, namely when landing and quickly lifting off again. Currently experimenting with different timers, but this needs more testing.
+#### 1.2.0 (2023-03-22)
+- Pet summoning can now occur while mounted (not flying). This is a significant change:
+  - With normal mounts, this is clearly a good thing, because: A problem with (auto-)summoning pets can be that it triggers the Global Cooldown (GCD), which can prevent you from casting a spell or using an ability at that moment. You are usually less likely to want to cast a spell while mounted, so it is good if the pet is summoned before you dismount. This reduces the chance of a GCD conflict later.
+  - With Dragonriding mounts, it's a bit different: The Dragonriding abilities require you to be off GCD. While on the ground, this applies to "Lift Off" and "Skyward Ascent". This means that, unlike with normal mounts, the GCD triggered by summoning a pet while DR-mounted has a realistic chance of interfering with other abilities (the DR abilities), especially when landing, moving a few yards, and quickly taking off again. 
+  - So I've added a setting to allow/disallow auto-summoning while mounted in a Dragonriding zone. The toggle command is `/pw r` or `/pw drsum`. I recommend experimenting with this to see if it produces more or less GCD conflicts for you. As with most PW settings, this is an account-wide setting.
+  - By default, this setting is _enabled,_ so auto-summoning while mounted in a Dragonriding zone will happen. Depending on user feedback, I may change the default setting in the future.
+  - Personally, I'm using it because even if I have an occasional GCD conflict with a Dragonriding ability, it still reduces the chance of a GCD conflict after dismounting. But your experience may vary depending on your personal Dragonriding landing/lift-off "style".
+  - To be clear, the GCD is not caused by PetWalker, it's a Blizz thing: any summoning of a pet triggers the GCD. It's stupid IMO, but there's nothing we can do about it. The summoning-while-mounted feature is meant to reduce the chance of GCD conflicts, but it cannot be eliminated.
+- Changes to the in-game Help display (`/pw h`) and Status display (`/pw s`).
+- Added a hint to the Pet Journal Filter settings to the zero-pets-in-pool warning message.
+- Fixed double printing of the zero-pets-in-pool warning message under certain conditions.
 - toc updated for 10.0.7.
+- Updated ReadMe/Description.
 
 #### 1.1.7 (2023-02-19)
 - New message logic for pools of only one pet: You can now have only a single pet in the "random" summon pool (e.g. only one favorite pet or only one char-specific favorite pet) without getting spammed with warnings. Thanks to Syrusel for his constructive input in [#5](https://github.com/tflo/PetWalker/issues/5).

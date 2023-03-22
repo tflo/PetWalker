@@ -47,6 +47,8 @@ ___If you are reading this description on CurseForge, be aware that Curse's Mark
 PetWalker has a rich chat console interface:
 
 - __`/pw a`__: Toggle automatic summoning of pets. (Basically enabling/disabling the addon.)  
+- __`/pw r`__: Allow/disallow automatic summoning of pets while _mounted_ (and on the ground) _in a Dragonriding zone._  
+    - As of version 1.2.0 (March 2023), automatic pet summoning can also happen while you are mounted. With "normal" mounts, this behavior is trouble-free and only beneficial, but with Dragonriding mounts it can cause occasional glitches. Therefore, you can disable it with this toggle. _It is enabled by default._ Please read the 1.1.8 change notes, or the explanation in the FAQ below!
 - __`/pw d`__: Dismiss current pet and disable auto-summoning. A kind of emergency command, if you want to get rid of your pet immediately and prevent any automatic summoning.   
 - __`/pw <number>`__: Interval [minutes] for summoning a new pet. ‘0’ disables summoning of new pets, though the pet-_restore_ functionality is still active (use `/pw a` to disable it).
 - __`/pw f`__: Toggle the random-summon pool between Favorites and All Pets. 
@@ -115,7 +117,25 @@ The most difficult situation is when you select a team for a pet battle. If you 
 The main event that causes PetWalker to check for the pet and summon it if necessary is `PLAYER_STARTED_MOVING`.  
 This is a fairly common event. I have experimented with several other events, but overall I have found that this one gives the best results. (After all, the aim of PetWalker is to ensure that your pet is _always_ out, not that it's out from time to time).
 
-On rare occasions, a summoning action can interfere with other casts, e.g. Druids who shape-shift immediately after they start moving. But since PetWalker does nothing in combat (and other sensitive situations), it should be pretty safe. 
+On rare occasions, a summoning action can interfere with other casts (GCD conflict), e.g. Druids who shape-shift immediately after they start moving. But since PetWalker does nothing in combat (and other sensitive situations), it should be pretty safe. 
+
+### Should I disable "auto-summoning while mounted in a Dragonriding zone" (`/pw r`)?
+
+__As of version 1.2.0 (March 2023)__, automatic pet summoning can also happen while you are mounted (not flying).
+
+With normal mounts, this is clearly a good thing, because: A problem with (auto-)summoning pets can be that it triggers the Global Cooldown (GCD), which can prevent you from casting a spell or using an ability at that moment. You are usually less likely to want to cast a spell while mounted, so it is good if the pet is summoned before you dismount. This reduces the chance of a GCD conflict later.
+
+With Dragonriding mounts, it's a bit different: The Dragonriding abilities require you to be off GCD. While on the ground, this applies to "Lift Off" and "Skyward Ascent". This means that, unlike with normal mounts, the GCD triggered by summoning a pet while DR-mounted has a realistic chance of interfering with other abilities (the DR abilities), especially when landing, moving a few yards, and quickly taking off again. 
+
+So I've added the possibility to allow/disallow auto-summoning while mounted in a Dragonriding zone. The toggle command is `/pw r` or `/pw drsum`. I recommend experimenting with this to see if it produces more or less GCD conflicts for you. As with most PW settings, this is an account-wide setting.
+
+By default, this setting is _enabled,_ so auto-summoning while mounted in a Dragonriding zone will happen. Depending on user feedback, I may change the default setting in the future.
+
+Personally, I'm using it because even if I have an occasional GCD conflict with a Dragonriding ability, it still reduces the chance of a GCD conflict after dismounting. But your experience may vary depending on your personal Dragonriding landing/lift-off "style".
+
+To be clear, the GCD is not caused by PetWalker, it's a Blizz thing: any summoning of a pet triggers the GCD. It's stupid IMO, but there's nothing we can do about it. The summoning-while-mounted feature is meant to reduce the chance of GCD conflicts, but it cannot be eliminated.
+
+
 
 ---
 
