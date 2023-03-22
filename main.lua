@@ -352,7 +352,10 @@ function ns:NewPet(time, viaHotkey)
 	local npool = #ns.petPool
 	local newpet
 	if npool == 0 then
-		ns.MsgLowPetPool(npool)
+		if now - timePoolMsg > 30 then
+			ns.MsgLowPetPool(npool)
+			timePoolMsg = now
+		end
 		if not actpet then ns:RestorePet() end
 	else
 		if npool == 1 then
