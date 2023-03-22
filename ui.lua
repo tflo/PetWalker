@@ -160,9 +160,9 @@ function ns.HelpText()
 	}
 
 	local body = {
-		CO.c .. "\nd", ": ", CO.k .. "Dismiss ", "current pet and ", CO.k .. "disable auto-summon ", "(new pet / restore).",
+		CO.c .. "\nd", ": ", CO.k .. "Dismiss ", "current pet and ", CO.k .. "disable auto-summoning ", "(new pet / restore).",
 		CO.c .. "\na", ": ", "Toggle ", CO.k .. "auto-summoning ", "(new pet / restore).",
-		CO.c .. "\nds", ": ", "Toggle ", CO.k .. "auto-summoning allowed ", "also ", CO.k .. "while mounted in a Dragonriding zone", ".",
+		CO.c .. "\nr", ": ", "Toggle ", CO.k .. "auto-summoning ", "also ", CO.k .. "while mounted in a Dragonriding zone: ", CO.s .. "allowed / not allowed", ".",
 		CO.c .. "\nn", ": ", "Summon ", CO.k .. "new pet ", "from pool.",
 		CO.c .. "\nf", ": ", "Toggle ", CO.k .. "pet pool: ", CO.s .. "Favorites Only", ", or ", CO.s .. "All Pets", ".",
 		CO.c .. "\nc", ": ", "Toggle ", CO.k .. "favorites: ", CO.s .. "Per-character", ", or ", CO.s .. "Global Favorites", ".",
@@ -194,7 +194,7 @@ function ns.Status()
 		CO.bn .. "Status & Settings:",
 	}
 	local body = {
-		CO.k .."\nAutomatic Random-summon / Restore ", "is ", CO.s .. (ns.db.autoEnabled and "enabled" or "disabled"), ".",
+		CO.k .."\nAutomatic Random-summoning / Restore ", "is ", CO.s .. (ns.db.autoEnabled and "enabled" or "disabled"), ".",
 		CO.k .. "\nSummon Timer ", "is ", CO.s .. (ns.db.newPetTimer > 0 and (ns.db.newPetTimer/60) .. CO.bn .. " minutes" or "disabled"), ". Next random pet in ", CO.e .. ns.RemainingTimerForDisplay(), ".",
 		CO.k .."\nAutomatic summoning while mounted in a Dragonriding zone ", "is ", CO.s .. (ns.db.autoEnabled and "allowed" or "not allowed"), ".",
 		CO.k .. "\nVerbosity ", "level of messages: ", CO.s .. ns.db.verbosityLevel, " (of 3).",
@@ -218,14 +218,12 @@ function ns.MsgLowPetPool(nPool)
 	if ns.db.verbosityLevel < 0 then return end
 	local R = CO.bw
 	local content = {
-		(nPool < 1 and CO.e .. "0 (zero) " ..R.. " pets " or R.. "Only " ..CO.e .. "1 " ..R.. "pet "),
+		(nPool < 1 and CO.k .. "0 (zero) " ..R.. " pets " or R.. "Only " ..CO.k .. "1 " ..R.. "pet "),
 		"eligible as random summon!",
-		"\nYou should either " .. (ns.db.favsOnly and "flag more pets as favorite, or set the ramdom pool to " .. CO.s .."All Pets" or "collect more pets"),
-		", or set the random-summon timer to ",
-		CO.s .. "0",
-		". \nPlease note that certain pets are excluded from random summoning, to not break their usability (for example ",
-		CO.q .. "Guild Herald",
-		"). ",
+		"\nYou should either " .. (ns.db.favsOnly and "flag more pets as favorite, or set the ramdom pool to " .. CO.s .."All Pets" or "collect more pets"), ", or set the random-summon timer to ", CO.s .. "0", ".",
+		"\nAlso check also your ", CO.k .. "Filter ", "settings in the ", CO.k .. "Pet Journal", ", as they will limit the pool of available pets!",
+		"\nPlease note that certain pets are ", CO.k .. "excluded ", "from random summoning, to not break their usability (for example ",
+		CO.q .. "Guild Herald", "). ",
 		((ns.dbc.charFavsEnabled and ns.db.favsOnly) and "\nYou have set " .. CO.e .. thisChar ..R.. " to use " .. CO.s .. "char-specific favorite " ..R.. "pets. Maybe switching to " .. CO.s .. "global favorites " ..R.. "(" .. CO.c .. "/pw c" ..R.. ") will help." or ""),
 	}
 	local content = table.concat(content, R)
@@ -260,7 +258,7 @@ function SlashCmdList.PetWalker(cmd)
 		ns:NewPet()
 	elseif cmd == 'f' or cmd == 'fav' then
 		ns:FavsToggle()
-	elseif cmd == 'e' or cmd == 'eve' then -- Not meant for the user; undocumented
+	elseif cmd == 'e' or cmd == 'eve' then -- Not meant for the user; leave it undocumented
 		ns:EventAlt()
 	elseif cmd == 'c' or cmd == 'char' then
 		ns.CharFavsSlashToggle()
