@@ -196,7 +196,7 @@ function ns.Status()
 	local body = {
 		CO.k .."\nAutomatic Random-summoning / Restore ", "is ", CO.s .. (ns.db.autoEnabled and "enabled" or "disabled"), ".",
 		CO.k .. "\nSummon Timer ", "is ", CO.s .. (ns.db.newPetTimer > 0 and (ns.db.newPetTimer/60) .. CO.bn .. " minutes" or "disabled"), ". Next random pet in ", CO.e .. ns.RemainingTimerForDisplay(), ".",
-		CO.k .."\nAutomatic summoning while mounted in a Dragonriding zone ", "is ", CO.s .. (ns.db.autoEnabled and "allowed" or "not allowed"), ".",
+		CO.k .."\nAutomatic summoning while mounted in a Dragonriding zone ", "is ", CO.s .. (ns.db.drSummoning and "allowed" or "not allowed"), ".",
 		CO.k .. "\nVerbosity ", "level of messages: ", CO.s .. ns.db.verbosityLevel, " (of 3).",
 		CO.k .. "\nPet Pool ", "is set to ", CO.s .. (ns.db.favsOnly and "Favorites Only" or "All Pets"), ". Eligible pets: ", CO.e .. #ns.petPool, ".",
 		CO.k .. "\nPer-character Favorites ", "are ", CO.s .. (ns.dbc.charFavsEnabled and "enabled" or "disabled"), " for ", CO.e .. thisChar, ".",

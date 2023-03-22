@@ -1,3 +1,6 @@
+#### 1.2.0.1 (2023-03-22)
+- Fixed: "Summoning while mounted in Dragonriding zone" setting was not correctly reflected in the Status display.
+
 #### 1.2.0 (2023-03-22)
 - Pet summoning can now occur while mounted (not flying). This is a significant change:
   - With normal mounts, this is clearly a good thing, because: A problem with (auto-)summoning pets can be that it triggers the Global Cooldown (GCD), which can prevent you from casting a spell or using an ability at that moment. You are usually less likely to want to cast a spell while mounted, so it is good if the pet is summoned before you dismount. This reduces the chance of a GCD conflict later.
