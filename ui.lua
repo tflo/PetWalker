@@ -161,7 +161,8 @@ function ns.HelpText()
 
 	local body = {
 		CO.c .. "\nd", ": ", CO.k .. "Dismiss ", "current pet and ", CO.k .. "disable auto-summon ", "(new pet / restore).",
-		CO.c .. "\na", ": ", "Toggle ", CO.k .. "auto-summon ", "(new pet / restore).",
+		CO.c .. "\na", ": ", "Toggle ", CO.k .. "auto-summoning ", "(new pet / restore).",
+		CO.c .. "\nds", ": ", "Toggle ", CO.k .. "auto-summoning allowed ", "also ", CO.k .. "while mounted in a Dragonriding zone", ".",
 		CO.c .. "\nn", ": ", "Summon ", CO.k .. "new pet ", "from pool.",
 		CO.c .. "\nf", ": ", "Toggle ", CO.k .. "pet pool: ", CO.s .. "Favorites Only", ", or ", CO.s .. "All Pets", ".",
 		CO.c .. "\nc", ": ", "Toggle ", CO.k .. "favorites: ", CO.s .. "Per-character", ", or ", CO.s .. "Global Favorites", ".",
@@ -195,6 +196,7 @@ function ns.Status()
 	local body = {
 		CO.k .."\nAutomatic Random-summon / Restore ", "is ", CO.s .. (ns.db.autoEnabled and "enabled" or "disabled"), ".",
 		CO.k .. "\nSummon Timer ", "is ", CO.s .. (ns.db.newPetTimer > 0 and (ns.db.newPetTimer/60) .. CO.bn .. " minutes" or "disabled"), ". Next random pet in ", CO.e .. ns.RemainingTimerForDisplay(), ".",
+		CO.k .."\nAutomatic summoning while mounted in a Dragonriding zone ", "is ", CO.s .. (ns.db.autoEnabled and "allowed" or "not allowed"), ".",
 		CO.k .. "\nVerbosity ", "level of messages: ", CO.s .. ns.db.verbosityLevel, " (of 3).",
 		CO.k .. "\nPet Pool ", "is set to ", CO.s .. (ns.db.favsOnly and "Favorites Only" or "All Pets"), ". Eligible pets: ", CO.e .. #ns.petPool, ".",
 		CO.k .. "\nPer-character Favorites ", "are ", CO.s .. (ns.dbc.charFavsEnabled and "enabled" or "disabled"), " for ", CO.e .. thisChar, ".",
@@ -268,6 +270,8 @@ function SlashCmdList.PetWalker(cmd)
 		ns.Status()
 	elseif tonumber(cmd) then
 		ns:TimerSlashCmd(cmd)
+	elseif cmd == 'r' or cmd == 'drsum' then
+		ns.DRSummoningToggle()
 	elseif cmd == 't' or cmd == 'target' then
 		ns.SummonTargetPet()
 	elseif cmd == 'h' or cmd == 'help' then
@@ -342,6 +346,11 @@ function ns.CharFavsSlashToggle() -- for slash command only
 	restore the pet from the new list, rather than doing NewPet like in the FavsToggle. ]]
 	if ns.db.autoEnabled then ns.TransitionCheck() end
 	ChatUserNotification(format('%sCharacter-specific favorites %s.', CO.bn, (ns.dbc.charFavsEnabled and 'enabled' or 'disabled')))
+end
+
+function ns.DRSummoningToggle()
+	ns.db.drSummoning = not ns.db.drSummoning
+	ChatUserNotification(format('%sSummoning while mounted in Dragonriding zones %s.', CO.bn, (ns.db.drSummoning and 'enabled' or 'disabled')))
 end
 
 function ns.DebugModeToggle() -- for slash command only
