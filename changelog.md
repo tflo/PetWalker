@@ -1,3 +1,6 @@
+#### 1.2.1 (2023-03-27)
+- Added aura 290460 to excluded auras. This is the aura you get when you mount the Battlebot Champion in Zskera Vault (Forbidden Reach). PW tried to summon a pet, which threw you out of the Battlebot; this no longer happens.
+
 #### 1.2.0.1 (2023-03-22)
 - Fixed: "Summoning while mounted in Dragonriding zone" setting was not correctly reflected in the Status display.
 

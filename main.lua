@@ -547,6 +547,7 @@ local excludedAuras = {
 	312993, -- Carrying Forbidden Tomes (Scrivener Lenua event, Revendreth)
 	43880, -- Ramstein's Swift Work Ram (Brewfest daily; important bc the quest cannot be restarted if messed up)
 	43883, -- Rental Racing Ram (Brewfest daily)
+	290460, -- Battlebot Champion (Forbidden Reach: Zskera Vault)
 	5384, -- Hunter: Feign Death (only useful to avoid accidental summoning via keybind, or if we use a different event than PLAYER_STARTED_MOVING)
 } -- More exclusions in the Summon function itself
 
