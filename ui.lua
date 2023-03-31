@@ -372,8 +372,7 @@ end
 
 -- Used for info print
 function ns:ListCharFavs()
-	local favlinks = {}
-	local count = 0
+	local favlinks, count, name = {}, 0
 	for id, _ in pairs(ns.dbc.charFavs) do
 		count = count + 1
 		name = C_PetJournal.GetBattlePetLink(id)
