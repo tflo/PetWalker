@@ -774,20 +774,6 @@ function ns:debugprintL2(msg)
 	end
 end
 
--- Table dump
-function ns.dump(o)
-	if type(o) == 'table' then
-		local s = '{ '
-		for k,v in pairs(o) do
-			if type(k) ~= 'number' then k = '"'..k..'"' end
-			s = s .. '['..k..'] = ' .. dump(v) .. ','
-		end
-		return s .. '} '
-	else
-		return tostring(o)
-	end
-end
-
 function ns.RemainingTimer(time)
 	local rem = ns.timeNewPetSuccess + ns.db.newPetTimer - time
 	return rem > 0 and rem or 0
