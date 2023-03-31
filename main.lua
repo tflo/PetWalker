@@ -260,14 +260,11 @@ end
 MAIN ACTIONS
 ===========================================================================]]--
 
-local debugflag = "blank"
-
 --[[ To be used only in func InitializePool and IsExcludedByPetID ]]
-local function IsExcludedBySpecies(spec, debugflag)
+local function IsExcludedBySpecies(spec)
 	for _, e in pairs(excludedSpecies) do
 		if e == spec then
 			if e ~= 3247 or ns.currentZone == 1970 then -- Pocopoc
--- 				ns:debugprintL1("Excluded pet found while doing: " .. debugflag)
 				return true
 			end
 		end
@@ -276,9 +273,9 @@ local function IsExcludedBySpecies(spec, debugflag)
 end
 
 --[[ To be used only in func NewPet and SavePet ]]
-local function IsExcludedByPetID(id, debugflag)
+local function IsExcludedByPetID(id)
 	id, speciesID = '"'..id..'"', C_PetJournal.GetPetInfoByPetID(id)
-	return IsExcludedBySpecies(speciesID, debugflag)
+	return IsExcludedBySpecies(speciesID)
 end
 
 --[[---------------------------------------------------------------------------
@@ -343,8 +340,7 @@ function ns:NewPet(time, viaHotkey)
 	local now = time or GetTime()
 	if now - ns.timeNewPetSuccess < 1.5 then return end
 	local actpet = C_PetJournal.GetSummonedPetGUID()
-	debugflag = "NewPet" -- TODO: remove this and the flag in the func
-	if actpet and IsExcludedByPetID(actpet, debugflag) then return end
+	if actpet and IsExcludedByPetID(actpet) then return end
 	if not ns.poolInitialized then
 		ns:debugprintL1("ns.NewPet --> InitializePool")
 		ns.InitializePool()
@@ -514,10 +510,9 @@ function ns.SavePet()
 	if not ns.petVerified then return end
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 -- 	local now = GetTime()
-	debugflag = "SavePet" -- TODO: remove this and the flag in the func
 	if not actpet
 -- 		or now - timeSavePet < 3
-		or IsExcludedByPetID(actpet, debugflag) then
+		or IsExcludedByPetID(actpet) then
 		return
 	end
 	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
@@ -628,14 +623,13 @@ end
 -- Called by 3: PET_JOURNAL_LIST_UPDATE; conditionally by ns:NewPet, ns.ManualSummonNew
 function ns.InitializePool(self)
 	ns:debugprintL1("Running ns.InitializePool()")
-	local debugflag = "InitializePool"
 	table.wipe(ns.petPool)
 	CleanCharFavs()
 	local index = 1
 	while true do
 		local petID, speciesID, _, _, _, favorite = C_PetJournal.GetPetInfoByIndex(index)
 		if not petID then break end
-		if not IsExcludedBySpecies(speciesID, debugflag) then
+		if not IsExcludedBySpecies(speciesID) then
 			if ns.db.favsOnly then
 				if favorite then
 					table.insert(ns.petPool, petID)
