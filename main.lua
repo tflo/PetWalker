@@ -613,11 +613,24 @@ This can be, depending on user setting:
   pools without changing his favorites.
 ===========================================================================]]--
 
+local function CleanCharFavs()
+	local count, link = 0
+	for id, _ in pairs(ns.dbc.charFavs) do
+		link = C_PetJournal.GetBattlePetLink(id)
+		if not link then
+			ns.dbc.charFavs[id] = nil
+			count = count + 1
+		end
+	end
+	if count > 0 then ns.MsgRemovedInvalidID(count) end
+end
+
 -- Called by 3: PET_JOURNAL_LIST_UPDATE; conditionally by ns:NewPet, ns.ManualSummonNew
 function ns.InitializePool(self)
 	ns:debugprintL1("Running ns.InitializePool()")
 	local debugflag = "InitializePool"
 	table.wipe(ns.petPool)
+	CleanCharFavs()
 	local index = 1
 	while true do
 		local petID, speciesID, _, _, _, favorite = C_PetJournal.GetPetInfoByIndex(index)

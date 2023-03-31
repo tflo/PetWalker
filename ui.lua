@@ -75,6 +75,11 @@ function ns.MsgOnlyFavIsActive(ap)
 	ChatUserNotification(CO.bn .. "Your only eligible random pet " .. (ns.PetIDtoLink(ap) or "???") .. " is already active.")
 end
 
+function ns.MsgRemovedInvalidID(counter)
+	if ns.db.verbosityLevel < 2 then return end
+	ChatUserNotification(format('%s%s orphaned pet ID%s %s been removed from the char favorites.', CO.bn, counter, counter > 1 and 's' or '', counter > 1 and 'have' or 'has'))
+end
+
 
 -- Summon Target Pet messages
 
