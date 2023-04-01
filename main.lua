@@ -290,7 +290,7 @@ function ns.AutoAction()
 		local now = GetTime()
 		if ns.RemainingTimer(now) == 0 and now - timeSafeSummonFailed > 40 then
 			ns:debugprintL2("AutoAction() decided for NewPet.")
-			ns:NewPet(now)
+			ns:NewPet(now, false)
 			return
 		end
 	end
@@ -326,7 +326,7 @@ function ns:RestorePet()
 	else
 		ns:debugprintL1("RestorePet() could not find saved pet --> summoning new pet")
 		ns.MsgNoSavedPet()
-		ns:NewPet()
+		ns:NewPet(now, false)
 	end
 end
 
@@ -478,7 +478,7 @@ function ns.TransitionCheck()
 	elseif not actpet then
 		ns:debugprintL1("TransitionCheck() could not find saved pet --> summoning new pet")
 		ns.MsgNoSavedPet()
-		ns:NewPet()
+		ns:NewPet(now, false)
 	end
 	timeRestorePet = now
 	--[[ This is not 100% reliable here, but should do the trick most of the time. ]]
