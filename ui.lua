@@ -371,7 +371,7 @@ function ns:TimerSlashCmd(value)
 		ns.db.newPetTimer = value * 60
 		ChatUserNotification(format('%s%s.',CO.bn, (ns.db.newPetTimer == 0 and 'Summon timer disabled' or 'Summoning a new pet every ' .. ns.db.newPetTimer/60 .. ' minutes')))
 	else
-		ChatUserNotification(format('%sNot a valid timer value. Enter a number from %s1%s to %s1440%s for a timer in minutes, or %s0%s (zero) to %sdisable%s the timer. \nExamples: %s/pw 20%s will summon a new pet every 20 minutes, %s/pw 0%s disables the timer. Note that there is a space between "/pw" and the number.',CO.bw, CO.c, CO.bw, CO.c, CO.bw, CO.c, CO.bw, CO.k, CO.bw, CO.c, CO.bw, CO.c, CO.bw))
+		ChatUserNotification(format('%sNot a valid timer value. Enter a number from %s1%1$s to %2$s1440%1$s for a timer in minutes, or %2$s0%1$s (zero) to %3$sdisable%1$s the timer. \nExamples: %2$s/pw 20%1$s will summon a new pet every 20 minutes, %2$s/pw 0%1$s disables the timer. Note that there is a space between "/pw" and the number.', CO.bw, CO.c, CO.k))
 	end
 end
 
