@@ -1,3 +1,10 @@
+#### 1.2.2 (2023-03-31)
+- Added: Automatic removal of orphaned pet IDs from the char favorites table. 
+  - A pet ID becomes "orphaned" when the server assigns a new ID to the pet in your collection (for whatever reason), and also when you cage a pet. As a result you could have a wrong char favorites count in the Status display (e.g. it says your char has 8 favorites but displays only 5 pet links), and permanently invalid pet entries in your Saved Variables file. The removal happens automatically in the background whenever the pet pool is updated.
+  - If PW removes an orphaned pet ID, you'll get a message in the chat, so you know that something has changed with your char favs.
+- Fixed: The "Your only eligible random pet is already active" message appeared more often than intended.
+- Some code cleanup.
+
 #### 1.2.1 (2023-03-27)
 - Added aura 290460 to excluded auras. This is the aura you get when you mount the Battlebot Champion in Zskera Vault (Forbidden Reach). PW tried to summon a pet, which threw you out of the Battlebot; this no longer happens.
 
