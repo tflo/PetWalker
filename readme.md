@@ -108,6 +108,20 @@ Unlike the global favorites, these char-specific favorites are not sorted at the
 
 Simply set the Summon New Pet timer to ‘0’ (zero). You can set it to 0 with the command `/pw 0`. With this setting, the addon will never give you a new pet, and will do its best to keep your current pet out, until _you_ decide to summon a different one. _How_ the pet is summoned, is irrelevant: it can be summoned via Pet Journal, or via PetWalker keybind, or whatever. PetWalker will remember it, treat is as your “valid” current pet and will try to re-summon it whenever it is lost.
 
+### I set the pet pool to All Pets (not just favorites), but PetWalker only summons a few pets!
+
+The Filter settings in the Pet Journal can actually restrict the pet pool, i.e. you can actively use the filters to "shape" your pet pool without using favorites. This includes any text in the search box(!).
+
+However, it is also possible that the game has messed up the filters (I often see this after a hard disconnect), or you have been searching for a pet and forgot to reset the filters.
+
+First, check PetWalker's status with `/pw s`. If it reports that your pool is set to All Pets, but also says that there are only (for example) 5 pets "eligible", while you have 500 pets in your collection, then you can be pretty sure that the Pet Journal filters or the search box are restricting the pool.
+
+If this is not what you want, open Pet Journal (not Rematch!) and remove all filters by clicking the "X" badge on the Filter drop-down menu, and clear the search box of any text.
+
+Note that you must have access to the Blizz Pet Journal to do this, so make sure that Rematch does not overwrite it! (Go to Rematch > Options > Miscellaneous Options and check "Use Default Pet Journal" or uncheck the Rematch checkbox at the bottom of the Pet Journal. With this setting, you can still invoke Rematch with its own hotkey). 
+
+See also [issue#6](https://github.com/tflo/PetWalker/issues/6).
+
 ### Where/when does PetWalker fail to keep my pet out?
 
 The most difficult situation is when you select a team for a pet battle. If you are using Rematch, you should select the “Keep Companion” option (in “Miscellaneous Options”). This will definitely help, but it is not guaranteed that, after the pet battle, you have the same pet out as before.

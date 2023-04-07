@@ -1,3 +1,8 @@
+#### 1.2.3 (2023-04-07)
+- Updated readme.md, readme.pdf, description on CurseForge and Wago:
+  - Added a point to the FAQ to make it clearer that the Pet Journal filters (and not the Rematch filters) are affecting the pool of pets that is used for summoning. Fixes [issue#6](https://github.com/tflo/PetWalker/issues/6).
+- Modified the Pet Pool warning message to make it clearer to the user that he should verify the Pet Journal filters, not the Rematch ones.
+
 #### 1.2.2 (2023-03-31)
 - Added: Automatic removal of orphaned pet IDs from the char favorites table. 
   - A pet ID becomes "orphaned" when the server assigns a new ID to the pet in your collection (for whatever reason), and also when you cage a pet. As a result you could have a wrong char favorites count in the Status display (e.g. it says your char has 8 favorites but displays only 5 pet links), and permanently invalid pet entries in your Saved Variables file. The removal happens automatically in the background whenever the pet pool is updated.
