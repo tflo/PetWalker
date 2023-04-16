@@ -13,6 +13,34 @@ end)
 
 ns.events:RegisterEvent("ADDON_LOADED")
 
+function ns.events:RegisterSummonEvents()
+	if ns.db.eventAlt then
+		self:RegisterEvent("ZONE_CHANGED")
+		self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
+	else
+		self:RegisterEvent("PLAYER_STARTED_MOVING")
+	end
+end
+
+function ns.events:UnregisterSummonEvents()
+	self:UnregisterEvent("ZONE_CHANGED")
+	self:UnregisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
+	self:UnregisterEvent("PLAYER_STARTED_MOVING")
+end
+
+function ns.events:RegisterPWEvents()
+	self:RegisterEvent("PLAYER_ENTERING_WORLD")
+	self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
+	self:RegisterEvent("COMPANION_UPDATE")
+	self:RegisterEvent("PLAYER_LOGOUT")
+	self:RegisterSummonEvents()
+end
+
+function ns.events:UnregisterPWEvents()
+	self:UnregisterAllEvents()
+end
+
 --[[---------------------------------------------------------------------------
 For the Bindings file
 ---------------------------------------------------------------------------]]--
@@ -121,6 +149,8 @@ Init
 
 		ns.timeNewPetSuccess = GetTime() - (ns.db.newPetTimer - ns.db.remainingTimer)
 
+		if ns.db.autoEnabled then ns.events:RegisterPWEvents() end
+
 		--[[
 		Two suitable events here:
 		1) PLAYER_ENTERING_WORLD and 2) ZONE_CHANGED_NEW_AREA
@@ -133,15 +163,17 @@ Init
 		In any case, we should make sure to be out of the loading process here,
 		otherwise we might unsummon our - not yet spawned - pet.
 		]]
-		ns.events:RegisterEvent("PLAYER_ENTERING_WORLD")
 		function ns.PLAYER_ENTERING_WORLD(_, isLogin, isReload)
 			--[[ To prevent saving the wrong pet if we get an arbitrary
 			COMPANION_UPDATE before the TransitionCheck could summon a pet ]]
 			if isLogin then
+				ns:debugprintL1("Event: PLAYER_ENTERING_WORLD: Login")
 				delayLoad = 12
 			elseif isReload then
+				ns:debugprintL1("Event: PLAYER_ENTERING_WORLD: Reload")
 				delayLoad = 8
 			else
+				ns:debugprintL1("Event: PLAYER_ENTERING_WORLD: Instance change")
 				delayLoad = 5 -- TODO: Find out if we really need the TransitionCheck here
 			end
 			ns.petVerified = false
@@ -155,38 +187,36 @@ Init
 		needed, that is before selecting a random pet.
 		--> This seems to work, so far!
 		]]
-		ns.events:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 		function ns.PET_JOURNAL_LIST_UPDATE()
+			ns:debugprintL1("Event: PET_JOURNAL_LIST_UPDATE --> poolInitialized = false")
 			ns.poolInitialized = false
 -- 			ns:debugprintL1("ns.PET_JOURNAL_LIST_UPDATE has run. ns.poolInitialized =="
 -- 			.. tostring(ns.poolInitialized))
 		end
 
 
-		if ns.db.eventAlt then -- Experimental events
-			ns.events:RegisterEvent("ZONE_CHANGED")
-			function ns:ZONE_CHANGED()
-				if not ns.db.autoEnabled or UnitAffectingCombat("player") or IsFlying() then return end
-				ns.AutoAction()
+		-- Experimental alternative events
+		function ns:ZONE_CHANGED()
+			if UnitAffectingCombat("player") or IsFlying() then return end
+			ns:debugprintL1("Event: ZONE_CHANGED --> AutoAction")
+			ns.AutoAction()
+		end
+		function ns:PLAYER_MOUNT_DISPLAY_CHANGED()
+			if UnitAffectingCombat("player") or IsFlying() then return end
+			ns:debugprintL1("Event: PLAYER_MOUNT_DISPLAY_CHANGED --> AutoAction")
+			ns.AutoAction()
+		end
+		-- Regular main event
+		function ns:PLAYER_STARTED_MOVING()
+			if
+				UnitAffectingCombat("player")
+				or IsFlying()
+				or IsMounted() and IsAdvancedFlyableArea() and not ns.db.drSummoning -- API since 10.0.7
+			then
+				return
 			end
-			ns.events:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
-			function ns:PLAYER_MOUNT_DISPLAY_CHANGED()
-				if not ns.db.autoEnabled or UnitAffectingCombat("player") or IsFlying() then return end
-				ns.AutoAction()
-			end
-		else -- Regular main event
-			ns.events:RegisterEvent("PLAYER_STARTED_MOVING")
-			function ns:PLAYER_STARTED_MOVING()
-				if
-					not ns.db.autoEnabled
-					or UnitAffectingCombat 'player'
-					or IsFlying()
-					or IsMounted() and IsAdvancedFlyableArea() and not ns.db.drSummoning -- API since 10.0.7
-				then
-					return
-				end
-				ns.AutoAction()
-			end
+			ns:debugprintL1("Event: PLAYER_STARTED_MOVING --> AutoAction")
+			ns.AutoAction()
 		end
 
 		--[[ What we are trying to do here ]]--[[ We assume that a
@@ -194,23 +224,23 @@ Init
 		COMPANION_UPDATE was a pet-summoning by the player, hence we save the pet.
 		]]
 
-		ns.events:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
 		function ns:UNIT_SPELLCAST_SUCCEEDED()
-			if ns.db.autoEnabled and not UnitAffectingCombat("player") then
+			if not IsFlying() and not UnitAffectingCombat("player") then
+				ns:debugprintL1("Event: UNIT_SPELLCAST_SUCCEEDED:player --> GetTime")
 				timePlayerCast = GetTime()
 			end
 		end
 
-		ns.events:RegisterEvent("COMPANION_UPDATE")
 		function ns:COMPANION_UPDATE(what)
-			if ns.db.autoEnabled and what == "CRITTER" and GetTime() - timePlayerCast < 0.2 then
+			if what == "CRITTER" and GetTime() - timePlayerCast < 0.2 then
+				ns:debugprintL1("Event: COMPANION_UPDATE --> SavePet")
 				ns.SavePet()
 -- 				C_Timer.After(1, ns.SavePet)
 			end
 		end
 
-		ns.events:RegisterEvent("PLAYER_LOGOUT")
 		function ns:PLAYER_LOGOUT()
+			ns:debugprintL1("Event: PLAYER_LOGOUT --> remainingTimer")
 			ns.db.remainingTimer = ns.RemainingTimer(GetTime())
 		end
 

@@ -152,6 +152,11 @@ function ns.MsgPetSummonFailed()
 	ChatUserNotification(CO.bw .. "You don't meet the conditions for summoning a pet right now.")
 end
 
+-- If we block a command bc auto-summoning is disabled (aka events unregistered). Currently not used.
+-- function ns.MsgAutoIsDisabled()
+-- 	ChatUserNotification(format("%sAuto-summoning must be enabled for this! %s(%s/pw a%2$s)", CO.bw, CO.bn, CO.c))
+-- end
+
 
 --[[---------------------------------------------------------------------------
 Three big messages: Status, Low Pet Pool, and Help
@@ -297,6 +302,7 @@ function ns:DismissAndDisable()
 		C_PetJournal.SummonPetByGUID(actpet)
 	end
 	ns.db.autoEnabled = false
+	ns.events:UnregisterPWEvents()
 	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.autoEnabled) end
 	ChatUserNotification(format('%sPet dismissed and auto-summoning %s.', CO.bn, (ns.db.autoEnabled and 'enabled' or 'disabled')))
 end
@@ -322,14 +328,24 @@ function ns.VerbosityMute()
 end
 
 function ns:AutoToggle()
-	ns.db.autoEnabled = not ns.db.autoEnabled
+	if ns.db.autoEnabled then
+		ns.db.autoEnabled = false
+		ns.events:UnregisterPWEvents()
+	else
+		ns.db.autoEnabled = true
+		ns.events:RegisterPWEvents()
+	end
 	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.autoEnabled) end
 	ChatUserNotification(format('%sPet auto-summoning %s.', CO.bn, (ns.db.autoEnabled and 'enabled' or 'disabled')))
 end
 
 function ns:EventAlt()
 	ns.db.eventAlt = not ns.db.eventAlt
-	ChatUserNotification(format('%s%s activated. Requires UI reload!', CO.bn, (ns.db.eventAlt and 'Alternative event(s)' or 'Default event (PLAYER_STARTED_MOVING)')))
+	if ns.db.autoEnabled then
+		ns.events:UnregisterSummonEvents()
+		ns.events:RegisterSummonEvents()
+	end
+	ChatUserNotification(format('%s%s %s.', CO.bn, ns.db.eventAlt and 'Alternative event(s)' or 'Default event (PLAYER_STARTED_MOVING)', ns.db.autoEnabled and 'registered' or 'selected. Note that auto-summoning is currently disabled; event(s) will be registered when you enable auto-summoning (' .. CO.c .. '/pw a' .. CO.bn .. ')'))
 end
 
 function ns:FavsToggle()

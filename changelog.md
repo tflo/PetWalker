@@ -1,3 +1,8 @@
+#### 1.3.0 (2023-04-16)
+- If you now disable auto-summoning with the usual command (`/pw a`), all events will be unregistered.
+- This means … actually nothing for you from a CPU perspective, but it is a cleaner way to disable auto-summoning. And you can now rest assured that when PW's auto-summoning is off, it won't interfere with or delay anything. It will do exactly _nothing_ then, unless you use a PW hotkey or slash command.
+
+
 #### 1.2.3 (2023-04-07)
 - Updated readme.md, readme.pdf, description on CurseForge and Wago:
   - Added a point to the FAQ to make it clearer that the Pet Journal filters (and not the Rematch filters) are affecting the pool of pets that is used for summoning. Fixes [issue#6](https://github.com/tflo/PetWalker/issues/6).

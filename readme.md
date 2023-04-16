@@ -158,7 +158,6 @@ To be clear, the GCD is not caused by PetWalker, it's a Blizz thing: any summoni
 - Remove erroneous “summoned” messages in a few situations where actually no pet was summoned.
 - As mentioned in the FAQ, there is a chance that after a pet battle your previous companion is not re-summoned. This needs to be improved.
 - Add an optional login message.
-- Try to completely unregister all events if the addon is disabled via `/pw a`. (But, well, why would anyone disable it for more than a couple of minutes? So probably this doesn't matter at all…)
 
 Feel free to post suggestions or issues in the [GitHub Issues](https://github.com/tflo/PetWalker/issues) of the repo!
 __Please do not post issues or suggestions in the comments on Curseforge.__
