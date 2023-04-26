@@ -31,8 +31,6 @@ end
 function ns.events:RegisterPWEvents()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
-	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
-	self:RegisterEvent("COMPANION_UPDATE")
 	self:RegisterEvent("PLAYER_LOGOUT")
 	self:RegisterSummonEvents()
 end
@@ -222,24 +220,25 @@ Init
 			ns.AutoAction()
 		end
 
-		--[[ What we are trying to do here ]]--[[ We assume that a
-		UNIT_SPELLCAST_SUCCEEDED event by the player, immediately followed by
-		COMPANION_UPDATE was a pet-summoning by the player, hence we save the pet.
-		]]
 
-		function ns:UNIT_SPELLCAST_SUCCEEDED()
-			if not IsFlying() and not UnitAffectingCombat("player") then
-				ns:debugprintL1("Event: UNIT_SPELLCAST_SUCCEEDED:player --> GetTime")
-				timePlayerCast = GetTime()
+		hooksecurefunc(C_PetJournal, "SummonPetByGUID", function()
+			ns.timeSummonSpell = GetTime() -- Debug
+			ns:debugprintL1("Hook: SummonPetByGUID runs; ns.inBattleSleep: " .. tostring(ns.inBattleSleep))
+-- 			if ns.skipNextSave then ns.skipNextSave = false return end
+			if ns.inBattleSleep then return end
+			ns:debugprintL1("Hook: SummonPetByGUID --> register COMPANION_UPDATE")
+			ns.events:RegisterEvent("COMPANION_UPDATE") -- Timer better?
+-- 			C_Timer.After(0.2, ns.SavePet) -- 0.2 is the minimum
+		end)
+
+		function ns:COMPANION_UPDATE(what)
+			if what == "CRITTER" then
+				ns.events:UnregisterEvent("COMPANION_UPDATE")
+				ns:debugprintL1("Event: COMPANION_UPDATE --> SavePet")
+				ns.SavePet()
 			end
 		end
 
-		function ns:COMPANION_UPDATE(what)
-			if what == "CRITTER" and GetTime() - timePlayerCast < 0.2 then
-				ns:debugprintL1("Event: COMPANION_UPDATE --> SavePet")
-				ns.SavePet()
--- 				C_Timer.After(1, ns.SavePet)
-			end
 		end
 
 		function ns:PLAYER_LOGOUT()
