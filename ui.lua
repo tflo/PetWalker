@@ -267,7 +267,7 @@ function SlashCmdList.PetWalker(cmd)
 		ns:NewPet()
 	elseif cmd == 'f' or cmd == 'fav' then
 		ns:FavsToggle()
-	elseif cmd == 'e' or cmd == 'eve' then -- Not meant for the user; leave it undocumented
+	elseif cmd == 'aev' or cmd == 'altevents' then -- Probably better to leave this undocumented
 		ns:EventAlt()
 	elseif cmd == 'c' or cmd == 'char' then
 		ns.CharFavsSlashToggle()
