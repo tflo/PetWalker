@@ -31,6 +31,7 @@ end
 function ns.events:RegisterPWEvents()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
+	self:RegisterEvent("PET_BATTLE_OPENING_START")
 	self:RegisterEvent("PLAYER_LOGOUT")
 	self:RegisterSummonEvents()
 end
@@ -74,6 +75,8 @@ instead of the last saved pet in our DB (which can be the last active pet of the
 alt we just logged out). Caution, to not lock out manually summoned pets from
 being saved. ]]
 ns.petVerified = false
+-- ns.skipNextSave = false
+ns.inBattleSleep = false
 local timeSafeSummonFailed = 0
 --[[ Last time AutoRestore() was called. ]]
 local timeRestorePet = 0
@@ -82,6 +85,8 @@ local timePoolMsg = 0
 local timePlayerCast = 0
 local timeTransitionCheck = 0
 local delayAfterLoad
+local delayAfterBattle = 15
+local instaSummonAfterBattleSleep = true
 local msgOnlyFavIsActiveAlreadyDisplayed = false
 
 local excludedSpecies = {
@@ -220,6 +225,11 @@ Init
 			ns.AutoAction()
 		end
 
+		hooksecurefunc(C_PetJournal, "SetPetLoadOutInfo", function()
+			-- Note that SetPetLoadOutInfo summons the slot pet, but it does so _not_ via SummonPetByGUID
+			ns:debugprintL1("Hook: SetPetLoadOutInfo --> petVerified = false")
+			ns.petVerified = false
+		end)
 
 		hooksecurefunc(C_PetJournal, "SummonPetByGUID", function()
 			ns.timeSummonSpell = GetTime() -- Debug
@@ -239,6 +249,25 @@ Init
 			end
 		end
 
+		function ns:PET_BATTLE_OPENING_START()
+			ns:debugprintL1("Event: PET_BATTLE_OPENING_START --> Unregister events")
+			ns.events:UnregisterPWEvents()
+			ns.events:RegisterEvent("PET_BATTLE_OVER") -- Alternative: PET_BATTLE_CLOSE (fires twice)
+			ns.inBattleSleep = true
+		end
+
+		function ns:PET_BATTLE_OVER()
+			ns:debugprintL1(format("Event: PET_BATTLE_OVER --> Re-register events in %ss, unless we are in the next battle", delayAfterBattle))
+			C_Timer.After(delayAfterBattle, function()
+				if C_PetBattles.IsInBattle() then return end
+				ns:debugprintL1("Re-registering events now")
+-- 				ns.events:RegisterSummonEvents()
+				ns.events:UnregisterEvent("PET_BATTLE_OVER")
+				ns.inBattleSleep = false
+				ns.events:RegisterPWEvents()
+				-- Summon without waiting for trigger event
+				if instaSummonAfterBattleSleep then ns.TransitionCheck() end
+			end)
 		end
 
 		function ns:PLAYER_LOGOUT()
@@ -625,6 +654,7 @@ function ns:SafeSummon(pet, resettimer)
 		and not InArena()
 	then
 		ns.petVerified = true
+-- 		ns.skipNextSave = true
 		if resettimer then ns.timeNewPetSuccess = now end
 		ns.MsgPetSummonSuccess()
 		C_PetJournal.SummonPetByGUID(pet)
