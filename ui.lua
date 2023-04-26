@@ -196,8 +196,6 @@ function ns.HelpText()
 end
 
 
-
-
 function ns.Status()
 	if not ns.poolInitialized then ns.InitializePool() end
 	local header = {

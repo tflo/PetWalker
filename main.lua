@@ -83,7 +83,7 @@ local timeSavePet = 0
 local timePoolMsg = 0
 local timePlayerCast = 0
 local timeTransitionCheck = 0
-local delayLoad
+local delayAfterLoad
 local msgOnlyFavIsActiveAlreadyDisplayed = false
 
 local excludedSpecies = {
@@ -168,16 +168,16 @@ Init
 			COMPANION_UPDATE before the TransitionCheck could summon a pet ]]
 			if isLogin then
 				ns:debugprintL1("Event: PLAYER_ENTERING_WORLD: Login")
-				delayLoad = 12
+				delayAfterLoad = 12
 			elseif isReload then
 				ns:debugprintL1("Event: PLAYER_ENTERING_WORLD: Reload")
-				delayLoad = 8
+				delayAfterLoad = 8
 			else
 				ns:debugprintL1("Event: PLAYER_ENTERING_WORLD: Instance change")
-				delayLoad = 5 -- TODO: Find out if we really need the TransitionCheck here
+				delayAfterLoad = 5 -- TODO: Find out if we really need the TransitionCheck here
 			end
 			ns.petVerified = false
-			C_Timer.After(delayLoad, ns.TransitionCheck)
+			C_Timer.After(delayAfterLoad, ns.TransitionCheck)
 		end
 
 		--[[
@@ -206,6 +206,7 @@ Init
 			ns:debugprintL1("Event: PLAYER_MOUNT_DISPLAY_CHANGED --> AutoAction")
 			ns.AutoAction()
 		end
+
 		-- Regular main event
 		function ns:PLAYER_STARTED_MOVING()
 			if
@@ -319,7 +320,7 @@ function ns.AutoAction()
 	if ns.db.newPetTimer ~= 0 then
 		local now = GetTime()
 		if ns.RemainingTimer(now) == 0 and now - timeSafeSummonFailed > 40 then
-			ns:debugprintL2("AutoAction() decided for NewPet.")
+			ns:debugprintL2("AutoAction decided for NewPet")
 			ns:NewPet(now, false)
 			return
 		end
@@ -327,7 +328,7 @@ function ns.AutoAction()
 	if not ns.petVerified then ns.TransitionCheck() return end
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	if not actpet then
-		ns:debugprintL2("AutoAction() decided for RestorePet.")
+		ns:debugprintL2("AutoAction decided for RestorePet")
 		ns:RestorePet()
 	end
 end
@@ -800,14 +801,14 @@ end
 -- without pet info
 function ns:debugprintL1(msg)
 	if ns.db.debugMode then
-		print("|cffEE82EE# PETWALKER DEBUG: " .. (msg or "<nil>") .. " #")
+		print("|cffEE82EE### PetWalker Debug: " .. (msg or "<nil>") .. " ###")
 	end
 end
 
 -- with pet info
 function ns:debugprintL2(msg)
 	if ns.db.debugMode then
-		print("|cffEE82EE# PETWALKER DEBUG: " .. (msg or "<nil>") .. " ### Current DB pet: " .. (ns.PetIDtoName(((ns.dbc.charFavs and ns.db.favsOnly) and ns.dbc.currentPet or ns.db.currentPet)) or "<nil>") .. " #")
+		print("|cffEE82EE### PetWalker Debug: " .. (msg or "<nil>") .. " # Current DB pet: " .. (ns.PetIDtoName(((ns.dbc.charFavs and ns.db.favsOnly) and ns.dbc.currentPet or ns.db.currentPet)) or "<nil>") .. " ###")
 	end
 end
 
