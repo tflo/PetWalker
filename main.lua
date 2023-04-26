@@ -108,6 +108,8 @@ See the extra checks in IsExcludedBySpecies() and TransitionCheck(). ]]
 -- 2403,
 }
 
+-- Debug
+ns.timeSummonSpell = 0
 
 --[[===========================================================================
 LOADING
@@ -192,8 +194,6 @@ Init
 		function ns.PET_JOURNAL_LIST_UPDATE()
 			ns:debugprintL1("Event: PET_JOURNAL_LIST_UPDATE --> poolInitialized = false")
 			ns.poolInitialized = false
--- 			ns:debugprintL1("ns.PET_JOURNAL_LIST_UPDATE has run. ns.poolInitialized =="
--- 			.. tostring(ns.poolInitialized))
 		end
 
 
@@ -327,7 +327,11 @@ function ns.AutoAction()
 			return
 		end
 	end
-	if not ns.petVerified then ns.TransitionCheck() return end
+	if not ns.petVerified then
+		ns:debugprintL2("AutoAction decided for TransitionCheck (petVerified failed)")
+		ns.TransitionCheck()
+		return
+	end
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	if not actpet then
 		ns:debugprintL2("AutoAction decided for RestorePet")
@@ -540,6 +544,7 @@ Check the code.
 So, for the moment: Trying without SavePet CD. Also check the C_Timer at the event.
 ]]
 function ns.SavePet()
+	ns:debugprintL1("SavePet runs now: " .. (GetTime() - ns.timeSummonSpell))
 	if not ns.petVerified then return end
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 -- 	local now = GetTime()
