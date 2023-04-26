@@ -219,8 +219,9 @@ function ns.Status()
 	header = table.concat(header, CO.bn)
 	body = table.concat(body, CO.bn)
 	charfavlist = table.concat(charfavlist, CO.bn)
+	local extraSettings = (ns.db.eventAlt and table.concat({CO.k .."\nAlternative Events ", "are ", CO.s .. "enabled ", "for all chars."}, CO.bn) or nil)
 
-	ChatUserNotificationLarge(header, body, nil, charfavlist)
+	ChatUserNotificationLarge(header, body, extraSettings, charfavlist)
 end
 
 
