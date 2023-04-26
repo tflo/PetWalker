@@ -401,7 +401,7 @@ function ns:ListCharFavs()
 	end
 	favlinks = table.concat(favlinks, ' ')
 	return CO.e .. thisChar .. CO.bn .. " has " .. CO.e .. count .. CO.bn ..
-	" character-specific favorite pets" .. (count > 0 and ":\n" or ".") .. favlinks
+	" character-specific favorite pet" .. (count > 1 and "s:\n" or count > 0 and ":\n" or "s.") .. favlinks
 end
 
 
