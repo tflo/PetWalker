@@ -62,6 +62,12 @@ local function ChatUserNotificationLarge(first, second, third, last)
 	print(last, "\n" .. CO.an .. sep)
 end
 
+-- Login msg
+function ns.MsgLogin()
+	if ns.db.verbosityLevel < 2 then return end
+	ChatUserNotification(table.concat({CO.k .. "Auto: ", CO.s .. (ns.db.autoEnabled and "on" or CO.bw .. "off"), "; ", CO.k .. "Pet pool: ", CO.s .. (ns.db.favsOnly and ns.dbc.charFavsEnabled and "char favs" or ns.db.favsOnly and "global favs" or "all pets"), "; ", CO.k .. "Timer: ", CO.s .. (ns.db.newPetTimer > 0 and ns.db.newPetTimer/60 .. " min" or "off"), "."}, CO.bn))
+end
+
 -- TODO: Do we need a warning at 1 selectable pet? Or should this be considered a valid use-case? (User manually summons a pet from Journal, but wants to get back his (only) fav pet when the timer is due.)
 -- function ns.MsgLowPetPool(nPool)
 -- 	ChatUserNotification(CO.bw .. ": " .. (nPool < 1 and "0 (zero) pets" or "Only 1 pet") .. " eligible as random summon! You should either " .. (ns.db.favsOnly and "flag more pets as favorite, or set the ramdom pool to 'All Pets'" or "collect more pets") .. ", or set the random-summon timer to '0'. Please note that certain pets are excluded from random summoning, to not break their usability (for example Guild Herald)." .. ((ns.dbc.charFavsEnabled and ns.db.favsOnly) and "\nNote that you have set this char to use char-specific favorite pets. Maybe switching to global favorites ('/pw c') will help." or ""))

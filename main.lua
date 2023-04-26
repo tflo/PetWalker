@@ -149,6 +149,8 @@ Init
 
 		ns.timeNewPetSuccess = GetTime() - (ns.db.newPetTimer - ns.db.remainingTimer)
 
+		C_Timer.After(20, ns.MsgLogin)
+
 		if ns.db.autoEnabled then ns.events:RegisterPWEvents() end
 
 		--[[
