@@ -363,7 +363,7 @@ function ns.CharFavsSlashToggle() -- for slash command only
 	--[[ Since we are changing from one saved-pet table to another, we prefer to
 	restore the pet from the new list, rather than doing NewPet like in the FavsToggle. ]]
 	if ns.db.autoEnabled then ns.TransitionCheck() end
-	ChatUserNotification(format('%sCharacter-specific favorites %s.', CO.bn, (ns.dbc.charFavsEnabled and 'enabled' or 'disabled')))
+	ChatUserNotification(format('%sCharacter-specific favorites %s for %s%s.', CO.bn, ns.dbc.charFavsEnabled and 'enabled' or 'disabled', CO.e, thisChar))
 end
 
 function ns.DRSummoningToggle()
