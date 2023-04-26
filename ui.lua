@@ -3,6 +3,8 @@ local _
 
 local thisChar = UnitName("player")
 
+local GetAddOnMetadata = _G.GetAddOnMetadata or C_AddOns.GetAddOnMetadata
+
 --[[===========================================================================
 Colors
 ===========================================================================]]--
@@ -199,7 +201,7 @@ end
 function ns.Status()
 	if not ns.poolInitialized then ns.InitializePool() end
 	local header = {
-		CO.bn .. "Status & Settings:",
+		CO.bn .. "[v", GetAddOnMetadata(addonName, "Version"), "] Status & Settings:",
 	}
 	local body = {
 		CO.k .."\nAutomatic Random-summoning / Restore ", "is ", CO.s .. (ns.db.autoEnabled and "enabled" or CO.bw .. "disabled"), ".",
