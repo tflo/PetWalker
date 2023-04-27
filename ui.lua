@@ -1,7 +1,7 @@
 local addonName, ns = ...
 local _
 
-local thisChar = UnitName("player")
+local thisChar = UnitName 'player'
 
 local GetAddOnMetadata = _G.GetAddOnMetadata or C_AddOns.GetAddOnMetadata
 
@@ -45,21 +45,21 @@ local CO = SetColors(colSchemeGreen)
 Messages
 ===========================================================================]]--
 
-local sep = "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --"
+local sep = '-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --'
 
 local function ChatUserNotification(msg)
 	print(CO.an .. addonName .. ":", msg)
 end
 
 local function ChatUserNotificationBlock(msg)
-	print("\n" .. CO.an .. sep .. "\n" .. addonName .. ":", msg, "\n" .. CO.an .. sep , "\n ")
+	print('\n' .. CO.an .. sep .. '\n' .. addonName .. ':', msg, '\n' .. CO.an .. sep , '\n ')
 end
 
 local function ChatUserNotificationLarge(first, second, third, last)
-	print("\n" .. CO.an .. sep .. "\n" .. addonName .. ":", first)
+	print('\n' .. CO.an .. sep .. '\n' .. addonName .. ':', first)
 	if second then print(second) end
 	if third then print(third) end
-	print(last, "\n" .. CO.an .. sep)
+	print(last, '\n' .. CO.an .. sep)
 end
 
 -- Login msg
@@ -75,12 +75,12 @@ end
 
 function ns.MsgNoSavedPet()
 	if ns.db.verbosityLevel < 0 then return end
-	ChatUserNotification(CO.bw .. "No 'current pet' has been saved yet" .. (ns.dbc.charFavsEnabled and " for " .. CO.e .. thisChar or "") .. " --> could not restore pet.")
+	ChatUserNotification(CO.bw .. 'No Current Pet has been saved yet' .. (ns.dbc.charFavsEnabled and ' for ' .. CO.e .. thisChar or '') .. ' --> could not restore pet.')
 end
 
 function ns.MsgOnlyFavIsActive(ap)
 	if ns.db.verbosityLevel < 1 then return end
-	ChatUserNotification(CO.bn .. "Your only eligible random pet " .. (ns.PetIDtoLink(ap) or "???") .. " is already active.")
+	ChatUserNotification(CO.bn .. 'Your only eligible random pet ' .. (ns.PetIDtoLink(ap) or '???') .. ' is already active.')
 end
 
 function ns.MsgRemovedInvalidID(counter)
@@ -98,7 +98,7 @@ end
 
 function ns.MsgTargetIsSame(link) -- Without web link
 	if ns.db.verbosityLevel < 1 then return end
-	ChatUserNotification(format("%sTarget pet %s is the same pet as you currently have summened.", CO.bn, link))
+	ChatUserNotification(format('%sTarget pet %s is the same pet as you currently have summened.', CO.bn, link))
 end
 
 -- function ns.MsgTargetIsSame(link, name) -- With web link
@@ -134,17 +134,17 @@ end
 
 -- Called by the RestorePet func
 function ns.SetSumMsgToRestorePet(pet)
-	ns.msgPetSummonedContent = ns.db.verbosityLevel >= 3 and format('%sRestored your last pet %s.', CO.bn, (ns.PetIDtoLink(pet) or "???")) or nil
+	ns.msgPetSummonedContent = ns.db.verbosityLevel >= 3 and format('%sRestored your last pet %s.', CO.bn, (ns.PetIDtoLink(pet) or '???')) or nil
 end
 
 -- Called by the PreviousPet func
 function ns.SetSumMsgToPreviousPet(pet)
-	ns.msgPetSummonedContent = ns.db.verbosityLevel >= 2 and format('%sSummoned your previous pet %s.', CO.bn, (ns.PetIDtoLink(pet) or "???")) or nil
+	ns.msgPetSummonedContent = ns.db.verbosityLevel >= 2 and format('%sSummoned your previous pet %s.', CO.bn, (ns.PetIDtoLink(pet) or '???')) or nil
 end
 
 -- Called by the TransitionCheck func
 function ns.SetSumMsgToTransCheck(pet)
-	ns.msgPetSummonedContent = ns.db.verbosityLevel >= 3 and format('%sSummoned your last saved pet %s.', CO.bn, (ns.PetIDtoLink(pet) or "???")) or nil
+	ns.msgPetSummonedContent = ns.db.verbosityLevel >= 3 and format('%sSummoned your last saved pet %s.', CO.bn, (ns.PetIDtoLink(pet) or '???')) or nil
 end
 
 -- Called by the SafeSummon func
@@ -173,27 +173,27 @@ Three big messages: Status, Low Pet Pool, and Help
 function ns.HelpText()
 
 	local header = {
-		CO.bn .. "Help: ",
-		CO.c .. "\n/pw ", "or ", CO.c .. "/petwalker ", "supports these commands: ",
+		CO.bn .. 'Help: ',
+		CO.c .. '\n/pw ', 'or ', CO.c .. '/petwalker ', 'supports these commands: ',
 	}
 
 	local body = {
-		CO.c .. "\nd", ": ", CO.k .. "Dismiss ", "current pet and ", CO.k .. "disable auto-summoning ", "(new pet / restore).",
-		CO.c .. "\na", ": ", "Toggle ", CO.k .. "auto-summoning ", "(new pet / restore).",
-		CO.c .. "\nr", ": ", "Toggle ", CO.k .. "auto-summoning ", "also ", CO.k .. "while mounted in a Dragonriding zone: ", CO.s .. "allowed / not allowed", ".",
-		CO.c .. "\nn", ": ", "Summon ", CO.k .. "new pet ", "from pool.",
-		CO.c .. "\nf", ": ", "Toggle ", CO.k .. "pet pool: ", CO.s .. "Favorites Only", ", or ", CO.s .. "All Pets", ".",
-		CO.c .. "\nc", ": ", "Toggle ", CO.k .. "favorites: ", CO.s .. "Per-character", ", or ", CO.s .. "Global Favorites", ".",
-		CO.c .. "\n<number>", ": ", "Set ", CO.k .. "Summon Timer ", "in minutes (", CO.c .. "1 ", "to ", CO.c .. "1440", "; ", CO.c .. "0 ", "to ", CO.k .. "disable", ").",
-		CO.c .. "\np", ": ", "Summon ", CO.k .. "previous pet ", ".",
-		CO.c .. "\nv", ": ", CO.k .. "Verbosity: ", CO.s .. "silent ", "(only failures and warnings are printed to chat). ", CO.c .. "vv ", "for ", CO.s .. "medium ", CO.k .. "verbosity ", "(new summons), ", CO.c .. "vvv ", "for ", CO.s .. "full ", CO.k .. "verbosity ", "(also restored pets).",
-		CO.c .. "\ns", ": ", "Display current ", CO.k .. "status/settings.",
-		CO.c .. "\nh", ": ", "This help text.",
+		CO.c .. '\nd', ': ', CO.k .. 'Dismiss ', 'current pet and ', CO.k .. 'disable auto-summoning ', '(new pet / restore).',
+		CO.c .. '\na', ': ', 'Toggle ', CO.k .. 'auto-summoning ', '(new pet / restore).',
+		CO.c .. '\nr', ': ', 'Toggle ', CO.k .. 'auto-summoning ', 'also ', CO.k .. 'while mounted in a Dragonriding zone: ', CO.s .. 'allowed / not allowed', '.',
+		CO.c .. '\nn', ': ', 'Summon ', CO.k .. 'new pet ', 'from pool.',
+		CO.c .. '\nf', ': ', 'Toggle ', CO.k .. 'pet pool: ', CO.s .. 'Favorites Only', ', or ', CO.s .. 'All Pets', '.',
+		CO.c .. '\nc', ': ', 'Toggle ', CO.k .. 'favorites: ', CO.s .. 'Per-character', ', or ', CO.s .. 'Global Favorites', '.',
+		CO.c .. '\n<number>', ': ', 'Set ', CO.k .. 'Summon Timer ', 'in minutes (', CO.c .. '1 ', 'to ', CO.c .. '1440', '; ', CO.c .. '0 ', 'to ', CO.k .. 'disable', ').',
+		CO.c .. '\np', ': ', 'Summon ', CO.k .. 'previous pet ', '.',
+		CO.c .. '\nv', ': ', CO.k .. 'Verbosity: ', CO.s .. 'silent ', '(only failures and warnings are printed to chat). ', CO.c .. 'vv ', 'for ', CO.s .. 'medium ', CO.k .. 'verbosity ', '(new summons), ', CO.c .. 'vvv ', 'for ', CO.s .. 'full ', CO.k .. 'verbosity ', '(also restored pets).',
+		CO.c .. '\ns', ': ', 'Display current ', CO.k .. 'status/settings.',
+		CO.c .. '\nh', ': ', 'This help text.',
 	}
 
 	local footer = {
-		CO.bn .. "\nExamples: ", CO.c .. "/pw a", " disables auto-summon/restore, or enables it if disabled. ", CO.c .. "/pw 20", " sets the new-pet summon timer to 20 minutes.",
-		"\nIn 'Key Bindigs > AddOns' you can directly bind some commands.",
+		CO.bn .. '\nExamples: ', CO.c .. '/pw a', ' disables auto-summon/restore, or enables it if disabled. ', CO.c .. '/pw 20', ' sets the new-pet summon timer to 20 minutes.',
+		'\nIn Options > Keybindigs you can directly bind some commands.',
 	}
 
 	header = table.concat(header, CO.bn)
@@ -207,25 +207,25 @@ end
 function ns.Status()
 	if not ns.poolInitialized then ns.InitializePool() end
 	local header = {
-		CO.bn .. "[v", GetAddOnMetadata(addonName, "Version"), "] Status & Settings:",
+		CO.bn .. '[v', GetAddOnMetadata(addonName, 'Version'), '] Status & Settings:',
 	}
 	local body = {
-		CO.k .."\nAutomatic Random-summoning / Restore ", "is ", CO.s .. (ns.db.autoEnabled and "enabled" or CO.bw .. "disabled"), ".",
-		CO.k .. "\nSummon Timer ", "is ", CO.s .. (ns.db.newPetTimer > 0 and (ns.db.newPetTimer/60) .. CO.bn .. " minutes" or "disabled"), ". Next random pet in ", CO.e .. ns.RemainingTimerForDisplay(), ".",
-		CO.k .."\nAutomatic summoning while mounted in a Dragonriding zone ", "is ", CO.s .. (ns.db.drSummoning and "allowed" or "not allowed"), ".",
-		CO.k .. "\nVerbosity ", "level of messages: ", CO.s .. ns.db.verbosityLevel, " (of 3).",
-		CO.k .. "\nPet Pool ", "is set to ", CO.s .. (ns.db.favsOnly and "Favorites Only" or "All Pets"), ". Eligible pets: ", CO.e .. #ns.petPool, ".",
-		CO.k .. "\nPer-character Favorites ", "are ", CO.s .. (ns.dbc.charFavsEnabled and "enabled" or "disabled"), " for ", CO.e .. thisChar, ".",
+		CO.k ..'\nAutomatic Random-summoning / Restore ', 'is ', CO.s .. (ns.db.autoEnabled and 'enabled' or CO.bw .. 'disabled'), '.',
+		CO.k .. '\nSummon Timer ', 'is ', CO.s .. (ns.db.newPetTimer > 0 and (ns.db.newPetTimer/60) .. CO.bn .. ' minutes' or 'disabled'), '. Next random pet in ', CO.e .. ns.RemainingTimerForDisplay(), '.',
+		CO.k ..'\nAutomatic summoning while mounted in a Dragonriding zone ', 'is ', CO.s .. (ns.db.drSummoning and 'allowed' or 'not allowed'), '.',
+		CO.k .. '\nVerbosity ', 'level of messages: ', CO.s .. ns.db.verbosityLevel, ' (of 3).',
+		CO.k .. '\nPet Pool ', 'is set to ', CO.s .. (ns.db.favsOnly and 'Favorites Only' or 'All Pets'), '. Eligible pets: ', CO.e .. #ns.petPool, '.',
+		CO.k .. '\nPer-character Favorites ', 'are ', CO.s .. (ns.dbc.charFavsEnabled and 'enabled' or 'disabled'), ' for ', CO.e .. thisChar, '.',
 	}
 	-- Separating this bc it might be a longish list
 	local charfavlist = {
-		"\n", ns:ListCharFavs(),
+		'\n', ns:ListCharFavs(),
 	}
 
 	header = table.concat(header, CO.bn)
 	body = table.concat(body, CO.bn)
 	charfavlist = table.concat(charfavlist, CO.bn)
-	local extraSettings = (ns.db.eventAlt and table.concat({CO.k .."\nAlternative Events ", "are ", CO.s .. "enabled ", "for all chars."}, CO.bn) or nil)
+	local extraSettings = (ns.db.eventAlt and table.concat({CO.k ..'\nAlternative Events ', 'are ', CO.s .. 'enabled ', 'for all chars.'}, CO.bn) or nil)
 
 	ChatUserNotificationLarge(header, body, extraSettings, charfavlist)
 end
@@ -235,13 +235,13 @@ function ns.MsgLowPetPool(nPool)
 	if ns.db.verbosityLevel < 0 then return end
 	local R = CO.bw
 	local content = {
-		(nPool < 1 and CO.k .. "0 (zero) " ..R.. " pets " or R.. "Only " ..CO.k .. "1 " ..R.. "pet "),
-		"eligible as random summon!",
-		"\nYou should either " .. (ns.db.favsOnly and "flag more pets as favorite, or set the ramdom pool to " .. CO.s .."All Pets" or "collect more pets"), ", or set the random-summon timer to ", CO.s .. "0", ".",
-		"\nAlso check also your ", CO.k .. "Filter ", "settings in the ", CO.k .. "Blizz Pet Journal ", "(not in Rematch!), as they are affecting the pool of available pets!",
-		"\nPlease note that certain pets are ", CO.k .. "excluded ", "from random summoning, to not break their usability (for example ",
-		CO.q .. "Guild Herald", "). ",
-		((ns.dbc.charFavsEnabled and ns.db.favsOnly) and "\nYou have set " .. CO.e .. thisChar ..R.. " to use " .. CO.s .. "char-specific favorite " ..R.. "pets. Maybe switching to " .. CO.s .. "global favorites " ..R.. "(" .. CO.c .. "/pw c" ..R.. ") will help." or ""),
+		(nPool < 1 and CO.k .. '0 (zero) ' ..R.. ' pets ' or R.. 'Only ' ..CO.k .. '1 ' ..R.. 'pet '),
+		'eligible as random summon!',
+		'\nYou should either ' .. (ns.db.favsOnly and 'flag more pets as favorite, or set the ramdom pool to ' .. CO.s ..'All Pets' or 'collect more pets'), ', or set the random-summon timer to ', CO.s .. '0', '.',
+		'\nAlso check also your ', CO.k .. 'Filter ', 'settings in the ', CO.k .. 'Blizz Pet Journal ', '(not in Rematch!), as they are affecting the pool of available pets!',
+		'\nPlease note that certain pets are ', CO.k .. 'excluded ', 'from random summoning, to not break their usability (for example ',
+		CO.q .. 'Guild Herald', '). ',
+		((ns.dbc.charFavsEnabled and ns.db.favsOnly) and '\nYou have set ' .. CO.e .. thisChar ..R.. ' to use ' .. CO.s .. 'char-specific favorite ' ..R.. 'pets. Maybe switching to ' .. CO.s .. 'global favorites ' ..R.. '(' .. CO.c .. '/pw c' ..R.. ') will help.' or ''),
 	}
 	local content = table.concat(content, R)
 	ChatUserNotification(content)
@@ -407,8 +407,8 @@ function ns:ListCharFavs()
 		table.insert(favlinks, name)
 	end
 	favlinks = table.concat(favlinks, ' ')
-	return CO.e .. thisChar .. CO.bn .. " has " .. CO.e .. count .. CO.bn ..
-	" character-specific favorite pet" .. (count > 1 and "s:\n" or count > 0 and ":\n" or "s.") .. favlinks
+	return CO.e .. thisChar .. CO.bn .. ' has ' .. CO.e .. count .. CO.bn ..
+	' character-specific favorite pet' .. (count > 1 and 's:\n' or count > 0 and ':\n' or 's.') .. favlinks
 end
 
 
