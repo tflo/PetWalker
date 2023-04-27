@@ -129,22 +129,22 @@ NewPet, or PreviousPet or the TransitionCheck.
 
 -- Called by the NewPet func
 function ns.SetSumMsgToNewPet(ap, np, n)
-	ns.msgPetSummonedContent = ns.db.verbosityLevel >= 2 and format('%sSummoned %s pet %s.', CO.bn, (n > 1 and 'a new random' or 'your only eligible random'), ns.PetIDtoLink(np)) or nil
+	ns.msgPetSummonedContent = ns.db.verbosityLevel >= 2 and format('%sSummoned %s pet %s.', CO.bn, n > 1 and 'a new random' or 'your only eligible random', ns.PetIDtoLink(np)) or nil
 end
 
 -- Called by the RestorePet func
 function ns.SetSumMsgToRestorePet(pet)
-	ns.msgPetSummonedContent = ns.db.verbosityLevel >= 3 and format('%sRestored your last pet %s.', CO.bn, (ns.PetIDtoLink(pet) or '???')) or nil
+	ns.msgPetSummonedContent = ns.db.verbosityLevel >= 3 and format('%sRestored your last pet %s.', CO.bn, ns.PetIDtoLink(pet) or '???') or nil
 end
 
 -- Called by the PreviousPet func
 function ns.SetSumMsgToPreviousPet(pet)
-	ns.msgPetSummonedContent = ns.db.verbosityLevel >= 2 and format('%sSummoned your previous pet %s.', CO.bn, (ns.PetIDtoLink(pet) or '???')) or nil
+	ns.msgPetSummonedContent = ns.db.verbosityLevel >= 2 and format('%sSummoned your previous pet %s.', CO.bn, ns.PetIDtoLink(pet) or '???') or nil
 end
 
 -- Called by the TransitionCheck func
 function ns.SetSumMsgToTransCheck(pet)
-	ns.msgPetSummonedContent = ns.db.verbosityLevel >= 3 and format('%sSummoned your last saved pet %s.', CO.bn, (ns.PetIDtoLink(pet) or '???')) or nil
+	ns.msgPetSummonedContent = ns.db.verbosityLevel >= 3 and format('%sSummoned your last saved pet %s.', CO.bn, ns.PetIDtoLink(pet) or '???') or nil
 end
 
 -- Called by the SafeSummon func
@@ -186,7 +186,7 @@ function ns.HelpText()
 		CO.c .. '\nc', ': ', 'Toggle ', CO.k .. 'favorites: ', CO.s .. 'Per-character', ', or ', CO.s .. 'Global Favorites', '.',
 		CO.c .. '\n<number>', ': ', 'Set ', CO.k .. 'Summon Timer ', 'in minutes (', CO.c .. '1 ', 'to ', CO.c .. '1440', '; ', CO.c .. '0 ', 'to ', CO.k .. 'disable', ').',
 		CO.c .. '\np', ': ', 'Summon ', CO.k .. 'previous pet ', '.',
-		CO.c .. '\nv', ': ', CO.k .. 'Verbosity: ', CO.s .. 'silent ', '(only failures and warnings are printed to chat). ', CO.c .. 'vv ', 'for ', CO.s .. 'medium ', CO.k .. 'verbosity ', '(new summons), ', CO.c .. 'vvv ', 'for ', CO.s .. 'full ', CO.k .. 'verbosity ', '(also restored pets).',
+		CO.c .. '\nv', ': ', CO.k .. 'Verbosity: ', CO.s .. 'silent ', '(only failures and warnings are printed to chat); ', CO.c .. 'vv ', 'for ', CO.s .. 'medium ', CO.k .. 'verbosity ', '(new summons); ', CO.c .. 'vvv ', 'for ', CO.s .. 'full ', CO.k .. 'verbosity ', '(also restored pets).',
 		CO.c .. '\ns', ': ', 'Display current ', CO.k .. 'status/settings.',
 		CO.c .. '\nh', ': ', 'This help text.',
 	}
@@ -311,7 +311,7 @@ function ns:DismissAndDisable()
 	ns.db.autoEnabled = false
 	ns.events:UnregisterPWEvents()
 	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.autoEnabled) end
-	ChatUserNotification(format('%sPet dismissed and auto-summoning %s.', CO.bn, (ns.db.autoEnabled and 'enabled' or 'disabled')))
+	ChatUserNotification(format('%sPet dismissed and auto-summoning %s.', CO.bn, ns.db.autoEnabled and 'enabled' or 'disabled'))
 end
 
 function ns.VerbosityFull()
@@ -343,7 +343,7 @@ function ns:AutoToggle()
 		ns.events:RegisterPWEvents()
 	end
 	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.autoEnabled) end
-	ChatUserNotification(format('%sPet auto-summoning %s.', CO.bn, (ns.db.autoEnabled and 'enabled' or 'disabled')))
+	ChatUserNotification(format('%sPet auto-summoning %s.', CO.bn, ns.db.autoEnabled and 'enabled' or 'disabled'))
 end
 
 function ns:EventAlt()
@@ -376,12 +376,12 @@ end
 
 function ns.DRSummoningToggle()
 	ns.db.drSummoning = not ns.db.drSummoning
-	ChatUserNotification(format('%sSummoning while mounted in Dragonriding zones %s.', CO.bn, (ns.db.drSummoning and 'enabled' or 'disabled')))
+	ChatUserNotification(format('%sSummoning while mounted in Dragonriding zones %s.', CO.bn, ns.db.drSummoning and 'enabled' or 'disabled'))
 end
 
 function ns.DebugModeToggle() -- for slash command only
 	ns.db.debugMode = not ns.db.debugMode
-	ChatUserNotification(format('%sDebug mode %s.', CO.bn, (ns.db.debugMode and 'enabled' or 'disabled')))
+	ChatUserNotification(format('%sDebug mode %s.', CO.bn, ns.db.debugMode and 'enabled' or 'disabled'))
 end
 
 local function isAcceptableTimerValue(v)
@@ -392,7 +392,7 @@ function ns:TimerSlashCmd(value)
 	value = tonumber(value)
 	if isAcceptableTimerValue(value) or ns.db.debugMode then
 		ns.db.newPetTimer = value * 60
-		ChatUserNotification(format('%s%s.',CO.bn, (ns.db.newPetTimer == 0 and 'Summon timer disabled' or 'Summoning a new pet every ' .. ns.db.newPetTimer/60 .. ' minutes')))
+		ChatUserNotification(format('%s%s.',CO.bn, ns.db.newPetTimer == 0 and 'Summon timer disabled' or 'Summoning a new pet every ' .. ns.db.newPetTimer/60 .. ' minutes'))
 	else
 		ChatUserNotification(format('%sNot a valid timer value. Enter a number from %s1%1$s to %2$s1440%1$s for a timer in minutes, or %2$s0%1$s (zero) to %3$sdisable%1$s the timer. \nExamples: %2$s/pw 20%1$s will summon a new pet every 20 minutes, %2$s/pw 0%1$s disables the timer. Note that there is a space between "/pw" and the number.', CO.bw, CO.c, CO.k))
 	end
