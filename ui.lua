@@ -340,6 +340,7 @@ function ns:AutoToggle()
 	else
 		ns.db.autoEnabled = true
 		ns.events:RegisterPWEvents()
+		ns.AutoAction()
 	end
 	ChatUserNotification(format('%sPet auto-summoning %s.', CO.bn, ns.db.autoEnabled and 'enabled' or 'disabled'))
 end
