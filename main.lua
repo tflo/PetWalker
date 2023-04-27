@@ -3,65 +3,53 @@ local addonName, ns = ...
 local dbVersion = 1
 local _
 
-ns.events = CreateFrame("Frame")
+ns.events = CreateFrame 'Frame'
 
-ns.events:SetScript("OnEvent", function(self, event, ...)
-	if ns[event] then
-		ns[event](self,...)
-	end
+ns.events:SetScript('OnEvent', function(self, event, ...)
+	if ns[event] then ns[event](self, ...) end
 end)
 
-ns.events:RegisterEvent("ADDON_LOADED")
+ns.events:RegisterEvent 'ADDON_LOADED'
 
 function ns.events:RegisterSummonEvents()
 	if ns.db.eventAlt then
-		self:RegisterEvent("ZONE_CHANGED")
-		self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
+		self:RegisterEvent 'ZONE_CHANGED'
+		self:RegisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED'
 	else
-		self:RegisterEvent("PLAYER_STARTED_MOVING")
+		self:RegisterEvent 'PLAYER_STARTED_MOVING'
 	end
 end
 
 function ns.events:UnregisterSummonEvents()
-	self:UnregisterEvent("ZONE_CHANGED")
-	self:UnregisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
-	self:UnregisterEvent("PLAYER_STARTED_MOVING")
+	self:UnregisterEvent 'ZONE_CHANGED'
+	self:UnregisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED'
+	self:UnregisterEvent 'PLAYER_STARTED_MOVING'
 end
 
 function ns.events:RegisterPWEvents()
-	self:RegisterEvent("PLAYER_ENTERING_WORLD")
-	self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
-	self:RegisterEvent("PET_BATTLE_OPENING_START")
-	self:RegisterEvent("PLAYER_LOGOUT")
+	self:RegisterEvent 'PLAYER_ENTERING_WORLD'
+	self:RegisterEvent 'PET_JOURNAL_LIST_UPDATE'
+	self:RegisterEvent 'PET_BATTLE_OPENING_START'
+	self:RegisterEvent 'PLAYER_LOGOUT'
 	self:RegisterSummonEvents()
 end
 
-function ns.events:UnregisterPWEvents()
-	self:UnregisterAllEvents()
-end
+function ns.events:UnregisterPWEvents() self:UnregisterAllEvents() end
 
 --[[---------------------------------------------------------------------------
 For the Bindings file
 ---------------------------------------------------------------------------]]--
 
 -- BINDING_HEADER_PETWALKER = "PetWalker  "
-BINDING_NAME_PETWALKER_TOGGLE_AUTO = "Toggle Auto-Summoning"
-BINDING_NAME_PETWALKER_NEW_PET = "Summon New Pet"
-BINDING_NAME_PETWALKER_TARGET_PET = "Try to Summon Same Pet as Target"
-BINDING_NAME_PETWALKER_DISMISS_PET = "Dismiss Pet & Disable Auto-Summoning"
+BINDING_NAME_PETWALKER_TOGGLE_AUTO = 'Toggle Auto-Summoning'
+BINDING_NAME_PETWALKER_NEW_PET = 'Summon New Pet'
+BINDING_NAME_PETWALKER_TARGET_PET = 'Try to Summon Same Pet as Target'
+BINDING_NAME_PETWALKER_DISMISS_PET = 'Dismiss Pet & Disable Auto-Summoning'
 
-function petwalker_binding_toggle_autosummon()
-	ns:AutoToggle()
-end
-function petwalker_binding_new_pet()
-	ns:NewPet(nil, true)
-end
-function petwalker_binding_target_pet()
-	ns:SummonTargetPet()
-end
-function petwalker_binding_dismiss_and_disable()
-	ns:DismissAndDisable()
-end
+function petwalker_binding_toggle_autosummon() ns:AutoToggle() end
+function petwalker_binding_new_pet() ns:NewPet(nil, true) end
+function petwalker_binding_target_pet() ns:SummonTargetPet() end
+function petwalker_binding_dismiss_and_disable() ns:DismissAndDisable() end
 
 --[[===========================================================================
 Some Variables
@@ -129,7 +117,7 @@ Init
 		PetWalkerDB = PetWalkerDB or {}
 		PetWalkerPerCharDB = PetWalkerPerCharDB or {}
 		ns.db, ns.dbc = PetWalkerDB, PetWalkerPerCharDB
-		ns.db.dbVersion  = dbVersion
+		ns.db.dbVersion = dbVersion
 
 		ns.dbc.dbVersion = ns.db.dbVersion
 		ns.db.autoEnabled = ns.db.autoEnabled == nil and true or ns.db.autoEnabled
@@ -143,9 +131,7 @@ Init
 		ns.db.verbosityLevel = ns.db.verbosityLevel or 3
 		ns.db.drSummoning = ns.db.drSummoning == nil and true or ns.db.drSummoning
 
-		if not ns.db.dbVersion or ns.db.dbVersion ~= dbVersion then
-			table.wipe(ns.db)
-		end
+		if not ns.db.dbVersion or ns.db.dbVersion ~= dbVersion then table.wipe(ns.db) end
 		if not ns.dbc.dbVersion or ns.dbc.dbVersion ~= dbVersion then
 			local tmpCharFavs = ns.dbc.charFavs -- charFavs
 			table.wipe(ns.dbc)
@@ -172,15 +158,15 @@ Init
 		]]
 		function ns.PLAYER_ENTERING_WORLD(_, isLogin, isReload)
 			--[[ To prevent saving the wrong pet if we get an arbitrary
-			COMPANION_UPDATE before the TransitionCheck could summon a pet ]]
+					COMPANION_UPDATE before the TransitionCheck could summon a pet ]]
 			if isLogin then
-				ns:debugprintL1("Event: PLAYER_ENTERING_WORLD: Login")
+				ns:debugprintL1 'Event: PLAYER_ENTERING_WORLD: Login'
 				delayAfterLoad = 12
 			elseif isReload then
-				ns:debugprintL1("Event: PLAYER_ENTERING_WORLD: Reload")
+				ns:debugprintL1 'Event: PLAYER_ENTERING_WORLD: Reload'
 				delayAfterLoad = 8
 			else
-				ns:debugprintL1("Event: PLAYER_ENTERING_WORLD: Instance change")
+				ns:debugprintL1 'Event: PLAYER_ENTERING_WORLD: Instance change'
 				delayAfterLoad = 5 -- TODO: Find out if we really need the TransitionCheck here
 			end
 			ns.petVerified = false
@@ -195,74 +181,78 @@ Init
 		--> This seems to work, so far!
 		]]
 		function ns.PET_JOURNAL_LIST_UPDATE()
-			ns:debugprintL1("Event: PET_JOURNAL_LIST_UPDATE --> poolInitialized = false")
+			ns:debugprintL1 'Event: PET_JOURNAL_LIST_UPDATE --> poolInitialized = false'
 			ns.poolInitialized = false
 		end
 
-
 		-- Experimental alternative events
 		function ns:ZONE_CHANGED()
-			if UnitAffectingCombat("player") or IsFlying() then return end
-			ns:debugprintL1("Event: ZONE_CHANGED --> AutoAction")
+			if UnitAffectingCombat 'player' or IsFlying() then return end
+			ns:debugprintL1 'Event: ZONE_CHANGED --> AutoAction'
 			ns.AutoAction()
 		end
 		function ns:PLAYER_MOUNT_DISPLAY_CHANGED()
-			if UnitAffectingCombat("player") or IsFlying() then return end
-			ns:debugprintL1("Event: PLAYER_MOUNT_DISPLAY_CHANGED --> AutoAction")
+			if UnitAffectingCombat 'player' or IsFlying() then return end
+			ns:debugprintL1 'Event: PLAYER_MOUNT_DISPLAY_CHANGED --> AutoAction'
 			ns.AutoAction()
 		end
 
 		-- Regular main event
 		function ns:PLAYER_STARTED_MOVING()
 			if
-				UnitAffectingCombat("player")
+				UnitAffectingCombat 'player'
 				or IsFlying()
 				or IsMounted() and IsAdvancedFlyableArea() and not ns.db.drSummoning -- API since 10.0.7
 			then
 				return
 			end
-			ns:debugprintL1("Event: PLAYER_STARTED_MOVING --> AutoAction")
+			ns:debugprintL1 'Event: PLAYER_STARTED_MOVING --> AutoAction'
 			ns.AutoAction()
 		end
 
-		hooksecurefunc(C_PetJournal, "SetPetLoadOutInfo", function()
+		hooksecurefunc(C_PetJournal, 'SetPetLoadOutInfo', function()
 			-- Note that SetPetLoadOutInfo summons the slot pet, but it does so _not_ via SummonPetByGUID
-			ns:debugprintL1("Hook: SetPetLoadOutInfo --> petVerified = false")
+			ns:debugprintL1 'Hook: SetPetLoadOutInfo --> petVerified = false'
 			ns.petVerified = false
 		end)
 
-		hooksecurefunc(C_PetJournal, "SummonPetByGUID", function()
+		hooksecurefunc(C_PetJournal, 'SummonPetByGUID', function()
 			ns.timeSummonSpell = GetTime() -- Debug
-			ns:debugprintL1("Hook: SummonPetByGUID runs; ns.inBattleSleep: " .. tostring(ns.inBattleSleep))
--- 			if ns.skipNextSave then ns.skipNextSave = false return end
+			ns:debugprintL1('Hook: SummonPetByGUID runs; ns.inBattleSleep: ' .. tostring(ns.inBattleSleep))
+			-- 			if ns.skipNextSave then ns.skipNextSave = false return end
 			if ns.inBattleSleep then return end
-			ns:debugprintL1("Hook: SummonPetByGUID --> register COMPANION_UPDATE")
-			ns.events:RegisterEvent("COMPANION_UPDATE") -- Timer better?
--- 			C_Timer.After(0.2, ns.SavePet) -- 0.2 is the minimum
+			ns:debugprintL1 'Hook: SummonPetByGUID --> register COMPANION_UPDATE'
+			ns.events:RegisterEvent 'COMPANION_UPDATE' -- Timer better?
+			-- 			C_Timer.After(0.2, ns.SavePet) -- 0.2 is the minimum
 		end)
 
 		function ns:COMPANION_UPDATE(what)
-			if what == "CRITTER" then
-				ns.events:UnregisterEvent("COMPANION_UPDATE")
-				ns:debugprintL1("Event: COMPANION_UPDATE --> SavePet")
+			if what == 'CRITTER' then
+				ns.events:UnregisterEvent 'COMPANION_UPDATE'
+				ns:debugprintL1 'Event: COMPANION_UPDATE --> SavePet'
 				ns.SavePet()
 			end
 		end
 
 		function ns:PET_BATTLE_OPENING_START()
-			ns:debugprintL1("Event: PET_BATTLE_OPENING_START --> Unregister events")
+			ns:debugprintL1 'Event: PET_BATTLE_OPENING_START --> Unregister events'
 			ns.events:UnregisterPWEvents()
-			ns.events:RegisterEvent("PET_BATTLE_OVER") -- Alternative: PET_BATTLE_CLOSE (fires twice)
+			ns.events:RegisterEvent 'PET_BATTLE_OVER' -- Alternative: PET_BATTLE_CLOSE (fires twice)
 			ns.inBattleSleep = true
 		end
 
 		function ns:PET_BATTLE_OVER()
-			ns:debugprintL1(format("Event: PET_BATTLE_OVER --> Re-register events in %ss, unless we are in the next battle", delayAfterBattle))
+			ns:debugprintL1(
+				format(
+					'Event: PET_BATTLE_OVER --> Re-register events in %ss, unless we are in the next battle',
+					delayAfterBattle
+				)
+			)
 			C_Timer.After(delayAfterBattle, function()
 				if C_PetBattles.IsInBattle() then return end
-				ns:debugprintL1("Re-registering events now")
+				ns:debugprintL1 'Re-registering events now'
 -- 				ns.events:RegisterSummonEvents()
-				ns.events:UnregisterEvent("PET_BATTLE_OVER")
+				ns.events:UnregisterEvent 'PET_BATTLE_OVER'
 				ns.inBattleSleep = false
 				ns.events:RegisterPWEvents()
 				-- Summon without waiting for trigger event
@@ -271,36 +261,36 @@ Init
 		end
 
 		function ns:PLAYER_LOGOUT()
-			ns:debugprintL1("Event: PLAYER_LOGOUT --> remainingTimer")
+			ns:debugprintL1 'Event: PLAYER_LOGOUT --> remainingTimer'
 			ns.db.remainingTimer = ns.RemainingTimer(GetTime())
 		end
 
 
-	elseif addon == "Blizzard_Collections" then
+	elseif addon == 'Blizzard_Collections' then
 --[[---------------------------------------------------------------------------
 Pet Journal
 ---------------------------------------------------------------------------]]--
 
-		ns.events:UnregisterEvent("ADDON_LOADED")
+		ns.events:UnregisterEvent 'ADDON_LOADED'
 
 	-- TODO: the same for Rematch
 -- 	Currently disabled due to DF changes
 -- 		for i, btn in ipairs(PetJournal.listScroll.buttons) do
 -- 		for i, btn in ipairs(PetJournal.ScrollBox.ScrollTarget) do
--- 			btn:SetScript("OnClick",function(self, button)
+-- 			btn:SetScript('OnClick', function(self, button)
 -- 				if IsMetaKeyDown() or IsControlKeyDown() then
 -- 					local isFavorite = C_PetJournal.PetIsFavorite(self.petID)
 -- 					C_PetJournal.SetFavorite(self.petID, isFavorite and 0 or 1)
 -- 				else
--- 					return PetJournalListItem_OnClick(self,button)
+-- 					return PetJournalListItem_OnClick(self, button)
 -- 				end
 -- 			end)
 -- 		end
 
 		-- TODO: the same for Rematch
 		ns.CFavs_Button = ns:CreateCfavsCheckBox()
-		hooksecurefunc("CollectionsJournal_UpdateSelectedTab", function(self)
-			local selected = PanelTemplates_GetSelectedTab(self);
+		hooksecurefunc('CollectionsJournal_UpdateSelectedTab', function(self)
+			local selected = PanelTemplates_GetSelectedTab(self)
 			if selected == 2 then
 				ns.CFavs_Button:SetChecked(ns.dbc.charFavsEnabled)
 				ns.CFavs_Button:Show()
@@ -335,7 +325,7 @@ end
 
 --[[ To be used only in func NewPet and SavePet ]]
 local function IsExcludedByPetID(id)
-	id, speciesID = '"'..id..'"', C_PetJournal.GetPetInfoByPetID(id)
+	id, speciesID = '"' .. id .. '"', C_PetJournal.GetPetInfoByPetID(id)
 	return IsExcludedBySpecies(speciesID)
 end
 
@@ -345,24 +335,24 @@ restore a (lost) pet, or summoning a new one (if the timer is set and due).
 ---------------------------------------------------------------------------]]--
 
 function ns.AutoAction()
--- 	Moved this to the event, because we use a C_Timer now if the player is mounted
--- 	if not ns.db.autoEnabled or UnitAffectingCombat("player") then return end
+	-- 	Moved this to the event, because we use a C_Timer now if the player is mounted
+	-- 	if not ns.db.autoEnabled or UnitAffectingCombat("player") then return end
 	if ns.db.newPetTimer ~= 0 then
 		local now = GetTime()
 		if ns.RemainingTimer(now) == 0 and now - timeSafeSummonFailed > 40 then
-			ns:debugprintL2("AutoAction decided for NewPet")
+			ns:debugprintL2 'AutoAction decided for NewPet'
 			ns:NewPet(now, false)
 			return
 		end
 	end
 	if not ns.petVerified then
-		ns:debugprintL2("AutoAction decided for TransitionCheck (petVerified failed)")
+		ns:debugprintL2 'AutoAction decided for TransitionCheck (petVerified failed)'
 		ns.TransitionCheck()
 		return
 	end
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	if not actpet then
-		ns:debugprintL2("AutoAction decided for RestorePet")
+		ns:debugprintL2 'AutoAction decided for RestorePet'
 		ns:RestorePet()
 	end
 end
@@ -385,11 +375,11 @@ function ns:RestorePet()
 	end
 	timeRestorePet = now
 	if savedpet then
-		ns:debugprintL1("RestorePet() is restoring saved pet")
+		ns:debugprintL1 'RestorePet() is restoring saved pet'
 		ns.SetSumMsgToRestorePet(savedpet)
 		ns:SafeSummon(savedpet, false)
 	else
-		ns:debugprintL1("RestorePet() could not find saved pet --> summoning new pet")
+		ns:debugprintL1 'RestorePet() could not find saved pet --> summoning new pet'
 		ns.MsgNoSavedPet()
 		ns:NewPet(now, false)
 	end
@@ -407,7 +397,7 @@ function ns:NewPet(time, viaHotkey)
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	if actpet and IsExcludedByPetID(actpet) then return end
 	if not ns.poolInitialized then
-		ns:debugprintL1("ns.NewPet --> InitializePool")
+		ns:debugprintL1 'ns.NewPet --> InitializePool'
 		ns.InitializePool()
 	end
 	local npool = #ns.petPool
@@ -472,7 +462,9 @@ function ns.SummonTargetPet()
 	if not C_PetJournal.GetOwnedBattlePetString(targetSpeciesID) then
 		if not UnitIsBattlePetCompanion 'target' then
 			ns.MsgTargetIsNotCompanionBattlePet(targetPetName)
-			if tarpet then ChatUserNotification(CO.bn .. 'Not a companion battle pet, but we have found a GUID! This is weird.') end -- for testing if there exists maybe a non-companion pet with a corresponding *collectible* species.
+			if tarpet then -- for testing if there exists maybe a non-companion pet with a corresponding *collectible* species.
+				ChatUserNotification(CO.bn .. 'Not a companion battle pet, but we have found a GUID! This is weird.')
+			end
 		else
 			ns.MsgTargetNotInCollection(targetPetLink, targetPetName)
 		end
@@ -486,7 +478,7 @@ function ns.SummonTargetPet()
 		ns.MsgTargetSummoned(targetPetLink)
 	else
 		ns.MsgTargetIsSame(targetPetLink) -- Without web link
--- 		ns.MsgTargetIsSame(targetPetLink, targetPetName) -- With web link
+		-- ns.MsgTargetIsSame(targetPetLink, targetPetName) -- With web link
 	end
 end
 
@@ -505,12 +497,8 @@ AutoAction, and here we are not.
 -- Called by 2: ns:PLAYER_ENTERING_WORLD, AutoAction
 
 function ns.TransitionCheck()
-	if not ns.db.autoEnabled
-		or ns.petVerified
-		or UnitAffectingCombat("player")
-		or IsFlying()
-		or UnitOnTaxi("player") then
-		ns:debugprintL1("TransitionCheck() returned early")
+	if not ns.db.autoEnabled or ns.petVerified or UnitAffectingCombat 'player' or IsFlying() or UnitOnTaxi 'player' then
+		ns:debugprintL1 'TransitionCheck() returned early'
 		return
 	end
 	local now = GetTime()
@@ -518,14 +506,12 @@ function ns.TransitionCheck()
 	might come before us. Also prevents redundant run in case we use both events
 	NEW_AREA and ENTERING_WORLD. ]]
 	if now - timeRestorePet < 6 then return end
-	ns.currentZone = C_Map.GetBestMapForUnit("player")
+	ns.currentZone = C_Map.GetBestMapForUnit 'player'
 	local savedpet
 	ns:CFavsUpdate()
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
-		if not actpet or actpet ~= ns.dbc.currentPet then
-			savedpet = ns.dbc.currentPet
-		end
+		if not actpet or actpet ~= ns.dbc.currentPet then savedpet = ns.dbc.currentPet end
 	elseif not actpet or actpet ~= ns.db.currentPet then
 		savedpet = ns.db.currentPet
 	end
@@ -535,20 +521,20 @@ function ns.TransitionCheck()
 		end
 	end
 	if savedpet then
-		ns:debugprintL1("TransitionCheck() is restoring saved pet")
+		ns:debugprintL1 'TransitionCheck() is restoring saved pet'
 		ns.SetSumMsgToTransCheck(savedpet)
 		ns:SafeSummon(savedpet, false)
 	--[[ Should only come into play if savedpet is still nil due to a slow
 	loading process ]]
 	elseif not actpet then
-		ns:debugprintL1("TransitionCheck() could not find saved pet --> summoning new pet")
+		ns:debugprintL1 'TransitionCheck() could not find saved pet --> summoning new pet'
 		ns.MsgNoSavedPet()
 		ns:NewPet(now, false)
 	end
 	timeRestorePet = now
 	--[[ This is not 100% reliable here, but should do the trick most of the time. ]]
 	ns.petVerified = true
-	ns:debugprintL1("TransitionCheck() complete")
+	ns:debugprintL1 'TransitionCheck() complete'
 end
 
 
@@ -572,13 +558,15 @@ Check the code.
 So, for the moment: Trying without SavePet CD. Also check the C_Timer at the event.
 ]]
 function ns.SavePet()
-	ns:debugprintL1("SavePet runs now: " .. (GetTime() - ns.timeSummonSpell))
+	ns:debugprintL1('SavePet runs now: ' .. (GetTime() - ns.timeSummonSpell))
 	if not ns.petVerified then return end
 	local actpet = C_PetJournal.GetSummonedPetGUID()
--- 	local now = GetTime()
-	if not actpet
--- 		or now - timeSavePet < 3
-		or IsExcludedByPetID(actpet) then
+	-- local now = GetTime()
+	if
+		not actpet
+		-- or now - timeSavePet < 3
+		or IsExcludedByPetID(actpet)
+	then
 		return
 	end
 	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
@@ -590,8 +578,8 @@ function ns.SavePet()
 		ns.db.previousPet = ns.db.currentPet
 		ns.db.currentPet = actpet
 	end
-	ns:debugprintL2("SavePet() has run")
--- 	timeSavePet = now
+	ns:debugprintL2 'SavePet() has run'
+	-- timeSavePet = now
 end
 
 
@@ -615,7 +603,7 @@ local excludedAuras = {
 local function OfflimitsAura(auras)
 	for _, a in pairs(auras) do
 		if C_UnitAuras.GetPlayerAuraBySpellID(a) then
-			ns:debugprintL1("Excluded Aura found!")
+			ns:debugprintL1 'Excluded Aura found!'
 			return true
 		end
 	end
@@ -624,42 +612,43 @@ end
 
 local function InMythicKeystone()
 	local _, instanceType, difficultyID = GetInstanceInfo()
-	return instanceType == "party" and difficultyID == 8
+	return instanceType == 'party' and difficultyID == 8
 end
 
 local function InArena()
 	local _, instanceType = IsInInstance()
-	return instanceType == "arena"
+	return instanceType == 'arena'
 end
 
 -- Called by: RestorePet, TransitionCheck, NewPet, PreviousPet
 function ns:SafeSummon(pet, resettimer)
 	if not pet then -- TODO: needed?
-		ns:debugprintL1("SafeSummon was called without 'pet' argument!")
+		ns:debugprintL1 "SafeSummon was called without 'pet' argument!"
 		return
 	end
 	local now = GetTime()
-	if not UnitAffectingCombat("player")
---		and not IsMounted() -- Not needed
+	if
+		not UnitAffectingCombat 'player'
+		-- and not IsMounted() -- Not needed
 		--[[ 'IsFlying()' is checked in AutoAction and TransitionCheck, for
 		early return from any event-triggered action. Since it seems to be
 		impossible to summon while flying, we don't need it here or in the
 		manual summon functions. ]]
 		and not OfflimitsAura(excludedAuras)
 		and not IsStealthed() -- Includes Hunter Camouflage
-		and not (UnitIsControlling("player") and UnitChannelInfo("player"))
-		and not UnitHasVehicleUI("player")
-		and not UnitIsGhost("player")
+		and not (UnitIsControlling 'player' and UnitChannelInfo 'player')
+		and not UnitHasVehicleUI 'player'
+		and not UnitIsGhost 'player'
 		and not InMythicKeystone()
 		and not InArena()
 	then
 		ns.petVerified = true
--- 		ns.skipNextSave = true
+		-- ns.skipNextSave = true
 		if resettimer then ns.timeNewPetSuccess = now end
 		ns.MsgPetSummonSuccess()
 		C_PetJournal.SummonPetByGUID(pet)
 	else
--- 		ns.MsgPetSummonFailed() -- Too spammy, remove that
+		-- ns.MsgPetSummonFailed() -- Too spammy, remove that
 		timeSafeSummonFailed = now
 	end
 end
@@ -689,7 +678,7 @@ end
 
 -- Called by 3: PET_JOURNAL_LIST_UPDATE; conditionally by ns:NewPet, ns.ManualSummonNew
 function ns.InitializePool(self)
-	ns:debugprintL1("Running ns.InitializePool()")
+	ns:debugprintL1 'Running ns.InitializePool()'
 	table.wipe(ns.petPool)
 	CleanCharFavs()
 	local index = 1
@@ -698,9 +687,7 @@ function ns.InitializePool(self)
 		if not petID then break end
 		if not IsExcludedBySpecies(speciesID) then
 			if ns.db.favsOnly then
-				if favorite then
-					table.insert(ns.petPool, petID)
-				end
+				if favorite then table.insert(ns.petPool, petID) end
 			else
 				table.insert(ns.petPool, petID)
 			end
@@ -726,30 +713,46 @@ function ns.CFavsUpdate()
 		C_PetJournal.PetIsFavorite1 = C_PetJournal.PetIsFavorite1 or C_PetJournal.PetIsFavorite
 		C_PetJournal.SetFavorite1 = C_PetJournal.SetFavorite1 or C_PetJournal.SetFavorite
 		C_PetJournal.GetPetInfoByIndex1 = C_PetJournal.GetPetInfoByIndex1 or C_PetJournal.GetPetInfoByIndex
-		C_PetJournal.PetIsFavorite = function(petGUID)
-			return ns.dbc.charFavs[petGUID] or false
-		end
+		C_PetJournal.PetIsFavorite = function(petGUID) return ns.dbc.charFavs[petGUID] or false end
 		C_PetJournal.SetFavorite = function(petGUID, new)
 			if new == 1 then
 				ns.dbc.charFavs[petGUID] = true
 			else
 				ns.dbc.charFavs[petGUID] = nil
 			end
-			if PetJournal then PetJournal_OnEvent(PetJournal, "PET_JOURNAL_LIST_UPDATE") end
+			if PetJournal then PetJournal_OnEvent(PetJournal, 'PET_JOURNAL_LIST_UPDATE') end
 			ns:PET_JOURNAL_LIST_UPDATE()
 		end
 		local gpi = C_PetJournal.GetPetInfoByIndex1
 		C_PetJournal.GetPetInfoByIndex = function(...)
-			local petGUID, speciesID, isOwned, customName, level, favorite, isRevoked, name, icon, petType, creatureID, sourceText, description, isWildPet, canBattle, arg1, arg2, arg3 = gpi(...)
+			local petGUID, speciesID, isOwned, customName, level, favorite, isRevoked, name, icon, petType, creatureID, sourceText, description, isWildPet, canBattle, arg1, arg2, arg3 =
+				gpi(...)
 			local customFavorite = C_PetJournal.PetIsFavorite(petGUID)
-			return petGUID, speciesID, isOwned, customName, level, customFavorite, isRevoked, name, icon, petType, creatureID, sourceText, description, isWildPet, canBattle, arg1, arg2, arg3
+			return petGUID,
+				speciesID,
+				isOwned,
+				customName,
+				level,
+				customFavorite,
+				isRevoked,
+				name,
+				icon,
+				petType,
+				creatureID,
+				sourceText,
+				description,
+				isWildPet,
+				canBattle,
+				arg1,
+				arg2,
+				arg3
 		end
 	else
 		if C_PetJournal.PetIsFavorite1 then C_PetJournal.PetIsFavorite = C_PetJournal.PetIsFavorite1 end
 		if C_PetJournal.SetFavorite1 then C_PetJournal.SetFavorite = C_PetJournal.SetFavorite1 end
 		if C_PetJournal.GetPetInfoByIndex1 then C_PetJournal.GetPetInfoByIndex = C_PetJournal.GetPetInfoByIndex1 end
 	end
-	if PetJournal then PetJournal_OnEvent(PetJournal, "PET_JOURNAL_LIST_UPDATE") end
+	if PetJournal then PetJournal_OnEvent(PetJournal, 'PET_JOURNAL_LIST_UPDATE') end
 	ns:PET_JOURNAL_LIST_UPDATE()
 end
 
@@ -765,17 +768,15 @@ see at a glance (in the opened Pet Journal) which type of favs are enabled.
 ]]
 
 function ns.CreateCheckBoxBase(self)
-	local f = CreateFrame("CheckButton", "PetWalkerAutoCheckbox",PetJournal,"UICheckButtonTemplate")
+	local f = CreateFrame('CheckButton', 'PetWalkerAutoCheckbox', PetJournal, 'UICheckButtonTemplate')
 	f:SetWidth(25)
 	f:SetHeight(25)
 
-	f:SetScript("OnLeave",function(self)
-		GameTooltip:Hide();
-	end)
+	f:SetScript('OnLeave', function(self) GameTooltip:Hide() end)
 
-	local label = f:CreateFontString(nil, "OVERLAY")
-	label:SetFontObject("GameFontNormal")
-	label:SetPoint("LEFT",f,"RIGHT",0,0)
+	local label = f:CreateFontString(nil, 'OVERLAY')
+	label:SetFontObject 'GameFontNormal'
+	label:SetPoint('LEFT', f, 'RIGHT', 0, 0)
 
 	return f, label
 end
@@ -783,18 +784,25 @@ end
 
 function ns.CreateCfavsCheckBox(self)
 	local f, label = self:CreateCheckBoxBase()
-	f:SetPoint("BOTTOMLEFT",PetJournal,"BOTTOMLEFT",400,1)
+	f:SetPoint('BOTTOMLEFT', PetJournal, 'BOTTOMLEFT', 400, 1)
 	f:SetChecked(ns.dbc.charFavsEnabled)
-	f:SetScript("OnClick",function(self,button)
+	f:SetScript('OnClick', function(self, button)
 		ns.dbc.charFavsEnabled = not ns.dbc.charFavsEnabled
 		ns:CFavsUpdate()
 	end)
-	f:SetScript("OnEnter",function(self)
-		GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
-		GameTooltip:SetText(addonName .. ": Select this to use per-character favorites. \nFor more info, enter '/pw' in the chat console.", nil, nil, nil, nil, 1);
-		GameTooltip:Show();
+	f:SetScript('OnEnter', function(self)
+		GameTooltip:SetOwner(self, 'ANCHOR_BOTTOMRIGHT')
+		GameTooltip:SetText(
+			addonName .. ': Select this to use per-character favorites. \nFor more info, enter "/pw" in the chat console.',
+			nil,
+			nil,
+			nil,
+			nil,
+			1
+		)
+		GameTooltip:Show()
 	end)
-	label:SetText("Character favorites")
+	label:SetText 'Character favorites'
 	return f
 end
 
@@ -805,20 +813,20 @@ end
 
 
 function ns.PetIDtoName(id)
-if not id then return "<nil> from PetIDtoName" end
--- 	local id, name = '"'..id..'"', select(8, C_PetJournal.GetPetInfoByPetID(id))
+	if not id then return '<nil> from PetIDtoName' end
+	-- 	local id, name = '"'..id..'"', select(8, C_PetJournal.GetPetInfoByPetID(id))
 	local name = select(8, C_PetJournal.GetPetInfoByPetID(id))
 	return name
 end
 
 function ns.PetIDtoSpecies(id)
-if not id then return "<nil> from PetIDtoSpecies" end
+	if not id then return '<nil> from PetIDtoSpecies' end
 	local spec = C_PetJournal.GetPetInfoByPetID(id)
 	return spec
 end
 
 function ns.PetIDtoLink(id)
-if not id then return "<nil> from PetIDtoLink" end
+	if not id then return '<nil> from PetIDtoLink' end
 	local link = C_PetJournal.GetBattlePetLink(id)
 	return link
 end
@@ -826,25 +834,29 @@ end
 
 function ns:DebugDisplay()
 	ns.Status()
-	print("|cffEE82EEDebug:\n  DB current pet: ",
-	(ns.PetIDtoName(ns.db.currentPet) or "<nil>"),
-	"\n  DB previous pet: ", (ns.PetIDtoName(ns.db.previousPet) or "<nil>"),
-	"\n  Char DB current pet: ", (ns.PetIDtoName(ns.dbc.currentPet) or "<nil>"),
-	"\n  Char DB previous pet: ", (ns.PetIDtoName(ns.dbc.previousPet) or "<nil>"),
-	"\n  ns.petVerified: ", ns.petVerified, "\n")
+	print('|cffEE82EEDebug:\n  DB current pet: ',
+	(ns.PetIDtoName(ns.db.currentPet) or '<nil>'),
+	'\n  DB previous pet: ', (ns.PetIDtoName(ns.db.previousPet) or '<nil>'),
+	'\n  Char DB current pet: ', (ns.PetIDtoName(ns.dbc.currentPet) or '<nil>'),
+	'\n  Char DB previous pet: ', (ns.PetIDtoName(ns.dbc.previousPet) or '<nil>'),
+	'\n  ns.petVerified: ', ns.petVerified, '\n')
 end
 
 -- without pet info
 function ns:debugprintL1(msg)
-	if ns.db.debugMode then
-		print("|cffEE82EE### PetWalker Debug: " .. (msg or "<nil>") .. " ###")
-	end
+	if ns.db.debugMode then print('|cffEE82EE### PetWalker Debug: ' .. (msg or '<nil>') .. ' ###') end
 end
 
 -- with pet info
 function ns:debugprintL2(msg)
 	if ns.db.debugMode then
-		print("|cffEE82EE### PetWalker Debug: " .. (msg or "<nil>") .. " # Current DB pet: " .. (ns.PetIDtoName(((ns.dbc.charFavs and ns.db.favsOnly) and ns.dbc.currentPet or ns.db.currentPet)) or "<nil>") .. " ###")
+		print(
+			'|cffEE82EE### PetWalker Debug: '
+				.. (msg or '<nil>')
+				.. ' # Current DB pet: '
+				.. (ns.PetIDtoName(((ns.dbc.charFavs and ns.db.favsOnly) and ns.dbc.currentPet or ns.db.currentPet)) or '<nil>')
+				.. ' ###'
+		)
 	end
 end
 
