@@ -313,7 +313,7 @@ MAIN ACTIONS
 
 --[[ To be used only in func InitializePool and IsExcludedByPetID ]]
 local function IsExcludedBySpecies(spec)
-	for _, e in pairs(excludedSpecies) do
+	for _, e in ipairs(excludedSpecies) do
 		if e == spec then
 			if e ~= 3247 or ns.currentZone == 1970 then -- Pocopoc
 				return true
@@ -325,7 +325,7 @@ end
 
 --[[ To be used only in func NewPet and SavePet ]]
 local function IsExcludedByPetID(id)
-	speciesID = C_PetJournal.GetPetInfoByPetID(id)
+	local speciesID = C_PetJournal.GetPetInfoByPetID(id)
 	return IsExcludedBySpecies(speciesID)
 end
 
