@@ -310,7 +310,6 @@ function ns:DismissAndDisable()
 	end
 	ns.db.autoEnabled = false
 	ns.events:UnregisterPWEvents()
-	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.autoEnabled) end
 	ChatUserNotification(format('%sPet dismissed and auto-summoning %s.', CO.bn, ns.db.autoEnabled and 'enabled' or 'disabled'))
 end
 
@@ -342,7 +341,6 @@ function ns:AutoToggle()
 		ns.db.autoEnabled = true
 		ns.events:RegisterPWEvents()
 	end
-	if ns.Auto_Button then ns.Auto_Button:SetChecked(ns.db.autoEnabled) end
 	ChatUserNotification(format('%sPet auto-summoning %s.', CO.bn, ns.db.autoEnabled and 'enabled' or 'disabled'))
 end
 
@@ -371,6 +369,7 @@ function ns.CharFavsSlashToggle() -- for slash command only
 	--[[ Since we are changing from one saved-pet table to another, we prefer to
 	restore the pet from the new list, rather than doing NewPet like in the FavsToggle. ]]
 	if ns.db.autoEnabled then ns.TransitionCheck() end
+	if PetWalkerCharFavsCheckbox then PetWalkerCharFavsCheckbox:SetChecked(ns.dbc.charFavsEnabled) end
 	ChatUserNotification(format('%sCharacter-specific favorites %s for %s%s.', CO.bn, ns.dbc.charFavsEnabled and 'enabled' or 'disabled', CO.e, thisChar))
 end
 

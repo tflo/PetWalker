@@ -757,7 +757,7 @@ see at a glance (in the opened Pet Journal) which type of favs are enabled.
 ]]
 
 function ns.CreateCheckBoxBase(self)
-	local f = CreateFrame('CheckButton', 'PetWalkerAutoCheckbox', PetJournal, 'UICheckButtonTemplate')
+	local f = CreateFrame('CheckButton', 'PetWalkerCharFavsCheckbox', PetJournal, 'UICheckButtonTemplate')
 	f:SetWidth(25)
 	f:SetHeight(25)
 
