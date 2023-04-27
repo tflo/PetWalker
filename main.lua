@@ -325,7 +325,7 @@ end
 
 --[[ To be used only in func NewPet and SavePet ]]
 local function IsExcludedByPetID(id)
-	id, speciesID = '"' .. id .. '"', C_PetJournal.GetPetInfoByPetID(id)
+	speciesID = C_PetJournal.GetPetInfoByPetID(id)
 	return IsExcludedBySpecies(speciesID)
 end
 
@@ -814,7 +814,6 @@ end
 
 function ns.PetIDtoName(id)
 	if not id then return '<nil> from PetIDtoName' end
-	-- 	local id, name = '"'..id..'"', select(8, C_PetJournal.GetPetInfoByPetID(id))
 	local name = select(8, C_PetJournal.GetPetInfoByPetID(id))
 	return name
 end
