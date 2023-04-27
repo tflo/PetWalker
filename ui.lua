@@ -65,7 +65,7 @@ end
 -- Login msg
 function ns.MsgLogin()
 	if ns.db.verbosityLevel < 2 then return end
-	ChatUserNotification(table.concat({CO.k .. "Auto: ", CO.s .. (ns.db.autoEnabled and "on" or CO.bw .. "off"), "; ", CO.k .. "Pet pool: ", CO.s .. (ns.db.favsOnly and ns.dbc.charFavsEnabled and "char favs" or ns.db.favsOnly and "global favs" or "all pets"), "; ", CO.k .. "Timer: ", CO.s .. (ns.db.newPetTimer > 0 and ns.db.newPetTimer/60 .. " min" or "off"), "."}, CO.bn))
+	ChatUserNotification(table.concat({CO.k .. 'Auto: ', CO.s .. (ns.db.autoEnabled and 'On' or CO.bw .. 'Off'), ' | ', CO.k .. 'Pet pool: ', CO.s .. (ns.db.favsOnly and ns.dbc.charFavsEnabled and 'Char favs' or ns.db.favsOnly and 'Global favs' or 'All pets'), ' | ', CO.k .. 'Timer: ', CO.s .. (ns.db.newPetTimer > 0 and ns.db.newPetTimer/60 .. ' min' or 'Off')}, CO.bn))
 end
 
 -- TODO: Do we need a warning at 1 selectable pet? Or should this be considered a valid use-case? (User manually summons a pet from Journal, but wants to get back his (only) fav pet when the timer is due.)
