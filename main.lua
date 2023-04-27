@@ -95,8 +95,8 @@ But it should be safe, bc CD starts only after activating the ability via dialog
 --[[ Pocopoc is special: he cannot be summoned in Zereth Mortis (1970)).
 See the extra checks in IsExcludedBySpecies() and TransitionCheck(). ]]
 	3247, -- Pocopoc
---[[ Dummy ID for debugging! Keep this commented out! ]]
--- 2403,
+--[[ Dummy ID for debugging. Keep this commented out! ]]
+-- 	2403, -- Abyssal Eel
 }
 
 -- Debug
@@ -395,9 +395,12 @@ function ns:NewPet(time, viaHotkey)
 	local now = time or GetTime()
 	if now - ns.timeNewPetSuccess < 1.5 then return end
 	local actpet = C_PetJournal.GetSummonedPetGUID()
-	if actpet and IsExcludedByPetID(actpet) then return end
+	if actpet and IsExcludedByPetID(actpet) then
+		ns:debugprintL1 'NewPet(): actpet is excluded'
+		return
+	end
 	if not ns.poolInitialized then
-		ns:debugprintL1 'ns.NewPet --> InitializePool'
+		ns:debugprintL1 'NewPet() --> InitializePool'
 		ns.InitializePool()
 	end
 	local npool = #ns.petPool
@@ -540,25 +543,10 @@ end
 
 --[[---------------------------------------------------------------------------
 SAVING: Save a newly summoned pet, no matter how it was summoned.
-Should run with the COMPANION_UPDATE event.
 ---------------------------------------------------------------------------]]--
 
---[[ TODO: Issue here: When loading a team via Rematch and Rematch's option
-"restore pet that was active before selecting activating a team" is selected,
-then we need to do this:
-Do not save the wrong pet (summoned by selecting a team.
-Do save the pet resummoned by Rematch.
-Since it seems impossible to distinguish the pet summoning due to a team
-selection from any normal pet summoning, we have to save both pets, hence a CD
-for SavePet is detrimental.
-Deselecting Rematch's restore option would make things not better. Unlesss: We
-can determine if a pet was selected thru teams. It seems Rematch can do this.
-Check the code.
-
-So, for the moment: Trying without SavePet CD. Also check the C_Timer at the event.
-]]
 function ns.SavePet()
-	ns:debugprintL1('SavePet runs now: ' .. (GetTime() - ns.timeSummonSpell))
+	ns:debugprintL1('SavePet() runs now: ' .. (GetTime() - ns.timeSummonSpell))
 	if not ns.petVerified then return end
 	local actpet = C_PetJournal.GetSummonedPetGUID()
 	-- local now = GetTime()
@@ -567,6 +555,7 @@ function ns.SavePet()
 		-- or now - timeSavePet < 3
 		or IsExcludedByPetID(actpet)
 	then
+		ns:debugprintL1 'SavePet(): No actpet or actpet is excluded'
 		return
 	end
 	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
@@ -578,7 +567,7 @@ function ns.SavePet()
 		ns.db.previousPet = ns.db.currentPet
 		ns.db.currentPet = actpet
 	end
-	ns:debugprintL2 'SavePet() has run'
+	ns:debugprintL2 'SavePet() completed'
 	-- timeSavePet = now
 end
 
@@ -678,7 +667,7 @@ end
 
 -- Called by 3: PET_JOURNAL_LIST_UPDATE; conditionally by ns:NewPet, ns.ManualSummonNew
 function ns.InitializePool(self)
-	ns:debugprintL1 'Running ns.InitializePool()'
+	ns:debugprintL1 'Running InitializePool()'
 	table.wipe(ns.petPool)
 	CleanCharFavs()
 	local index = 1
