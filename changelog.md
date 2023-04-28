@@ -1,3 +1,6 @@
+#### 2.0.1 (2023-04-28)
+- Updated readme.pdf. (For the big change notes, see 2.0.0.)
+
 #### 2.0.0 (2023-04-28)
 - Completely reworked the handling of intentional user summoning versus automatic (unwanted) summoning in the context of pet battles:
   - As you probably know, when a pet is slotted into a battle team, it is automatically summoned. PetWalker has always had trouble distinguishing between this unwanted summoning and the user's intentional summoning, resulting in the "wrong" pet being at your side after a pet battle.
