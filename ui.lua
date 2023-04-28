@@ -379,7 +379,7 @@ function ns:FavsToggle()
 	ns.db.favsOnly = not ns.db.favsOnly
 	ns.poolInitialized, ns.petVerified = false, false
 	if ns.db.autoEnabled then ns:NewPet() end
-	ChatUserNotification(format('%sPet pool: %s%s.', CO.bn, ns.db.favsOnly and 'favorites only' or 'all pets', ns.db.favsOnly and ns.dbc.charFavsEnabled and ' (char-specific)' or ns.db.favsOnly and ' (global)' or ''))
+	ChatUserNotification(format('%sPet pool: %s%s.', CO.bn, ns.db.favsOnly and 'favorites' or 'all pets', ns.db.favsOnly and ns.dbc.charFavsEnabled and ' (char-specific)' or ns.db.favsOnly and ' (global)' or ''))
 end
 
 function ns.CharFavsSlashToggle() -- for slash command only
