@@ -5,6 +5,18 @@ local thisChar = UnitName 'player'
 
 local GetAddOnMetadata = _G.GetAddOnMetadata or C_AddOns.GetAddOnMetadata
 
+local function getLinkActualPet()
+	local p = C_PetJournal.GetSummonedPetGUID()
+	p = p and C_PetJournal.GetBattlePetLink(p)
+	return p
+end
+
+local function getLinkSavedPet()
+	local p = ns.dbc.charFavsEnabled and ns.dbc.currentPet or ns.db.currentPet
+	p = p and C_PetJournal.GetBattlePetLink(p)
+	return p
+end
+
 --[[===========================================================================
 Colors
 ===========================================================================]]--
@@ -65,7 +77,16 @@ end
 -- Login msg
 function ns.MsgLogin()
 	if ns.db.verbosityLevel < 2 then return end
-	ChatUserNotification(table.concat({CO.k .. 'Auto: ', CO.s .. (ns.db.autoEnabled and 'On' or CO.bw .. 'Off'), ' | ', CO.k .. 'Pet pool: ', CO.s .. (ns.db.favsOnly and ns.dbc.charFavsEnabled and 'Char favs' or ns.db.favsOnly and 'Global favs' or 'All pets'), ' | ', CO.k .. 'Timer: ', CO.s .. (ns.db.newPetTimer > 0 and ns.db.newPetTimer/60 .. ' min' or 'Off')}, CO.bn))
+	local sep = CO.bn .. ' | '
+	local petInfo
+	if ns.db.verbosityLevel > 2 then
+		local async = false
+		local ap, sp = getLinkActualPet(), getLinkSavedPet()
+		if not ap or not sp or ap ~= sp then async = true end
+		ap, sp = ap or 'None', sp or 'None'
+		petInfo = CO.k .. (async and 'Current Pet: ' or 'Pet: ') .. CO.s .. ap .. (async and sep .. CO.k .. 'Saved pet: ' .. CO.s .. sp or '')
+	end
+	ChatUserNotification(table.concat({CO.k .. 'Auto: ' .. CO.s .. (ns.db.autoEnabled and 'On' or CO.bw .. 'Off'), CO.k .. 'Pet pool: ' .. CO.s .. (ns.db.favsOnly and ns.dbc.charFavsEnabled and 'Char favs' or ns.db.favsOnly and 'Global favs' or 'All pets'), CO.k .. 'Timer: ' .. CO.s .. (ns.db.newPetTimer > 0 and ns.db.newPetTimer/60 .. ' min' or 'Off'), petInfo}, sep))
 end
 
 -- TODO: Do we need a warning at 1 selectable pet? Or should this be considered a valid use-case? (User manually summons a pet from Journal, but wants to get back his (only) fav pet when the timer is due.)
