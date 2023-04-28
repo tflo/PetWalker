@@ -31,32 +31,33 @@ ___If you are reading this description on CurseForge, be aware that Curse's Mark
 - The pool of favorite pets to summon can be char-specific or account-wide. You can change this on a per-char basis at any time, and your char-specific list will be retained for later if you switch from char-specific to global favourites.
 - Easy switching between ‘random-summoning of new pets’ and ‘just keep my pet out’. (`/pw 0` to disable the auto-timer, see Usage)
 - The addon knows about special pets and does not try to summon pets that can or should not be summoned, e.g. the Pocopoc pet in Zereth Mortis, the Winter Veil pets, or the vendor pets with CD like Guild Herald.
+- PetWalker ignores pets that are automatically summoned because they are slotted into a team. It will reliably restore your previous pet 15 seconds after a pet battle. (See also FAQ.)
 
 ### Other Features / Notes
 
 - No GUI settings. Basically it’s a set-and-forget addon.
-- No nasty Minimap button, and thus no conflicts minimap mods.
+- No nasty Minimap button, and thus no conflicts with minimap mods.
 - 100% standalone, no libraries or other dependencies.
 - Resource friendly in terms of CPU and memory usage. 
 - Alt friendly: All settings are account wide (except for char-specific favorite pets, ofc).
-- For obvious reasons conflicting with: [NugMiniPet](https://www.curseforge.com/wow/addons/nugminipet), [Zone Pet](https://www.curseforge.com/wow/addons/zonepet) and probably any similar addon that auto-summons pets.
-- Not conflicting with: [Rematch](https://www.curseforge.com/wow/addons/rematch). Usage of Rematch is recommended.
+- For obvious reasons conflicting with [NugMiniPet](https://www.curseforge.com/wow/addons/nugminipet), [Zone Pet](https://www.curseforge.com/wow/addons/zonepet), [Mount Mini-Me](https://www.curseforge.com/wow/addons/mount-mini-me) and probably any similar addon that auto-summons pets.
+- Fully compatible with [Rematch](https://www.curseforge.com/wow/addons/rematch). 
 
 ## Usage
 
 PetWalker has a rich chat console interface:
 
-- __`/pw a`__: Toggle automatic summoning of pets. (Basically enabling/disabling the addon.)  
+- __`/pw a`__: Toggle all automatic summoning of pets. Basically the main switch of the addon (all events are unregistered/registered), but manual summoning via keybind or slash command (see below) is still available. 
 - __`/pw r`__: Allow/disallow automatic summoning of pets while _mounted_ (and on the ground) _in a Dragonriding zone._  
     - As of version 1.2.0 (March 2023), automatic pet summoning can also happen while you are mounted. With "normal" mounts, this behavior is trouble-free and only beneficial, but with Dragonriding mounts it can cause occasional glitches. Therefore, you can disable it with this toggle. _It is enabled by default._ Please read the 1.1.8 change notes, or the explanation in the FAQ below!
-- __`/pw d`__: Dismiss current pet and disable auto-summoning. A kind of emergency command, if you want to get rid of your pet immediately and prevent any automatic summoning.   
+- __`/pw d`__: Dismiss current pet and disable auto-summoning. A kind of emergency command, if you want to get rid of your pet immediately and prevent all automatic summoning. Re-enable with `/pw a`.   
 - __`/pw <number>`__: Interval [minutes] for summoning a new pet. ‘0’ disables summoning of new pets, though the pet-_restore_ functionality is still active (use `/pw a` to disable it).
 - __`/pw f`__: Toggle the random-summon pool between Favorites and All Pets. 
     - With the All Pets setting, the currently active filters of the Pet Journal still apply (Pet Family and Sources). Since these filters can be combined, this offers quite some possibilities to create varied pools for random summoning, without the need to select favorites.
     - Hint: You can also use the search box of the Pet Journal as filter: If your summon pool is set to All Pets and the search box contains "rabbit", PetWalker will only summon pets with "rabbit" in their name.
     - Note that this works only with the filters or search box in Blizz’s Pet Journal, not in Rematch. 
     - If you set the pool to Favorites, make sure that your favorites are not excluded by the Pet Journal filters or search string.
-- __`/pw c`__: Toggle char-specific favorites list. (Only applies if set to Favorites via `/pw f`.)      
+- __`/pw c`__: Toggle char-specific favorites list. (Applies if Favorites are enabled via `/pw f`.)      
 - __`/pw n`__: Summon new pet (from the active pet pool: Favs or All, see commands explained above). Summoning a pet with `/pw n` (or the keybind) resets your current auto-summon timer.
 - __`/pw p`__: Summon previous pet. By ‘previous’ we don‘t mean a pet you just lost (this is covered by the core functionality of the addon), but the one before that. For example, if your auto-summon timer gives you a new pet, but you actually liked the last one, you can quickly get it back with this command.
 - __`/pw v[vv]`__: Verbosity level for messages:
@@ -65,6 +66,7 @@ PetWalker has a rich chat console interface:
     - `/pw vvv`: _full_: all messages; you get a message also when a lost pet is restored, which happens quite often.
 - __`/pw h`__: Display the Help text in the console. (Also `/pw help` or just `/pw`.) 
 - __`/pw s`__: Display the Status & Settings report in the console, with these infos:
+    - Addon version.
     - If the addon is active (auto-summoning/restore enabled or disabled).
     - The summon timer interval and the remaining time (that is, when you will get the next new pet).
     - Verbosity level of messages.
@@ -124,9 +126,13 @@ See also [issue#6](https://github.com/tflo/PetWalker/issues/6).
 
 ### Where/when does PetWalker fail to keep my pet out?
 
-The most difficult situation is when you select a team for a pet battle. If you are using Rematch, you should select the “Keep Companion” option (in “Miscellaneous Options”). This will definitely help, but it is not guaranteed that, after the pet battle, you have the same pet out as before.
+<s>The most difficult situation is when you select a team for a pet battle. If you are using Rematch, you should select the “Keep Companion” option (in “Miscellaneous Options”). This will definitely help, but it is not guaranteed that, after the pet battle, you have the same pet out as before.</s>
 
-### What events does PetWalker respond to?
+__As of version 2.0.0 (April 2023)__, PetWalker's behavior in the context of pet battles has dramatically improved. For the gory details, see the change notes of version 2.0.0 from 2023-04-28.
+
+TL;DR: PetWalker now reliably restores your previous pet 15 seconds after a pet battle. The delay is intentional and allows you to chain pet battles, without any annoying automatic summoning/unsummoning of your pet in-between. Pets that were auto-summoned because they are slotted into a team are ignored and the pet restoration now works reliably also without Rematch’s “Keep Companion” setting. But, if you prefer, you can still enable Rematch’s “Keep Companion”. (The difference is that Rematch restores your pet more or less immediately after a battle.)
+
+### What events does PetWalker monitor?
 
 The main event that causes PetWalker to check for the pet and summon it if necessary is `PLAYER_STARTED_MOVING`.  
 This is a fairly common event. I have experimented with several other events, but overall I have found that this one gives the best results. (After all, the aim of PetWalker is to ensure that your pet is _always_ out, not that it's out from time to time).
@@ -156,8 +162,8 @@ To be clear, the GCD is not caused by PetWalker, it's a Blizz thing: any summoni
 ## Known Issues / To Do 
 
 - Remove erroneous “summoned” messages in a few situations where actually no pet was summoned.
-- As mentioned in the FAQ, there is a chance that after a pet battle your previous companion is not re-summoned. This needs to be improved.
-- Add an optional login message.
+- <s>As mentioned in the FAQ, there is a chance that after a pet battle your previous companion is not re-summoned. This needs to be improved.</s>
+- <s>Add an optional login message.</s>
 
 Feel free to post suggestions or issues in the [GitHub Issues](https://github.com/tflo/PetWalker/issues) of the repo!
 __Please do not post issues or suggestions in the comments on Curseforge.__

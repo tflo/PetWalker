@@ -1,7 +1,25 @@
+#### 2.0.0 (2023-04-28)
+- Completely reworked the handling of intentional user summoning versus automatic (unwanted) summoning in the context of pet battles:
+  - As you probably know, when a pet is slotted into a battle team, it is automatically summoned. PetWalker has always had trouble distinguishing between this unwanted summoning and the user's intentional summoning, resulting in the "wrong" pet being at your side after a pet battle.
+  - This should now be a thing of the past. PetWalker now reliably ignores any pet that is summoned via team slotting, and is therefore able to reliably re-summon your previous pet after the pet battle.
+  - This works regardless of Rematch's "Keep Companion" setting. After a pet battle ends, PetWalker will "sleep" for 15 seconds. If you have Rematch's "Keep Companion" enabled, Rematch will (probably) resummon your previous pet immediately after the battle, without any risk of collision with PetWalker's activities.
+  - If you don't have Rematch's "Keep Companion" enabled, PetWalker will re-summon your previous pet if you don't start a new pet battle after 15 seconds.
+  - This 15 second sleep also allows you to chain-battle (e.g. when power-leveling) without the annoyance of pets repeatedly re-summoning/disappearing between battles (assuming you have Rematch's Keep Companion turned off!). Sure, you could turn PetWalker off manually for the duration of your power-leveling session, but this will save you the hassle. 
+  - So the old recommendation to keep Rematch's "Keep Companion" enabled has now changed to "Do whatever you want". Rematch will restore your pet immediately after a battle, PetWalker will wait 15 seconds.
+  - Along with this overhaul, the detection of regular (intentional) pet summons has also been greatly improved and streamlined: Instead of relying on a wonky combination of events, we now hook directly into the summoning function. This should make it impossible for PetWalker to miss that the player has manually summoned a new pet and erroneously returns the old pet.
+  - Since two core mechanics of the addon have drastically changed, it is likely that all this will see some fine tuning in the next weeks.
+- Also:
+  - Added login message: The message will appear shortly after login in the chat, and will display the most important current settings in one line (sort of a mini Status Display). You must have the verbosity level set to 2 or higher for the message to appear. On verbosity level 3, the message additionally shows the current pet and, if current pet and saved pet are out of sync, also the last saved pet.
+  - When you enable Favorites, the confirmation message will now indicate whether the toon has per-char favorites or global favorites enabled.
+  - The Status Display now also shows the version of the addon.
+  - Enabling Auto (`/pw a`) now instantly triggers the main action (random pet or restore pet).
+  - When switching between char and global favs while PW is deactivated (Auto off), the Pet Journal now reflects the correct favs.
+  - Miscellaneous minor improvements and corrections to the UI.
+  - Miscellaneous minor code cleanup and fixes, updated description/readme.
+
 #### 1.3.0 (2023-04-16)
 - If you now disable auto-summoning with the usual command (`/pw a`), all events will be unregistered.
 - This means … actually nothing for you from a CPU perspective, but it is a cleaner way to disable auto-summoning. And you can now rest assured that when PW's auto-summoning is off, it won't interfere with or delay anything. It will do exactly _nothing_ then, unless you use a PW hotkey or slash command.
-
 
 #### 1.2.3 (2023-04-07)
 - Updated readme.md, readme.pdf, description on CurseForge and Wago:
