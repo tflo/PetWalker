@@ -384,13 +384,14 @@ end
 
 function ns.CharFavsSlashToggle() -- for slash command only
 	ns.dbc.charFavsEnabled = not ns.dbc.charFavsEnabled
--- 	ns:CFavsUpdate() -- Added this to TransitionCheck()
-	--[[ This is redundant, _if_ we leave the 'ns.poolInitialized = false' in the
-	PET_JOURNAL_LIST_UPDATE function, which gets called by the ns:CFavsUpdate above ]]
 	ns.poolInitialized, ns.petVerified = false, false
 	--[[ Since we are changing from one saved-pet table to another, we prefer to
 	restore the pet from the new list, rather than doing NewPet like in the FavsToggle. ]]
-	if ns.db.autoEnabled then ns.TransitionCheck() end
+	if ns.db.autoEnabled then
+		ns.TransitionCheck()
+	else -- Needed for a correct display of char/normal favs in the PJ
+		ns:CFavsUpdate()
+	end
 	if PetWalkerCharFavsCheckbox then PetWalkerCharFavsCheckbox:SetChecked(ns.dbc.charFavsEnabled) end
 	ChatUserNotification(format('%sCharacter-specific favorites %s for %s%s.', CO.bn, ns.dbc.charFavsEnabled and 'enabled' or 'disabled', CO.e, thisChar))
 end
