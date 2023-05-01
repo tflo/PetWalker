@@ -4,10 +4,14 @@ local db_version = 1
 local _
 
 -- API references -- TODO: add the stuff from cfavs_update
+local C_PetJournalPetIsFavorite1, C_PetJournalSetFavorite1, C_PetJournalGetPetInfoByIndex1
+local C_PetJournalPetIsFavorite = _G.C_PetJournal.PetIsFavorite
+local C_PetJournalSetFavorite = _G.C_PetJournal.SetFavorite
+local C_PetJournalGetPetInfoByIndex = _G.C_PetJournal.GetPetInfoByIndex
+
 local C_PetJournalGetSummonedPetGUID = _G.C_PetJournal.GetSummonedPetGUID
 local C_PetJournalGetPetInfoByPetID = _G.C_PetJournal.GetPetInfoByPetID
 local C_PetJournalGetPetInfoBySpeciesID = _G.C_PetJournal.GetPetInfoBySpeciesID
-local C_PetJournalGetPetInfoByIndex = _G.C_PetJournal.GetPetInfoByIndex
 local C_PetJournalFindPetIDByName = _G.C_PetJournal.FindPetIDByName
 local C_PetJournalGetBattlePetLink = _G.C_PetJournal.GetBattlePetLink
 local C_PetJournalGetOwnedBattlePetString = _G.C_PetJournal.GetOwnedBattlePetString
@@ -729,11 +733,11 @@ Char Favs
 -- Largely unaltered code from NugMiniPet
 function ns.cfavs_update()
 	if ns.dbc.charFavsEnabled then
-		C_PetJournal.PetIsFavorite1 = C_PetJournal.PetIsFavorite1 or C_PetJournal.PetIsFavorite
-		C_PetJournal.SetFavorite1 = C_PetJournal.SetFavorite1 or C_PetJournal.SetFavorite
-		C_PetJournal.GetPetInfoByIndex1 = C_PetJournal.GetPetInfoByIndex1 or C_PetJournal.GetPetInfoByIndex
-		C_PetJournal.PetIsFavorite = function(petGUID) return ns.dbc.charFavs[petGUID] or false end
-		C_PetJournal.SetFavorite = function(petGUID, new)
+		C_PetJournalPetIsFavorite1 = C_PetJournalPetIsFavorite1 or C_PetJournalPetIsFavorite
+		C_PetJournalSetFavorite1 = C_PetJournalSetFavorite1 or C_PetJournalSetFavorite
+		C_PetJournalGetPetInfoByIndex1 = C_PetJournalGetPetInfoByIndex1 or C_PetJournalGetPetInfoByIndex
+		C_PetJournalPetIsFavorite = function(petGUID) return ns.dbc.charFavs[petGUID] or false end
+		C_PetJournalSetFavorite = function(petGUID, new)
 			if new == 1 then
 				ns.dbc.charFavs[petGUID] = true
 			else
@@ -742,17 +746,20 @@ function ns.cfavs_update()
 			if PetJournal then PetJournal_OnEvent(PetJournal, 'PET_JOURNAL_LIST_UPDATE') end
 			ns:PET_JOURNAL_LIST_UPDATE()
 		end
-		local gpi = C_PetJournal.GetPetInfoByIndex1
-		C_PetJournal.GetPetInfoByIndex = function(...)
+		local gpi = C_PetJournalGetPetInfoByIndex1
+		C_PetJournalGetPetInfoByIndex = function(...)
 			local petGUID, speciesID, isOwned, customName, level, favorite, isRevoked, name, icon, petType, creatureID, sourceText, description, isWildPet, canBattle, arg1, arg2, arg3 = gpi(...)
-			local customFavorite = C_PetJournal.PetIsFavorite(petGUID)
+			local customFavorite = C_PetJournalPetIsFavorite(petGUID)
 			return petGUID, speciesID, isOwned, customName, level, customFavorite, isRevoked, name, icon, petType, creatureID, sourceText, description, isWildPet, canBattle, arg1, arg2, arg3
 		end
 	else
-		if C_PetJournal.PetIsFavorite1 then C_PetJournal.PetIsFavorite = C_PetJournal.PetIsFavorite1 end
-		if C_PetJournal.SetFavorite1 then C_PetJournal.SetFavorite = C_PetJournal.SetFavorite1 end
-		if C_PetJournal.GetPetInfoByIndex1 then C_PetJournal.GetPetInfoByIndex = C_PetJournal.GetPetInfoByIndex1 end
+		if C_PetJournalPetIsFavorite1 then C_PetJournalPetIsFavorite = C_PetJournalPetIsFavorite1 end
+		if C_PetJournalSetFavorite1 then C_PetJournalSetFavorite = C_PetJournalSetFavorite1 end
+		if C_PetJournalGetPetInfoByIndex1 then C_PetJournalGetPetInfoByIndex = C_PetJournalGetPetInfoByIndex1 end
 	end
+	_G.C_PetJournal.PetIsFavorite = C_PetJournalPetIsFavorite
+	_G.C_PetJournal.SetFavorite = C_PetJournalSetFavorite
+	_G.C_PetJournal.GetPetInfoByIndex = C_PetJournalGetPetInfoByIndex
 	if PetJournal then PetJournal_OnEvent(PetJournal, 'PET_JOURNAL_LIST_UPDATE') end
 	ns:PET_JOURNAL_LIST_UPDATE()
 end
