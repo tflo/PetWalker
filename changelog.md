@@ -1,3 +1,7 @@
+#### 2.0.2 (2023-05-02)
+- Code optimization (and embellishment).
+- toc updated for 10.1.
+
 #### 2.0.1 (2023-04-28)
 - Updated readme.pdf. (For the big change notes, see 2.0.0.)
 

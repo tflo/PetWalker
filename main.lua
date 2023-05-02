@@ -244,6 +244,8 @@ Init
 			ns.autoaction()
 		end
 
+		--[[ TOOD: Check if we really have to set the flag here. We could modify autoaction() to always check against the
+		saved pet if pet_verified is true. ]]
 		hooksecurefunc(C_PetJournal, 'SetPetLoadOutInfo', function()
 			-- Note that SetPetLoadOutInfo summons the slot pet, but it does so _not_ via SummonPetByGUID
 			ns:debugprint 'Hook: SetPetLoadOutInfo --> pet_verified = false'
