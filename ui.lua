@@ -5,7 +5,7 @@ local _
 local C_PetJournalGetSummonedPetGUID = _G.C_PetJournal.GetSummonedPetGUID
 local C_PetJournalGetBattlePetLink = _G.C_PetJournal.GetBattlePetLink
 local UnitName = _G.UnitName
-local GetAddOnMetadata = _G.GetAddOnMetadata or _G.C_AddOns.GetAddOnMetadata
+local GetAddOnMetadata = _G.C_AddOns.GetAddOnMetadata
 
 
 
