@@ -1,3 +1,6 @@
+#### 2.0.3 (2023-05-03)
+- Added in-game icon.
+
 #### 2.0.2 (2023-05-02)
 - Code optimization (and embellishment).
 - toc updated for 10.1.

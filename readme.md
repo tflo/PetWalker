@@ -14,7 +14,7 @@ The addon helps you to always have a companion pet out (summoned). You can choos
 In early 2022 this project started out as an improved version of [NugMiniPet](https://www.curseforge.com/wow/addons/nugminipet), but in the meantime not much of the original code is left. 
 Credits for the concept, the inspiration and for the initial code base though to the [author](https://www.curseforge.com/members/d87_/projects) of NugMiniPet.
 
-PetWalker was first published on [GitHub](https://github.com/tflo/PetWalker) and [Wago](https://addons.wago.io/addons/petwalker) in April 2022; starting with version 1.1.4 (Dec 2022) now also available on [Curseforge](https://www.curseforge.com/wow/addons/petwalker).
+PetWalker was first published on [GitHub](https://github.com/tflo/PetWalker) and [Wago](https://addons.wago.io/addons/petwalker) in April 2022; starting with version 1.1.4 (Dec 2022) now also available on [CurseForge](https://www.curseforge.com/wow/addons/petwalker).
 
 ___If you are reading this description on CurseForge, be aware that Curse's Markdown parser is quite broken. For a correctly rendered and more readable description, please go [here](https://addons.wago.io/addons/petwalker), or open the readme.pdf inside the addon folder.___
 
