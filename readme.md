@@ -2,12 +2,14 @@
 
 Never lose your pet again.
 
+
 ## Summary
 
 The addon helps you to always have a companion pet out (summoned). You can choose between two operating modes:
 
 - __Auto Restore only:__ Whenever your pet is lost – for whatever reason –, it will be restored. This works across logouts and characters.
 - __Random Summon:__ Automatically summons a random pet (from a configurable pool) every n minutes, or via keybind or slash command. This pet will be auto-restored whenever it is lost, until a new one is summoned.
+
 
 ## Notes
 
@@ -17,6 +19,7 @@ Credits for the concept, the inspiration and for the initial code base though to
 PetWalker was first published on [GitHub](https://github.com/tflo/PetWalker) and [Wago](https://addons.wago.io/addons/petwalker) in April 2022; starting with version 1.1.4 (Dec 2022) now also available on [CurseForge](https://www.curseforge.com/wow/addons/petwalker).
 
 ___If you are reading this description on CurseForge, be aware that Curse's Markdown parser is quite broken. For a correctly rendered and more readable description, please go [here](https://addons.wago.io/addons/petwalker), or open the readme.pdf inside the addon folder.___
+
 
 ## Features
 
@@ -33,6 +36,7 @@ ___If you are reading this description on CurseForge, be aware that Curse's Mark
 - The addon knows about special pets and does not try to summon pets that can or should not be summoned, e.g. the Pocopoc pet in Zereth Mortis, the Winter Veil pets, or the vendor pets with CD like Guild Herald.
 - PetWalker ignores pets that are automatically summoned because they are slotted into a team. It will reliably restore your previous pet 15 seconds after a pet battle. (See also FAQ.)
 
+
 ### Other Features / Notes
 
 - No GUI settings. Basically it’s a set-and-forget addon.
@@ -42,6 +46,7 @@ ___If you are reading this description on CurseForge, be aware that Curse's Mark
 - Alt friendly: All settings are account wide (except for char-specific favorite pets, ofc).
 - For obvious reasons conflicting with [NugMiniPet](https://www.curseforge.com/wow/addons/nugminipet), [Zone Pet](https://www.curseforge.com/wow/addons/zonepet), [Mount Mini-Me](https://www.curseforge.com/wow/addons/mount-mini-me) and probably any similar addon that auto-summons pets.
 - Fully compatible with [Rematch](https://www.curseforge.com/wow/addons/rematch). 
+
 
 ## Usage
 
@@ -85,6 +90,7 @@ Also check the Key Bindings section of your client. You’ll find three bindable
 - Dismiss current pet and disable auto-summoning (same as `/pw d`)
 - Summon new pet (same as `/pw n`)   
 
+
 ### New feature since version 1.1.5: Summon same pet as targeted pet
 
 1. Target a summoned pet of another player.
@@ -94,6 +100,7 @@ Also check the Key Bindings section of your client. You’ll find three bindable
 If the target pet is not in your collection, you get a weblink to the pet's page on warcraftpets.com, or on wowhead.com if it's not collectible.
 
 ---
+
 
 ## FAQ
 
@@ -106,9 +113,11 @@ In the Pet Journal, char-specific favorites are only visually marked with the fa
 
 Unlike the global favorites, these char-specific favorites are not sorted at the top of the Pet Journal list. However, the Status display (`/pw s` command) will show you a list of your current char-specific favorites. This makes them easier to identify, for example if you want to remove a pet from your favorites.
 
+
 ### I do not want to summon a new pet every `n` minutes, I just want to keep my current pet out!
 
 Simply set the Summon New Pet timer to ‘0’ (zero). You can set it to 0 with the command `/pw 0`. With this setting, the addon will never give you a new pet, and will do its best to keep your current pet out, until _you_ decide to summon a different one. _How_ the pet is summoned, is irrelevant: it can be summoned via Pet Journal, or via PetWalker keybind, or whatever. PetWalker will remember it, treat is as your “valid” current pet and will try to re-summon it whenever it is lost.
+
 
 ### PetWalker only summons a few pets out of my pool, or I get the "0 (zero) eligible pets" message!
 
@@ -124,6 +133,7 @@ Note that you must have access to the _Blizz Pet Journal_ to do this, so make su
 
 See also [issue#6](https://github.com/tflo/PetWalker/issues/6).
 
+
 ### Where/when does PetWalker fail to keep my pet out?
 
 <s>The most difficult situation is when you select a team for a pet battle. If you are using Rematch, you should select the “Keep Companion” option (in “Miscellaneous Options”). This will definitely help, but it is not guaranteed that, after the pet battle, you have the same pet out as before.</s>
@@ -132,12 +142,14 @@ __As of version 2.0.0 (April 2023),__ PetWalker's behavior in the context of pet
 
 TL;DR: PetWalker now reliably restores your previous pet 15 seconds after a pet battle. The delay is intentional and allows you to chain pet battles, without any annoying automatic summoning/unsummoning of your pet in-between. Pets that were auto-summoned because they are slotted into a team are ignored and the pet restoration now works reliably also without Rematch’s “Keep Companion” setting. But, if you prefer, you can still enable Rematch’s “Keep Companion”. (The difference is that Rematch restores your pet more or less immediately after a battle.)
 
+
 ### What events does PetWalker monitor?
 
 The main event that causes PetWalker to check for the pet and summon it if necessary is `PLAYER_STARTED_MOVING`.  
 This is a fairly common event. I have experimented with several other events, but overall I have found that this one gives the best results. (After all, the aim of PetWalker is to ensure that your pet is _always_ out, not that it's out from time to time).
 
 On rare occasions, a summoning action can interfere with other casts (GCD conflict), e.g. Druids who shape-shift immediately after they start moving. But since PetWalker does nothing in combat (and other sensitive situations), it should be pretty safe. 
+
 
 ### Should I disable "auto-summoning while mounted in a Dragonriding zone" (`/pw r`)?
 
@@ -155,9 +167,8 @@ Personally, I'm using it because even if I have an occasional GCD conflict with 
 
 To be clear, the GCD is not caused by PetWalker, it's a Blizz thing: any summoning of a pet triggers the GCD. It's stupid IMO, but there's nothing we can do about it. The summoning-while-mounted feature is meant to reduce the chance of GCD conflicts, but it cannot be eliminated.
 
-
-
 ---
+
 
 ## Known Issues / To Do 
 
