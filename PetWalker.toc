@@ -1,6 +1,6 @@
-## Interface: 100100
+## Interface: 100105
 ## Title: PetWalker
-## Version: 2.0.3
+## Version: 2.0.4
 ## IconTexture: Interface/AddOns/PetWalker/icon.png
 ## X-Flavor: Mainline
 ## Notes: Automatically re-summons your lost companion pet, or auto-summons a random or a favorite one.
@@ -30,7 +30,7 @@ ui.lua
 
 # License ======================================================================
 #
-# Copyright © 2022 Thomas Floeren
+# Copyright © 2022–2023 Thomas Floeren
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software

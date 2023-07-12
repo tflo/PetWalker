@@ -1,3 +1,7 @@
+#### 2.0.4 (2023-07-12)
+- toc updated for 10.1.5.
+- I've only tested it briefly with 10.1.5, but it seems OK, and as far as I know there are no relevant API changes. If I discover any problems, you'll get a content update soon.
+
 #### 2.0.3 (2023-05-03)
 - Added in-game icon.
 

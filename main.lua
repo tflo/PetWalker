@@ -886,7 +886,7 @@ end
 
 --[[ License ===================================================================
 
-	Copyright © 2022 Thomas Floeren
+	Copyright © 2022–2023 Thomas Floeren
 
 	This file is part of PetWalker.
 
