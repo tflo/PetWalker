@@ -1,0 +1,10 @@
+{
+	"Lua.diagnostics.globals": [
+		"SlashCmdList",
+		"PetJournal",
+		"PetJournal_OnEvent",
+		"PanelTemplates_GetSelectedTab"
+	],
+	"files.exclude": {
+	}
+}

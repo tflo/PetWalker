@@ -687,7 +687,7 @@ This can be, depending on user setting:
 ===========================================================================]]--
 
 local function clean_charfavs()
-	local count, link = 0
+	local count, link = 0, nil
 	for id, _ in pairs(ns.dbc.charFavs) do
 		link = C_PetJournalGetBattlePetLink(id)
 		if not link then
