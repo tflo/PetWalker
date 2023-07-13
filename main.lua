@@ -501,9 +501,6 @@ function ns.summon_targetpet()
 	if not C_PetJournalGetOwnedBattlePetString(target_species_id) then
 		if not UnitIsBattlePetCompanion 'target' then
 			ns.msg_target_is_not_companion_battlepet(target_pet_name)
-			if tarpet then -- for testing if there exists maybe a non-companion pet with a corresponding *collectible* species.
-				chat_user_notification(CO.bn .. 'Not a companion battle pet, but we have found a GUID! This is weird.')
-			end
 		else
 			ns.msg_target_not_in_collection(target_pet_link, target_pet_name)
 		end
