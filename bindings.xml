@@ -1,20 +1,20 @@
 <Bindings>
 	<Binding name="PETWALKER_TOGGLE_AUTO" category="PetWalker ">
-        petwalker_binding_toggle_autosummon()
+        PetWalker_binding_toggle_autosummon()
     </Binding>
     <Binding name="PETWALKER_NEW_PET" category="PetWalker ">
-		 petwalker_binding_new_pet()
+		 PetWalker_binding_new_pet()
     </Binding>
     <Binding name="PETWALKER_TARGET_PET" category="PetWalker ">
-		 petwalker_binding_target_pet()
+		 PetWalker_binding_target_pet()
     </Binding>
     <Binding name="PETWALKER_DISMISS_PET" category="PetWalker ">
-        petwalker_binding_dismiss_and_disable()
+        PetWalker_binding_dismiss_and_disable()
     </Binding>
 </Bindings>
 
-<!-- 
-Note on the category: 
+<!--
+Note on the category:
 
 As of now (Nov 2022, client 100002), using a variable for the category produces taint. Hence the string. The space at the end should ensure that it doesn't resolve to a global `PetWalker` namespace, should I introduce one in the future.
 

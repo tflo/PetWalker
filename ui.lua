@@ -225,11 +225,11 @@ function ns.help_display()
 		'\nIn Options > Keybindigs you can directly bind some commands.',
 	}
 
-	header = table.concat(header, CO.bn)
-	body = table.concat(body, CO.bn)
-	footer = table.concat(footer, CO.bn)
+	local header_text = table.concat(header, CO.bn)
+	local body_text = table.concat(body, CO.bn)
+	local footer_text = table.concat(footer, CO.bn)
 
-	chat_user_notification_large(header, body, nil, footer)
+	chat_user_notification_large(header_text, body_text, nil, footer_text)
 end
 
 
@@ -251,12 +251,12 @@ function ns.status_display()
 		'\n', ns:list_charfavs(),
 	}
 
-	header = table.concat(header, CO.bn)
-	body = table.concat(body, CO.bn)
-	charfavlist = table.concat(charfavlist, CO.bn)
+	local header_text = table.concat(header, CO.bn)
+	local body_text = table.concat(body, CO.bn)
+	local charfavlist_text = table.concat(charfavlist, CO.bn)
 	local extra_settings = (ns.db.eventAlt and table.concat({CO.k ..'\nAlternative Events ', 'are ', CO.s .. 'enabled ', 'for all chars.'}, CO.bn) or nil)
 
-	chat_user_notification_large(header, body, extra_settings, charfavlist)
+	chat_user_notification_large(header_text, body_text, extra_settings, charfavlist_text)
 end
 
 
@@ -430,15 +430,15 @@ end
 
 -- Used for info print
 function ns:list_charfavs()
-	local favlinks, count, name = {}, 0
+	local favlinks, count, name = {}, 0, nil
 	for id, _ in pairs(ns.dbc.charFavs) do
 		count = count + 1
 		name = C_PetJournalGetBattlePetLink(id)
 		table.insert(favlinks, name)
 	end
-	favlinks = table.concat(favlinks, ' ')
+	local favlinks_text = table.concat(favlinks, ' ')
 	return CO.e .. this_char .. CO.bn .. ' has ' .. CO.e .. count .. CO.bn ..
-	' character-specific favorite pet' .. (count > 1 and 's:\n' or count > 0 and ':\n' or 's.') .. favlinks
+	' character-specific favorite pet' .. (count > 1 and 's:\n' or count > 0 and ':\n' or 's.') .. favlinks_text
 end
 
 

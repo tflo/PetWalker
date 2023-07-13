@@ -76,10 +76,10 @@ BINDING_NAME_PETWALKER_NEW_PET = 'Summon New Pet'
 BINDING_NAME_PETWALKER_TARGET_PET = 'Try to Summon Same Pet as Target'
 BINDING_NAME_PETWALKER_DISMISS_PET = 'Dismiss Pet & Disable Auto-Summoning'
 
-function petwalker_binding_toggle_autosummon() ns:auto_toggle() end
-function petwalker_binding_new_pet() ns:new_pet(nil, true) end
-function petwalker_binding_target_pet() ns:summon_targetpet() end
-function petwalker_binding_dismiss_and_disable() ns:dismiss_and_disable() end
+function PetWalker_binding_toggle_autosummon() ns:auto_toggle() end
+function PetWalker_binding_new_pet() ns:new_pet(nil, true) end
+function PetWalker_binding_target_pet() ns:summon_targetpet() end
+function PetWalker_binding_dismiss_and_disable() ns:dismiss_and_disable() end
 
 --[[===========================================================================
 Some Variables/Constants
@@ -494,7 +494,7 @@ function ns.summon_targetpet()
 	end
 
 	local target_species_id = UnitBattlePetSpeciesID 'target'
-	local target_pet_name = C_PetJournalGetPetInfoBySpeciesID(target_species_id)
+	local target_pet_name = C_PetJournalGetPetInfoBySpeciesID(target_species_id) or ''
 	local _, tarpet = C_PetJournalFindPetIDByName(target_pet_name)
 	local target_pet_link = tarpet and C_PetJournalGetBattlePetLink(tarpet)
 

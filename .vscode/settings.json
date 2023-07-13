@@ -3,7 +3,8 @@
 		"SlashCmdList",
 		"PetJournal",
 		"PetJournal_OnEvent",
-		"PanelTemplates_GetSelectedTab"
+		"PanelTemplates_GetSelectedTab",
+		"PetWalkerCharFavsCheckbox"
 	],
 	"files.exclude": {
 	}
