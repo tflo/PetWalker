@@ -1,3 +1,7 @@
+#### 2.0.6 (2023-07-23)
+
+- Minor code and readme fixes.
+
 #### 2.0.5 (2023-07-12)
 
 - Readme improved.

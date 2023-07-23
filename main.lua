@@ -520,15 +520,12 @@ end
 
 
 
---[[---------------------------------------------------------------------------
-One time action, after big transitions, like login, portals, entering instance,
-etc. Basically a standalone restore_pet func; in addition, it not only checks for
-presence of a pet, but also against the saved pet.
-This makes sure that a newly logged toon gets the same pet as the previous
-toon had at logout.
-We need more checks here than in restore_pet, bc restore_pet is "prefiltered" by
-autoaction, and here we are not.
----------------------------------------------------------------------------]]--
+--[[--------------------------------------------------------------------------------------------------------------------
+One time action, after big transitions, like login, portals, entering instance, etc. Basically a standalone restore_pet
+func; in addition, it not only checks for presence of a pet, but also against the saved pet.
+This makes sure that a newly logged toon gets the same pet as the previous toon had at logout.
+We need more checks here than in restore_pet, bc restore_pet is "prefiltered" by autoaction, and here we are not.
+--------------------------------------------------------------------------------------------------------------------]]--
 
 -- Called by 2: ns:PLAYER_ENTERING_WORLD, autoaction
 
