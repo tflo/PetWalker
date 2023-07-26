@@ -3,7 +3,7 @@ local addon_name, ns = ...
 local db_version = 1
 local _
 
--- API references -- TODO: add the stuff from cfavs_update
+-- API references
 local C_PetJournalPetIsFavorite1, C_PetJournalSetFavorite1, C_PetJournalGetPetInfoByIndex1
 local C_PetJournalPetIsFavorite = _G.C_PetJournal.PetIsFavorite
 local C_PetJournalSetFavorite = _G.C_PetJournal.SetFavorite
@@ -496,7 +496,7 @@ function ns.summon_targetpet()
 	local target_species_id = UnitBattlePetSpeciesID 'target'
 	local target_pet_name = C_PetJournalGetPetInfoBySpeciesID(target_species_id) or ''
 	local _, tarpet = C_PetJournalFindPetIDByName(target_pet_name)
-	local target_pet_link = tarpet and C_PetJournalGetBattlePetLink(tarpet)
+	local target_pet_link = tarpet and C_PetJournalGetBattlePetLink(tarpet) or '[link: UNKNOWN]'
 
 	if not C_PetJournalGetOwnedBattlePetString(target_species_id) then
 		if not UnitIsBattlePetCompanion 'target' then

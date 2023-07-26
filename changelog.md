@@ -1,3 +1,8 @@
+#### 2.0.7 (2023-07-26)
+
+- Attempt to fix an error that occures when trying to summon the same pet as the target (`/pw t`) and the pet is not in the
+  collection (not owned).
+
 #### 2.0.6 (2023-07-23)
 
 - Minor code and readme fixes.
