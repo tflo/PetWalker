@@ -106,7 +106,7 @@ local delay_after_login = 12
 local delay_after_reload = 8
 local delay_after_instance = 5
 local delay_login_msg = 20 -- Timer starts with ADDON_LOADED
-local delay_after_battle = 15 -- Post-petbattle sleep
+local delay_after_battle = 20 -- Post-petbattle sleep
 local instasummon_after_battlesleep = true
 local msg_onlyfavisactive_alreadydisplayed = false
 
