@@ -45,6 +45,7 @@ function ns.events:register_summon_events()
 	if ns.db.eventAlt then
 		self:RegisterEvent 'ZONE_CHANGED'
 		self:RegisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED'
+		-- self:RegisterEvent 'BAG_UPDATE_DELAYED'
 	else
 		self:RegisterEvent 'PLAYER_STARTED_MOVING'
 	end
@@ -228,6 +229,12 @@ Init
 		function ns:PLAYER_MOUNT_DISPLAY_CHANGED()
 			if UnitAffectingCombat 'player' or IsFlying() then return end
 			ns:debugprint 'Event: PLAYER_MOUNT_DISPLAY_CHANGED --> autoaction'
+			ns.autoaction()
+		end
+
+		function ns:BAG_UPDATE_DELAYED()
+			if UnitAffectingCombat 'player' or IsFlying() then return end
+			ns:debugprint 'Event: BAG_UPDATE_DELAYED --> autoaction'
 			ns.autoaction()
 		end
 
