@@ -42,11 +42,18 @@ end)
 ns.events:RegisterEvent 'ADDON_LOADED'
 
 function ns.events:register_summon_events()
-	if ns.db.eventAlt then
+	if ns.db.eventAlt then -- Alt events, experimental
+		--[[ Pointless if it fires while flying, which is quite often. But this doesn't harm either. ]]
 		self:RegisterEvent 'ZONE_CHANGED'
+		--[[ Probably good, still testing.
+		Fires often together with zoneCh, but not always. ]]
+		self:RegisterEvent 'ZONE_CHANGED_INDOORS'
+		--[[ Good event ]]
 		self:RegisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED'
+		--[[ Fires pretty frequently, sometimes in quick succession. Chain-firing when posting auctions.
+		Redundancy: Seems to get triggered by plEntWorld and/or zoneChNewA and/or plLogin ]]
 		-- self:RegisterEvent 'BAG_UPDATE_DELAYED'
-	else
+	else -- Main event(s)
 		self:RegisterEvent 'PLAYER_STARTED_MOVING'
 	end
 end
@@ -226,17 +233,21 @@ Init
 			ns:debugprint 'Event: ZONE_CHANGED --> autoaction'
 			ns.autoaction()
 		end
+		function ns:ZONE_CHANGED_INDOORS()
+			if UnitAffectingCombat 'player' or IsFlying() then return end
+			ns:debugprint 'Event: ZONE_CHANGED_INDOORS --> autoaction'
+			ns.autoaction()
+		end
 		function ns:PLAYER_MOUNT_DISPLAY_CHANGED()
 			if UnitAffectingCombat 'player' or IsFlying() then return end
 			ns:debugprint 'Event: PLAYER_MOUNT_DISPLAY_CHANGED --> autoaction'
 			ns.autoaction()
 		end
-
-		function ns:BAG_UPDATE_DELAYED()
-			if UnitAffectingCombat 'player' or IsFlying() then return end
-			ns:debugprint 'Event: BAG_UPDATE_DELAYED --> autoaction'
-			ns.autoaction()
-		end
+		-- function ns:BAG_UPDATE_DELAYED()
+		-- 	if UnitAffectingCombat 'player' or IsFlying() then return end
+		-- 	ns:debugprint 'Event: BAG_UPDATE_DELAYED --> autoaction'
+		-- 	ns.autoaction()
+		-- end
 
 		-- Regular main event
 		function ns:PLAYER_STARTED_MOVING()
