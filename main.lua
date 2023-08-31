@@ -91,6 +91,38 @@ See the extra checks in is_excluded_by_species() and transitioncheck(). ]]
 -- Debug
 ns.time_summonspell = 0
 
+local excluded_auras = {
+	32612, -- Mage: Invisibility
+	110960, -- Mage: Greater Invisibility
+	131347, -- DH: Gliding
+	311796, -- Pet: Daisy as backpack (/beckon)
+	312993, -- Carrying Forbidden Tomes (Scrivener Lenua event, Revendreth)
+	43880, -- Ramstein's Swift Work Ram (Brewfest daily; important bc the quest cannot be restarted if messed up)
+	43883, -- Rental Racing Ram (Brewfest daily)
+	290460, -- Battlebot Champion (Forbidden Reach: Zskera Vault)
+	5384, -- Hunter: Feign Death (only useful to avoid accidental summoning via keybind, or if we use a different event than PLAYER_STARTED_MOVING)
+} -- More exclusions in the Summon function itself
+
+local function offlimits_aura(auras)
+	for _, a in pairs(auras) do
+		if C_UnitAurasGetPlayerAuraBySpellID(a) then
+			ns:debugprint 'Excluded Aura found!'
+			return true
+		end
+	end
+	return false
+end
+
+local function in_mythic_keystone()
+	local _, instance_type, difficulty_id = GetInstanceInfo()
+	return instance_type == 'party' and difficulty_id == 8
+end
+
+local function in_arena()
+	local _, instance_type = IsInInstance()
+	return instance_type == 'arena'
+end
+
 
 
 --[[---------------------------------------------------------------------------
@@ -643,37 +675,6 @@ end
 	Manual Summon function
 ---------------------------------------------------------------------------]]--
 
-local excluded_auras = {
-	32612, -- Mage: Invisibility
-	110960, -- Mage: Greater Invisibility
-	131347, -- DH: Gliding
-	311796, -- Pet: Daisy as backpack (/beckon)
-	312993, -- Carrying Forbidden Tomes (Scrivener Lenua event, Revendreth)
-	43880, -- Ramstein's Swift Work Ram (Brewfest daily; important bc the quest cannot be restarted if messed up)
-	43883, -- Rental Racing Ram (Brewfest daily)
-	290460, -- Battlebot Champion (Forbidden Reach: Zskera Vault)
-	5384, -- Hunter: Feign Death (only useful to avoid accidental summoning via keybind, or if we use a different event than PLAYER_STARTED_MOVING)
-} -- More exclusions in the Summon function itself
-
-local function offlimits_aura(auras)
-	for _, a in pairs(auras) do
-		if C_UnitAurasGetPlayerAuraBySpellID(a) then
-			ns:debugprint 'Excluded Aura found!'
-			return true
-		end
-	end
-	return false
-end
-
-local function in_mythic_keystone()
-	local _, instance_type, difficulty_id = GetInstanceInfo()
-	return instance_type == 'party' and difficulty_id == 8
-end
-
-local function in_arena()
-	local _, instance_type = IsInInstance()
-	return instance_type == 'arena'
-end
 
 function ns:safesummon(pet, resettimer)
 	if not pet then -- TODO: needed?
