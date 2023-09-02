@@ -113,14 +113,14 @@ local function offlimits_aura(auras)
 	return false
 end
 
-local function in_mythic_keystone()
-	local _, instance_type, difficulty_id = GetInstanceInfo()
-	return instance_type == 'party' and difficulty_id == 8
-end
-
-local function in_arena()
-	local _, instance_type = IsInInstance()
-	return instance_type == 'arena'
+local function forbidden_instance()
+	local in_instance, instance_type = IsInInstance()
+	if not in_instance then return false end
+	if instance_type == 'arena' then return true end
+	if instance_type == 'party' then
+		local _, _, difficulty_id = GetInstanceInfo()
+		if difficulty_id == 8 then return true end
+	end
 end
 
 
@@ -694,8 +694,7 @@ function ns:safesummon(pet, resettimer)
 		and not (UnitIsControlling 'player' and UnitChannelInfo 'player')
 		and not UnitHasVehicleUI 'player'
 		and not UnitIsGhost 'player'
-		and not in_mythic_keystone()
-		and not in_arena()
+		and not forbidden_instance()
 	then
 		ns.pet_verified = true
 		-- ns.skipNextSave = true
