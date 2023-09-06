@@ -1,3 +1,10 @@
+#### 2.0.8 (2023-09-06)
+
+- Code preparations for a revamped event throttling and summoning prevention implementation (coming soon).
+- Already more efficient detection of arena and mythic dungeons (for the summoning prevention) with this version.
+- Minor code cleanup and improvements.
+- toc bump tp 100107.
+
 #### 2.0.7 (2023-07-26)
 
 - Attempt to fix an error that occures when trying to summon the same pet as the target (`/pw t`) and the pet is not in the
