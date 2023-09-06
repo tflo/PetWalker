@@ -65,6 +65,11 @@ local delay_login_msg = 20 -- Timer starts with ADDON_LOADED
 local delay_after_battle = 15 -- Post-petbattle sleep
 local instasummon_after_battlesleep = true -- Summon without waiting for trigger event
 local msg_onlyfavisactive_alreadydisplayed = false
+local check_against_flying = false
+local time_responded_to_summoning_event = 0
+local throttle_min = 3
+local throttle = 0 --  throttle_min * 2
+local bypass_throttle = false
 
 local excluded_species = {
 --[[  Pet is vendor and goes on CD when summoned ]]
@@ -94,7 +99,7 @@ ns.time_summonspell = 0
 local excluded_auras = {
 	32612, -- Mage: Invisibility
 	110960, -- Mage: Greater Invisibility
-	131347, -- DH: Gliding
+	131347, -- DH: Gliding -- Prolly not needed, should be caught by IsFlying() (?)
 	311796, -- Pet: Daisy as backpack (/beckon)
 	312993, -- Carrying Forbidden Tomes (Scrivener Lenua event, Revendreth)
 	43880, -- Ramstein's Swift Work Ram (Brewfest daily; important bc the quest cannot be restarted if messed up)
@@ -124,7 +129,44 @@ local function forbidden_instance()
 end
 
 
-
+-- TODO: WiP
+local function forbidden_or_throttled()
+	-- if not not ns.db.autoEnabled then return true end
+	-- Always-active throttle
+	if not bypass_throttle then
+		throttle = max(throttle, throttle_min)
+		local now = GetTime()
+		if now - time_responded_to_summoning_event < throttle then return true end
+		time_responded_to_summoning_event, throttle = now, 0
+	end
+	local forbidden = false
+	if check_against_flying and
+		-- We need these tests only at events that can occure during it
+		(IsFlying() or UnitOnTaxi 'player') then
+		forbidden, throttle = true, 20
+	elseif forbidden_instance then
+		forbidden, throttle = true, 120
+	elseif UnitAffectingCombat 'player'
+		or IsStealthed() -- Includes Hunter Camouflage
+		or C_UnitAurasGetPlayerAuraBySpellID(32612) -- Mage: Invisibility
+		or C_UnitAurasGetPlayerAuraBySpellID(110960) -- Mage: Greater Invisibility
+		or C_UnitAurasGetPlayerAuraBySpellID(131347) -- DH: Gliding -- Prolly not needed, should be caught by IsFlying() (?)
+		or C_UnitAurasGetPlayerAuraBySpellID(5384) -- Hunter: Feign Death (only useful to avoid accidental summoning via keybind, or if we use a different event than PLAYER_STARTED_MOVING)
+		or (UnitIsControlling 'player' and UnitChannelInfo 'player')
+	then
+		forbidden, throttle = true, 8
+	elseif UnitIsGhost 'player'
+		or UnitHasVehicleUI 'player'
+		or C_UnitAurasGetPlayerAuraBySpellID(311796) -- Pet: Daisy as backpack (/beckon)
+		or C_UnitAurasGetPlayerAuraBySpellID(312993) -- Carrying Forbidden Tomes (Scrivener Lenua event, Revendreth)
+		or C_UnitAurasGetPlayerAuraBySpellID(43880) -- Ramstein's Swift Work Ram (Brewfest daily; important bc the quest cannot be restarted if messed up)
+		or C_UnitAurasGetPlayerAuraBySpellID(43883) -- Rental Racing Ram (Brewfest daily)
+		or C_UnitAurasGetPlayerAuraBySpellID(290460) -- Battlebot Champion (Forbidden Reach: Zskera Vault)
+	then
+		forbidden, throttle = true, 40
+	end
+	return forbidden
+end
 --[[---------------------------------------------------------------------------
 	§ For the Bindings file
 ---------------------------------------------------------------------------]]--
