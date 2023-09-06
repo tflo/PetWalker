@@ -233,7 +233,7 @@ function ns.events:unregister_pw_events() self:UnregisterAllEvents() end
 	§ Loading and event handlers
 ===========================================================================]]--
 
-function ns.ADDON_LOADED(_, addon)
+function ns:ADDON_LOADED(addon)
 
 --[[---------------------------------------------------------------------------
 	§ Our addon has loaded (init)
@@ -290,7 +290,7 @@ function ns.ADDON_LOADED(_, addon)
 		In any case, we should make sure to be completely out of the loading process,
 		otherwise we might unsummon our - not yet spawned - pet.
 		]]
-		function ns.PLAYER_ENTERING_WORLD(_, is_login, is_reload)
+		function ns:PLAYER_ENTERING_WORLD(is_login, is_reload)
 			local delay
 			if is_login then
 				ns:debugprint 'Event: PLAYER_ENTERING_WORLD: Login'
@@ -399,7 +399,7 @@ function ns.ADDON_LOADED(_, addon)
 		needed, that is before selecting a random pet.
 		--> This seems to work, so far!
 		]]
-		function ns.PET_JOURNAL_LIST_UPDATE()
+		function ns:PET_JOURNAL_LIST_UPDATE()
 			ns:debugprint 'Event: PET_JOURNAL_LIST_UPDATE --> pool_initialized = false'
 			ns.pool_initialized = false
 		end
