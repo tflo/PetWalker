@@ -270,6 +270,7 @@ function ns.ADDON_LOADED(_, addon)
 
 		-- *Not* with PLAYER_ENTERING_WORLD so that it is not affected when all events get unregistered via /pw a
 		C_Timer.After(delay_login_msg, ns.msg_login)
+		ns:debugprint('Event: ADDON_LOADED:', addon)
 
 --[[---------------------------------------------------------------------------
 	§ Summoning events
@@ -922,19 +923,18 @@ function ns:debug_display()
 end
 
 -- without pet info
-function ns:debugprint(msg)
-	if ns.db.debugMode then print('|cffEE82EE### PetWalker Debug: ' .. (msg or '<nil>') .. ' ###') end
+function ns:debugprint(...)
+	if ns.db.debugMode then print('|cffEE82EEPetWalker Debug:', ...) end
 end
 
 -- with pet info
 function ns:debugprint_pet(msg)
 	if ns.db.debugMode then
 		print(
-			'|cffEE82EE### PetWalker Debug: '
+			'|cffEE82EE PetWalker Debug: '
 				.. msg
 				.. ' # Current DB ' .. (ns.dbc.charFavsEnabled and ns.db.favsOnly and '(char)' or '(global)') .. ' pet: '
 				.. ns.id_to_name(ns.dbc.charFavsEnabled and ns.db.favsOnly and ns.dbc.currentPet or ns.db.currentPet)
-				.. ' ###'
 		)
 	end
 end
