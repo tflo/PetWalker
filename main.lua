@@ -647,8 +647,12 @@ function ns.previous_pet()
 	else
 		prevpet = ns.db.previousPet
 	end
-	ns.set_sum_msg_to_previouspet(prevpet)
-	ns:safesummon(prevpet, true)
+	if prevpet then
+		ns.set_sum_msg_to_previouspet(prevpet)
+		ns:safesummon(prevpet, true)
+	else
+		ns.msg_no_previous_pet()
+	end
 end
 
 --[[---------------------------------------------------------------------------

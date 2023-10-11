@@ -104,7 +104,12 @@ end
 
 function ns.msg_no_saved_pet()
 	if ns.db.verbosityLevel < 0 then return end
-	chat_user_notification(CO.bw .. 'No Current Pet has been saved yet' .. (ns.dbc.charFavsEnabled and ' for ' .. CO.e .. this_char or '') .. ' --> could not restore pet.')
+	chat_user_notification(CO.bw .. 'No Current Pet has been saved yet' .. (ns.dbc.charFavsEnabled and ' for ' .. CO.e .. this_char or '') .. CO.bw .. ' --> Summoning a new pet.')
+end
+
+function ns.msg_no_previous_pet()
+	if ns.db.verbosityLevel < 0 then return end
+	chat_user_notification(CO.bw .. 'No Previous Pet has been saved yet' .. (ns.dbc.charFavsEnabled and ' for ' .. CO.e .. this_char or '') .. CO.bw .. '.')
 end
 
 function ns.msg_onlyfavisactive(ap)
