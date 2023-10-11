@@ -117,6 +117,16 @@ function ns.msg_removed_invalid_id(counter)
 	chat_user_notification(format('%s%s orphaned pet ID%s %s been removed from the char favorites.', CO.bn, counter, counter > 1 and 's' or '', counter > 1 and 'have' or 'has'))
 end
 
+function ns.msg_saved_pet_unsummonable(reason, number)
+	if ns.db.verbosityLevel < 1 then return end
+	chat_user_notification(format('%sThe saved Current Pet is not summonable. Reason: %s(%s) %s%s\n--> Checking other saved pets (char/global pet, previous pet, etc.) now.', CO.bw, CO.e, number, reason, CO.bw))
+end
+
+function ns.msg_previous_pet_unsummonable()
+	if ns.db.verbosityLevel < 1 then return end
+	chat_user_notification(CO.bw .. 'The saved Previous Pet or other saved pets are not summonable either.\n--> Saving the currently active pet or summoning a new one.')
+end
+
 
 -- Summon Target Pet messages
 

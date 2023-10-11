@@ -18,6 +18,7 @@ local C_PetJournalGetPetInfoBySpeciesID = _G.C_PetJournal.GetPetInfoBySpeciesID
 local C_PetJournalFindPetIDByName = _G.C_PetJournal.FindPetIDByName
 local C_PetJournalGetBattlePetLink = _G.C_PetJournal.GetBattlePetLink
 local C_PetJournalGetOwnedBattlePetString = _G.C_PetJournal.GetOwnedBattlePetString
+local C_PetJournalGetPetSummonInfo = _G.C_PetJournal.GetPetSummonInfo
 local C_PetBattlesIsInBattle = _G.C_PetBattles.IsInBattle
 local C_MapGetBestMapForUnit = _G.C_Map.GetBestMapForUnit
 local C_UnitAurasGetPlayerAuraBySpellID = _G.C_UnitAuras.GetPlayerAuraBySpellID
@@ -61,7 +62,7 @@ local time_transitioncheck = 0
 local delay_after_login = 12
 local delay_after_reload = 8
 local delay_after_instance = 5
-local delay_login_msg = 20 -- Timer starts with ADDON_LOADED
+local delay_login_msg = 22 -- Timer starts with ADDON_LOADED
 local delay_after_battle = 15 -- Post-petbattle sleep
 local instasummon_after_battlesleep = true -- Summon without waiting for trigger event
 local msg_onlyfavisactive_alreadydisplayed = false
@@ -70,6 +71,7 @@ local time_responded_to_summoning_event = 0
 local throttle_min = 3
 local throttle = 0 --  throttle_min * 2
 local bypass_throttle = false
+local savedpet_is_summonable = true
 
 local excluded_species = {
 --[[  Pet is vendor and goes on CD when summoned ]]
@@ -167,6 +169,59 @@ local function forbidden_or_throttled()
 	end
 	return forbidden
 end
+
+local function unsummonability_test(guid)
+	local isSummonable, error, errorText = C_PetJournalGetPetSummonInfo(guid)
+	if not isSummonable then
+		return true, error, errorText
+	end
+end
+
+local function saved_pet_summonability_check() --- After login
+	local priorities, perchar = {}, nil
+
+	if ns.dbc.charFavsEnabled then
+		perchar = true
+		priorities = {
+			ns.dbc.currentPet,
+			ns.dbc.previousPet,
+			ns.db.currentPet,
+			ns.db.previousPet
+		}
+	else
+		priorities = {
+			ns.db.currentPet,
+			ns.db.previousPet,
+			ns.dbc.currentPet,
+			ns.dbc.previousPet
+		}
+	end
+
+	for i, guid in ipairs(priorities) do
+		if guid then
+			local is_summonable, error, error_text = C_PetJournalGetPetSummonInfo(guid)
+			if i == 1 then
+				if is_summonable then return end
+				ns.msg_saved_pet_unsummonable(error_text, error)
+			else
+				if is_summonable then
+					if perchar then
+						ns.dbc.currentPet = guid
+					else
+						ns.db.currentPet = guid
+					end
+					return
+				end
+			end
+		elseif i == 1 then
+			return
+		end
+	end
+	ns.msg_previous_pet_unsummonable()
+	savedpet_is_summonable = false
+end
+
+
 --[[---------------------------------------------------------------------------
 	§ For the Bindings file
 ---------------------------------------------------------------------------]]--
@@ -295,6 +350,8 @@ function ns:ADDON_LOADED(addon)
 			if is_login then
 				ns:debugprint 'Event: PLAYER_ENTERING_WORLD: Login'
 				delay = delay_after_login
+				-- This must run before transitioncheck
+				C_Timer.After(delay - 1, saved_pet_summonability_check)
 			elseif is_reload then
 				ns:debugprint 'Event: PLAYER_ENTERING_WORLD: Reload'
 				delay = delay_after_reload
@@ -662,7 +719,7 @@ function ns.transitioncheck()
 			savedpet = ns.db.previousPet
 		end
 	end
-	if savedpet then
+	if savedpet and savedpet_is_summonable then
 		ns:debugprint 'transitioncheck() is restoring saved pet'
 		ns.set_sum_msg_to_transcheck(savedpet)
 		ns:safesummon(savedpet, false)
@@ -675,7 +732,7 @@ function ns.transitioncheck()
 	end
 	time_restore_pet = now
 	--[[ This is not 100% reliable here, but should do the trick most of the time. ]]
-	ns.pet_verified = true
+	ns.pet_verified, savedpet_is_summonable = true, true
 	ns:debugprint 'transitioncheck() complete'
 end
 
@@ -724,6 +781,14 @@ function ns:safesummon(pet, resettimer)
 		ns:debugprint "safesummon was called without 'pet' argument!"
 		return
 	end
+	if ns.db.debugMode then
+		local isSummonable, error, errorText = C_PetJournalGetPetSummonInfo(pet)
+		if not isSummonable then
+			ns:debugprint('Pet connot be summoned. `GetPetSummonInfo` returned', isSummonable, error, errorText)
+			return
+		end
+	end
+	-- if pet_not_summonable(pet) then return end
 	local now = GetTime()
 	if
 		not UnitAffectingCombat 'player'
