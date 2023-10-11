@@ -12,6 +12,7 @@ local C_PetJournalPetIsFavorite = _G.C_PetJournal.PetIsFavorite
 local C_PetJournalSetFavorite = _G.C_PetJournal.SetFavorite
 local C_PetJournalGetPetInfoByIndex = _G.C_PetJournal.GetPetInfoByIndex
 
+local C_PetJournalSummonPetByGUID = _G.C_PetJournal.SummonPetByGUID
 local C_PetJournalGetSummonedPetGUID = _G.C_PetJournal.GetSummonedPetGUID
 local C_PetJournalGetPetInfoByPetID = _G.C_PetJournal.GetPetInfoByPetID
 local C_PetJournalGetPetInfoBySpeciesID = _G.C_PetJournal.GetPetInfoBySpeciesID
@@ -110,10 +111,10 @@ local excluded_auras = {
 	5384, -- Hunter: Feign Death (only useful to avoid accidental summoning via keybind, or if we use a different event than PLAYER_STARTED_MOVING)
 } -- More exclusions in the Summon function itself
 
-local function offlimits_aura(auras)
-	for _, a in pairs(auras) do
-		if C_UnitAurasGetPlayerAuraBySpellID(a) then
-			ns:debugprint 'Excluded Aura found!'
+local function offlimits_aura()
+	for _, aura in ipairs(excluded_auras) do
+		if C_UnitAurasGetPlayerAuraBySpellID(aura) then
+			ns:debugprint 'Excluded aura found!'
 			return true
 		end
 	end
@@ -263,13 +264,14 @@ function ns.events:register_summon_events()
 		--[[ Fires pretty frequently, sometimes in quick succession. Chain-firing when posting auctions.
 		Redundancy: Seems to get triggered by plEntWorld and/or zoneChNewA and/or plLogin ]]
 		-- self:RegisterEvent 'BAG_UPDATE_DELAYED'
-	else -- Main event(s)
+	else -- Traditional (default) event(s)
 		self:RegisterEvent 'PLAYER_STARTED_MOVING'
 	end
 end
 
 function ns.events:unregister_summon_events()
 	self:UnregisterEvent 'ZONE_CHANGED'
+	self:UnregisterEvent 'ZONE_CHANGED_INDOORS'
 	self:UnregisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED'
 	self:UnregisterEvent 'PLAYER_STARTED_MOVING'
 end
@@ -801,7 +803,7 @@ function ns:safesummon(pet, resettimer)
 		early return from any event-triggered action. Since it seems to be
 		impossible to summon while flying, we don't need it here or in the
 		manual summon functions. ]]
-		and not offlimits_aura(excluded_auras)
+		and not offlimits_aura()
 		and not IsStealthed() -- Includes Hunter Camouflage
 		and not (UnitIsControlling 'player' and UnitChannelInfo 'player')
 		and not UnitHasVehicleUI 'player'
@@ -812,7 +814,7 @@ function ns:safesummon(pet, resettimer)
 		-- ns.skipNextSave = true
 		if resettimer then ns.time_newpet_success = now end
 		ns.msg_pet_summon_success()
-		C_PetJournal.SummonPetByGUID(pet) -- TODO: ref this
+		C_PetJournalSummonPetByGUID(pet)
 	else
 		-- ns.msg_pet_summon_failed() -- Too spammy, remove that
 		time_safesummon_failed = now
