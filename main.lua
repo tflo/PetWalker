@@ -276,11 +276,22 @@ function ns.events:unregister_summon_events()
 	self:UnregisterEvent 'PLAYER_STARTED_MOVING'
 end
 
-function ns.events:register_pw_events()
+function ns.events:register_meta_events()
 	self:RegisterEvent 'PLAYER_ENTERING_WORLD'
 	self:RegisterEvent 'PET_JOURNAL_LIST_UPDATE'
 	self:RegisterEvent 'PET_BATTLE_OPENING_START'
 	self:RegisterEvent 'PLAYER_LOGOUT'
+end
+
+function ns.events:unregister_meta_events()
+	self:UnregisterEvent 'PLAYER_ENTERING_WORLD'
+	self:UnregisterEvent 'PET_JOURNAL_LIST_UPDATE'
+	self:UnregisterEvent 'PET_BATTLE_OPENING_START'
+	self:UnregisterEvent 'PLAYER_LOGOUT'
+end
+
+function ns.events:register_pw_events()
+	self:register_meta_events()
 	self:register_summon_events()
 end
 
@@ -330,10 +341,11 @@ function ns:ADDON_LOADED(addon)
 		ns:debugprint('Event: ADDON_LOADED:', addon)
 
 --[[---------------------------------------------------------------------------
-	§ Summoning events
+	§ Events
 ---------------------------------------------------------------------------]]--
 
-		if ns.db.autoEnabled then ns.events:register_pw_events() end
+		-- The summon events are now registered with transitioncheck
+		if ns.db.autoEnabled then ns.events:register_meta_events() end
 
 		-- For transition check
 		--[[ Two suitable events here:
@@ -349,6 +361,8 @@ function ns:ADDON_LOADED(addon)
 		]]
 		function ns:PLAYER_ENTERING_WORLD(is_login, is_reload)
 			local delay
+			-- We do not want summon events before transitioncheck has finished
+			ns.events:unregister_summon_events()
 			if is_login then
 				ns:debugprint 'Event: PLAYER_ENTERING_WORLD: Login'
 				delay = delay_after_login
@@ -741,6 +755,8 @@ function ns.transitioncheck()
 	time_restore_pet = now
 	--[[ This is not 100% reliable here, but should do the trick most of the time. ]]
 	ns.pet_verified, savedpet_is_summonable = true, true
+	-- Because we are unregistering now with every type of PLAYER_ENTERING_WORLD
+	ns.events:register_summon_events()
 	ns:debugprint 'transitioncheck() complete'
 end
 
