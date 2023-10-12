@@ -899,7 +899,7 @@ function ns.initialize_pool(self)
 	while true do
 		local pet_id, species_id, _, _, _, favorite = C_PetJournalGetPetInfoByIndex(index)
 		if not pet_id then break end
-		if not is_excluded_by_species(species_id) then
+		if not is_excluded_by_species(species_id) and is_pet_summonable(pet_id) then
 			if ns.db.favsOnly then
 				if favorite then table.insert(ns.pet_pool, pet_id) end
 			else
