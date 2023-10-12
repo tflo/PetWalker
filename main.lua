@@ -171,11 +171,39 @@ local function forbidden_or_throttled()
 	return forbidden
 end
 
-local function unsummonability_test(guid)
-	local isSummonable, error, errorText = C_PetJournalGetPetSummonInfo(guid)
-	if not isSummonable then
-		return true, error, errorText
+local unsummonable_species
+local player_faction = UnitFactionGroup 'player'
+
+-- Add only pets here that are bugged, i.e. not detectable as unsummonable by `GetPetSummonInfo`.
+if player_faction == 'Alliance' then
+	unsummonable_species = {
+		[2777] = true, -- Gillvanas
+		[342] = true, -- Festival Lantern
+	}
+else
+	unsummonable_species = {
+		[2778] = true, -- Finduin
+		[341] = true, -- Lunar Lantern
+	}
+end
+
+local EnumPetJournalError = _G.Enum.PetJournalError
+-- Couldn't find a Blizz constant for the string
+-- This should match the output of C_PetJournal.GetPetSummonInfo for Enum.PetJournalError.InvalidFaction (3).
+local ERROR_TEXT_WRONG_PET_FACTION = 'You are not the right faction for this companion.'
+
+local function is_pet_summonable(guid)
+	local is_summonable, error, error_text
+	local species_id = ns.id_to_species(guid)
+	if unsummonable_species[species_id] then
+		is_summonable, error, error_text = false, EnumPetJournalError.InvalidFaction, ERROR_TEXT_WRONG_PET_FACTION
+	else
+		is_summonable, error, error_text = C_PetJournalGetPetSummonInfo(guid)
 	end
+	if not is_summonable then
+		return false, error, error_text
+	end
+	return true
 end
 
 local function saved_pet_summonability_check() --- After login
@@ -200,7 +228,7 @@ local function saved_pet_summonability_check() --- After login
 
 	for i, guid in ipairs(priorities) do
 		if guid then
-			local is_summonable, error, error_text = C_PetJournalGetPetSummonInfo(guid)
+			local is_summonable, error, error_text = is_pet_summonable(guid)
 			if i == 1 then
 				if is_summonable then return end
 				ns.msg_saved_pet_unsummonable(error_text, error)
