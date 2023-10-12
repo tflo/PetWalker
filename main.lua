@@ -1020,7 +1020,7 @@ end
 function ns:debugprint_pet(msg)
 	if ns.db.debugMode then
 		print(
-			'|cffEE82EE PetWalker Debug: '
+			'|cffEE82EEPetWalker Debug: '
 				.. msg
 				.. ' # Current DB ' .. (ns.dbc.charFavsEnabled and ns.db.favsOnly and '(char)' or '(global)') .. ' pet: '
 				.. ns.id_to_name(ns.dbc.charFavsEnabled and ns.db.favsOnly and ns.dbc.currentPet or ns.db.currentPet)
