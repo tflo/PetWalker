@@ -282,8 +282,9 @@ function ns.msg_low_petpool(nPool)
 		(nPool < 1 and CO.k .. '0 (zero) ' ..R.. ' pets ' or R.. 'Only ' ..CO.k .. '1 ' ..R.. 'pet '),
 		'eligible as random summon!',
 		'\nYou should either ' .. (ns.db.favsOnly and 'flag more pets as favorite, or set the ramdom pool to ' .. CO.s ..'All Pets' or 'collect more pets'), ', or set the random-summon timer to ', CO.s .. '0', '.',
-		'\nAlso check also your ', CO.k .. 'Filter ', 'settings in the ', CO.k .. 'Blizz Pet Journal ', '(not in Rematch!), as they are affecting the pool of available pets!',
-		'\nPlease note that certain pets are ', CO.k .. 'excluded ', 'from random summoning, to not break their usability (for example ',
+		'\nAlso check your ', CO.k .. 'Filter ', 'settings in the ', CO.k .. 'Blizz Pet Journal ', '(not in Rematch!), as they are affecting the pool of available pets!',
+		'\nSome pets are ', CO.k .. 'faction-specific ', 'and cannot be summoned on the wrong faction, so they may not be eligible on your current toon.',
+		'\nPlease note that certain pets are intentionally ', CO.k .. 'excluded ', 'from random summoning, to not break their usability (for example ',
 		CO.q .. 'Guild Herald', '). ',
 		((ns.dbc.charFavsEnabled and ns.db.favsOnly) and '\nYou have set ' .. CO.e .. this_char ..R.. ' to use ' .. CO.s .. 'char-specific favorite ' ..R.. 'pets. Maybe switching to ' .. CO.s .. 'global favorites ' ..R.. '(' .. CO.c .. '/pw c' ..R.. ') will help.' or ''),
 	}
