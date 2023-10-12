@@ -836,7 +836,7 @@ function ns:safesummon(pet, resettimer)
 	if ns.db.debugMode then
 		local isSummonable, error, errorText = C_PetJournalGetPetSummonInfo(pet)
 		if not isSummonable then
-			ns:debugprint('Pet connot be summoned. `GetPetSummonInfo` returned', isSummonable, error, errorText)
+			ns:debugprint('Pet cannot be summoned. `GetPetSummonInfo` returned', isSummonable, error, errorText)
 			return
 		end
 	end
