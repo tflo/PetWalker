@@ -12,7 +12,7 @@ local C_PetJournalPetIsFavorite = _G.C_PetJournal.PetIsFavorite
 local C_PetJournalSetFavorite = _G.C_PetJournal.SetFavorite
 local C_PetJournalGetPetInfoByIndex = _G.C_PetJournal.GetPetInfoByIndex
 
-local C_PetJournalSummonPetByGUID = _G.C_PetJournal.SummonPetByGUID
+local C_PetJournalSummonPetByGUID -- We have a hook further down!
 local C_PetJournalGetSummonedPetGUID = _G.C_PetJournal.GetSummonedPetGUID
 local C_PetJournalGetPetInfoByPetID = _G.C_PetJournal.GetPetInfoByPetID
 local C_PetJournalGetPetInfoBySpeciesID = _G.C_PetJournal.GetPetInfoBySpeciesID
@@ -417,6 +417,8 @@ function ns:ADDON_LOADED(addon)
 			ns.events:RegisterEvent 'COMPANION_UPDATE' -- Timer better?
 			-- 			C_Timer.After(0.2, ns.save_pet) -- 0.2 is the minimum
 		end)
+
+		C_PetJournalSummonPetByGUID = _G.C_PetJournal.SummonPetByGUID
 
 		function ns:COMPANION_UPDATE(what)
 			if what == 'CRITTER' then
