@@ -380,7 +380,7 @@ function ns:ADDON_LOADED(addon)
 	§ Events
 ---------------------------------------------------------------------------]]--
 
-		-- The summon events are now registered with transitioncheck
+		-- The summon events are now registered with transitioncheck or delayed after PLAYER_ENTERING_WORLD
 		if ns.db.autoEnabled then ns.events:register_meta_events() end
 
 		-- For transition check
@@ -413,7 +413,12 @@ function ns:ADDON_LOADED(addon)
 				delay = delay_after_instance
 			end
 			ns.pet_verified = false
-			C_Timer.After(delay, ns.transitioncheck)
+			-- C_Timer.After(delay, ns.transitioncheck)
+			C_Timer.After(delay, function()
+				ns.transitioncheck()
+				-- For the moment, calling this separately, since `transitioncheck` in its current form is abortable
+				ns.events:register_summon_events()
+			end)
 		end
 
 		-- Regular main event
@@ -792,7 +797,8 @@ function ns.transitioncheck()
 	--[[ This is not 100% reliable here, but should do the trick most of the time. ]]
 	ns.pet_verified, savedpet_is_summonable = true, true
 	-- Because we are unregistering now with every type of PLAYER_ENTERING_WORLD
-	ns.events:register_summon_events()
+	-- HACK: Called separately after entering world, bc of the possible early return
+	-- ns.events:register_summon_events()
 	ns:debugprint 'transitioncheck() complete'
 end
 
