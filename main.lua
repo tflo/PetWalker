@@ -281,6 +281,7 @@ end)
 ns.events:RegisterEvent 'ADDON_LOADED'
 
 function ns.events:register_summon_events()
+	ns:debugprint 'Registering summon events.'
 	if ns.db.eventAlt then -- Alt events, experimental
 		--[[ Pointless if it fires while flying, which is quite often. But this doesn't harm either. ]]
 		self:RegisterEvent 'ZONE_CHANGED'
@@ -298,6 +299,7 @@ function ns.events:register_summon_events()
 end
 
 function ns.events:unregister_summon_events()
+	ns:debugprint 'Unregistering summon events.'
 	self:UnregisterEvent 'ZONE_CHANGED'
 	self:UnregisterEvent 'ZONE_CHANGED_INDOORS'
 	self:UnregisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED'
@@ -305,6 +307,7 @@ function ns.events:unregister_summon_events()
 end
 
 function ns.events:register_meta_events()
+	ns:debugprint 'Registering meta events.'
 	self:RegisterEvent 'PLAYER_ENTERING_WORLD'
 	self:RegisterEvent 'PET_JOURNAL_LIST_UPDATE'
 	self:RegisterEvent 'PET_BATTLE_OPENING_START'
@@ -312,6 +315,7 @@ function ns.events:register_meta_events()
 end
 
 function ns.events:unregister_meta_events()
+	ns:debugprint 'Unregistering meta events.'
 	self:UnregisterEvent 'PLAYER_ENTERING_WORLD'
 	self:UnregisterEvent 'PET_JOURNAL_LIST_UPDATE'
 	self:UnregisterEvent 'PET_BATTLE_OPENING_START'
@@ -319,11 +323,15 @@ function ns.events:unregister_meta_events()
 end
 
 function ns.events:register_pw_events()
+	ns:debugprint 'Registering PW events.'
 	self:register_meta_events()
 	self:register_summon_events()
 end
 
-function ns.events:unregister_pw_events() self:UnregisterAllEvents() end
+function ns.events:unregister_pw_events()
+	ns:debugprint 'Unregistering PW events (`UnregisterAllEvents`).'
+	self:UnregisterAllEvents()
+end
 
 --[[===========================================================================
 	§ Loading and event handlers
