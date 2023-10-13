@@ -1,3 +1,8 @@
+#### 2.1.1 (2023-10-13)
+
+- Fixed wrong type.
+- Better wording in the 'nothing eligible' warning.
+
 #### 2.1 (2023-10-13)
 
 - Proper handling of pets that require a specific faction (Issue [#7](https://github.com/tflo/PetWalker/issues/7)). This should fix all glitches and incorrect messages when…

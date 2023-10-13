@@ -766,7 +766,7 @@ end
 function ns.transitioncheck()
 	-- TODO: When we have finished our throttle and aura check rework, review if this is still needed here!
 	if not ns.db.autoEnabled or ns.pet_verified or UnitAffectingCombat 'player' or IsFlying() or UnitOnTaxi 'player' then
-		ns:debugprint(format('`transitioncheck` returned early (autoEnabled: %s; pet_verified: %s; other conditions: combat, flying, taxi)', ns.db.autoEnabled, ns.pet_verified))
+		ns:debugprint(format('`transitioncheck` returned early (autoEnabled: %s; pet_verified: %s; other conditions: combat, flying, taxi)', tostring(ns.db.autoEnabled), tostring(ns.pet_verified)))
 		return
 	end
 	local now = GetTime()
