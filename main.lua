@@ -1000,12 +1000,19 @@ see at a glance (in the opened Pet Journal) what type of favs are enabled.
 
 function ns.create_checkbox_base(self)
 	local f = CreateFrame('CheckButton', 'PetWalkerCharFavsCheckbox', PetJournal, 'UICheckButtonTemplate')
-	f:SetWidth(25)
-	f:SetHeight(25)
-	f:SetScript('OnLeave', function(self) GameTooltip:Hide() end)
+	f:SetSize(26, 26)
+	f:SetHitRectInsets(-2,-70,-2,-2)
+	f:SetScript('OnLeave', function() GameTooltip:Hide() end)
 	local label = f:CreateFontString(nil, 'OVERLAY')
-	label:SetFontObject 'GameFontNormal'
+	label:SetFontObject(GameFontNormal)
 	label:SetPoint('LEFT', f, 'RIGHT', 0, 0)
+	f:SetScript('OnEnter', function(self)
+		GameTooltip:SetOwner(self, 'ANCHOR_TOPLEFT')
+		GameTooltip:AddLine('\124cnDIM_GREEN_FONT_COLOR:PetWalker')
+		GameTooltip:AddLine('Select to use per-character favorites, or toggle with \124cnORANGE_FONT_COLOR:/pw c\124r.')
+		GameTooltip:AddLine('Toggle favs/all: \124cnORANGE_FONT_COLOR:/pw f\124r | Status: \124cnORANGE_FONT_COLOR:/pw s\124r | Help: \124cnORANGE_FONT_COLOR:/pw h\124r')
+		GameTooltip:Show()
+	end)
 	return f, label
 end
 
@@ -1013,23 +1020,11 @@ function ns.create_cfavs_checkbox(self)
 	local f, label = self:create_checkbox_base()
 	f:SetPoint('BOTTOMLEFT', PetJournal, 'BOTTOMLEFT', 400, 1)
 	f:SetChecked(ns.dbc.charFavsEnabled)
-	f:SetScript('OnClick', function(self, button)
+	f:SetScript('OnClick', function()
 		ns.dbc.charFavsEnabled = not ns.dbc.charFavsEnabled
 		ns:cfavs_update()
 	end)
-	f:SetScript('OnEnter', function(self)
-		GameTooltip:SetOwner(self, 'ANCHOR_BOTTOMRIGHT')
-		GameTooltip:SetText(
-			addon_name .. ': Select this to use per-character favorites. \nFor more info, enter "/pw" in the chat console.',
-			nil,
-			nil,
-			nil,
-			nil,
-			1
-		)
-		GameTooltip:Show()
-	end)
-	label:SetText 'Character favorites'
+	label:SetText 'Char Favs (PW)'
 	return f
 end
 
