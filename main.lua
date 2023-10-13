@@ -383,7 +383,6 @@ function ns:ADDON_LOADED(addon)
 
 		-- *Not* with PLAYER_ENTERING_WORLD so that it is not affected when all events get unregistered via /pw a
 		C_Timer.After(delay_login_msg, ns.msg_login)
-		ns:debugprint('Event: ADDON_LOADED:', addon)
 
 --[[---------------------------------------------------------------------------
 	§ Events
@@ -439,24 +438,24 @@ function ns:ADDON_LOADED(addon)
 			then
 				return
 			end
-			ns:debugprint 'Event: PLAYER_STARTED_MOVING --> autoaction'
+			ns:debugprint 'Event: PLAYER_STARTED_MOVING --> `autoaction`'
 			ns.autoaction()
 		end
 
 		-- Experimental alternative events
 		function ns:ZONE_CHANGED()
 			if UnitAffectingCombat 'player' or IsFlying() then return end
-			ns:debugprint 'Event: ZONE_CHANGED --> autoaction'
+			ns:debugprint 'Event: ZONE_CHANGED --> `autoaction`'
 			ns.autoaction()
 		end
 		function ns:ZONE_CHANGED_INDOORS()
 			if UnitAffectingCombat 'player' or IsFlying() then return end
-			ns:debugprint 'Event: ZONE_CHANGED_INDOORS --> autoaction'
+			ns:debugprint 'Event: ZONE_CHANGED_INDOORS --> `autoaction`'
 			ns.autoaction()
 		end
 		function ns:PLAYER_MOUNT_DISPLAY_CHANGED()
 			if UnitAffectingCombat 'player' or IsFlying() then return end
-			ns:debugprint 'Event: PLAYER_MOUNT_DISPLAY_CHANGED --> autoaction'
+			ns:debugprint 'Event: PLAYER_MOUNT_DISPLAY_CHANGED --> `autoaction`'
 			ns.autoaction()
 		end
 
@@ -468,15 +467,17 @@ function ns:ADDON_LOADED(addon)
 		the saved pet if pet_verified is true. ]]
 		hooksecurefunc(C_PetJournal, 'SetPetLoadOutInfo', function()
 			-- Note that SetPetLoadOutInfo summons the slot pet, but it does so _not_ via SummonPetByGUID
-			ns:debugprint 'Hook: SetPetLoadOutInfo --> pet_verified = false'
+			ns:debugprint 'Hook: `SetPetLoadOutInfo` --> setting `pet_verified` to false'
 			ns.pet_verified = false
 		end)
 
 		hooksecurefunc(C_PetJournal, 'SummonPetByGUID', function()
-			if ns.db.debugMode then ns.time_summonspell = GetTime() end
-			ns:debugprint(format(
-				'Hook: `SummonPetByGUID` runs; `in_battlesleep`: %s (if false --> register `COMPANION_UPDATE`)',
-				tostring(ns.in_battlesleep)))
+			if ns.db.debugMode then
+				ns.time_summonspell = GetTime()
+				ns:debugprint(format(
+					'Hook: `SummonPetByGUID` runs; `in_battlesleep`: %s (if false --> register `COMPANION_UPDATE`)',
+					tostring(ns.in_battlesleep)))
+			end
 			-- if ns.skipNextSave then ns.skipNextSave = false return end
 			if not ns.in_battlesleep then
 				ns.events:RegisterEvent 'COMPANION_UPDATE' -- Timer better?
@@ -489,7 +490,10 @@ function ns:ADDON_LOADED(addon)
 		function ns:COMPANION_UPDATE(what)
 			if what == 'CRITTER' then
 				ns.events:UnregisterEvent 'COMPANION_UPDATE'
-				ns:debugprint('Event: `COMPANION_UPDATE` (`actpet`: ' .. ns.id_to_name(C_PetJournalGetSummonedPetGUID()) .. ') --> `save_pet`')
+				if ns.db.debugMode then
+					ns:debugprint('Event: COMPANION_UPDATE (`actpet`: ' ..
+					ns.id_to_name(C_PetJournalGetSummonedPetGUID()) .. ') --> `save_pet`')
+				end
 				ns.save_pet()
 			end
 		end
@@ -525,12 +529,11 @@ function ns:ADDON_LOADED(addon)
 		--> This seems to work, so far!
 		]]
 		function ns:PET_JOURNAL_LIST_UPDATE()
-			ns:debugprint 'Event: PET_JOURNAL_LIST_UPDATE --> pool_initialized = false'
+			ns:debugprint 'Event: PET_JOURNAL_LIST_UPDATE --> setting `pool_initialized` to false'
 			ns.pool_initialized = false
 		end
 
 		function ns:PLAYER_LOGOUT()
-			ns:debugprint 'Event: PLAYER_LOGOUT --> remainingTimer'
 			ns.db.remainingTimer = ns.remaining_timer(GetTime())
 		end
 
@@ -606,19 +609,19 @@ function ns.autoaction()
 	if ns.db.newPetTimer ~= 0 then
 		local now = GetTime()
 		if ns.remaining_timer(now) == 0 and now - time_safesummon_failed > 40 then
-			ns:debugprint_pet 'autoaction decided for new_pet'
+			ns:debugprint_pet '`autoaction` decided for new_pet'
 			ns:new_pet(now, false)
 			return
 		end
 	end
 	if not ns.pet_verified then
-		ns:debugprint_pet 'autoaction decided for transitioncheck (pet_verified failed)'
+		ns:debugprint_pet '`autoaction` decided for `transitioncheck` (`pet_verified` is false)'
 		ns.transitioncheck()
 		return
 	end
 	local actpet = C_PetJournalGetSummonedPetGUID()
 	if not actpet then
-		ns:debugprint_pet 'autoaction decided for restore_pet'
+		ns:debugprint_pet '`autoaction` decided for `restore_pet`'
 		ns:restore_pet()
 	end
 end
@@ -642,11 +645,11 @@ function ns:restore_pet()
 	end
 	time_restore_pet = now
 	if savedpet then
-		ns:debugprint 'restore_pet() is restoring saved pet'
+		ns:debugprint '`restore_pet` is restoring saved pet'
 		ns.set_sum_msg_to_restore_pet(savedpet)
 		ns:safesummon(savedpet, false)
 	else
-		ns:debugprint 'restore_pet() could not find saved pet --> summoning new pet'
+		ns:debugprint '`restore_pet` could not find saved pet --> summoning new pet'
 		ns.msg_no_saved_pet()
 		ns:new_pet(now, false)
 	end
@@ -659,16 +662,18 @@ end
 ---------------------------------------------------------------------------]]--
 
 function ns:new_pet(time, via_hotkey)
-	ns:debugprint(format('new_pet() runs with args %s / %s ', tostring(time), tostring(via_hotkey)))
+	if ns.db.debugMode then
+		ns:debugprint(format('`new_pet` runs with args %s, %s ', tostring(time), tostring(via_hotkey)))
+	end
 	local now = time or GetTime()
 	if now - ns.time_newpet_success < 1.5 then return end
 	local actpet = C_PetJournalGetSummonedPetGUID()
 	if actpet and is_excluded_by_id(actpet) then
-		ns:debugprint 'new_pet(): actpet is excluded'
+		ns:debugprint '`new_pet`: `actpet` is excluded'
 		return
 	end
 	if not ns.pool_initialized then
-		ns:debugprint 'new_pet() --> initialize_pool'
+		ns:debugprint '`new_pet` --> `initialize_pool`'
 		ns.initialize_pool()
 	end
 	local npool = #ns.pet_pool
@@ -766,7 +771,11 @@ end
 function ns.transitioncheck()
 	-- TODO: When we have finished our throttle and aura check rework, review if this is still needed here!
 	if not ns.db.autoEnabled or ns.pet_verified or UnitAffectingCombat 'player' or IsFlying() or UnitOnTaxi 'player' then
-		ns:debugprint(format('`transitioncheck` returned early (autoEnabled: %s; pet_verified: %s; other conditions: combat, flying, taxi)', tostring(ns.db.autoEnabled), tostring(ns.pet_verified)))
+		if ns.db.debugMode then
+			ns:debugprint(format(
+				'`transitioncheck` returned early (`autoEnabled`: %s; `pet_verified`: %s; other conditions: combat, flying, taxi)',
+				tostring(ns.db.autoEnabled), tostring(ns.pet_verified)))
+		end
 		return
 	end
 	local now = GetTime()
@@ -818,9 +827,11 @@ end
 ---------------------------------------------------------------------------]]--
 
 function ns.save_pet()
-	ns:debugprint(format('`save_pet` runs now (%.3fs since summon spell)', GetTime() - ns.time_summonspell))
+	if ns.db.debugMode then
+		ns:debugprint(format('`save_pet` runs now (%.3fs since summon spell)', GetTime() - ns.time_summonspell))
+	end
 	if not ns.pet_verified then
-		ns:debugprint('`save_pet` returned early bc of `not pet_verified`')
+		ns:debugprint '`save_pet` returned early bc of `not pet_verified`'
 		return
 	end
 	local actpet = C_PetJournalGetSummonedPetGUID()
@@ -862,7 +873,7 @@ function ns:safesummon(pet, resettimer)
 	if ns.db.debugMode then
 		local isSummonable, error, errorText = C_PetJournalGetPetSummonInfo(pet)
 		if not isSummonable then
-			ns:debugprint('Pet cannot be summoned. `GetPetSummonInfo` returned', isSummonable, error, errorText)
+			ns:debugprint('`safesummon`: Something is wrong with our summonability check: pet cannot be summoned, `GetPetSummonInfo` returned', isSummonable, error, errorText)
 			return
 		end
 	end
@@ -918,7 +929,7 @@ local function clean_charfavs()
 end
 
 function ns.initialize_pool(self)
-	ns:debugprint 'Running initialize_pool()'
+	ns:debugprint 'Running `initialize_pool`'
 	table.wipe(ns.pet_pool)
 	clean_charfavs()
 	local index = 1
@@ -951,7 +962,7 @@ local C_PetJournalPetIsFavorite1, C_PetJournalSetFavorite1, C_PetJournalGetPetIn
 
 -- Largely unaltered code from NugMiniPet
 function ns.cfavs_update()
-	ns:debugprint('Running `cfavs_update`')
+	ns:debugprint 'Running `cfavs_update`'
 	if ns.dbc.charFavsEnabled then
 		C_PetJournalPetIsFavorite1 = C_PetJournalPetIsFavorite1 or C_PetJournalPetIsFavorite
 		C_PetJournalSetFavorite1 = C_PetJournalSetFavorite1 or C_PetJournalSetFavorite
