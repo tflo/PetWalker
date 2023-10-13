@@ -568,10 +568,6 @@ function ns:ADDON_LOADED(addon)
 				ns.cfavs_button:Hide()
 			end
 		end)
-
-		-- TODO: This should be redundant here(?), since we do this now in the transitioncheck (v1.1.6)
-		ns:cfavs_update()
-
 	end
 end
 
