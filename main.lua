@@ -994,34 +994,29 @@ can fit there. We leave the CharFavorites checkbox, because it makes sense to
 see at a glance (in the opened Pet Journal) what type of favs are enabled.
 ]]
 
-function ns.create_checkbox_base(self)
-	local f = CreateFrame('CheckButton', 'PetWalkerCharFavsCheckbox', PetJournal, 'UICheckButtonTemplate')
-	f:SetSize(26, 26)
-	f:SetHitRectInsets(-2,-70,-2,-2)
-	f:SetScript('OnLeave', function() GameTooltip:Hide() end)
-	local label = f:CreateFontString(nil, 'OVERLAY')
-	label:SetFontObject(GameFontNormal)
-	label:SetPoint('LEFT', f, 'RIGHT', 0, 0)
-	f:SetScript('OnEnter', function(self)
+function ns:create_cfavs_checkbox()
+	local btn = CreateFrame('CheckButton', 'PetWalkerCharFavsCheckbox', PetJournal, 'UICheckButtonTemplate')
+	btn:SetSize(26, 26)
+	btn:SetHitRectInsets(-2,-80,-2,-2)
+	btn:SetPoint('BOTTOMLEFT', PetJournal, 'BOTTOMLEFT', 400, 1)
+	-- btn:SetChecked(ns.dbc.charFavsEnabled)
+	btn:SetScript('OnEnter', function(self)
 		GameTooltip:SetOwner(self, 'ANCHOR_TOPLEFT')
 		GameTooltip:AddLine('\124cnDIM_GREEN_FONT_COLOR:PetWalker')
-		GameTooltip:AddLine('Select to use per-character favorites, or toggle with \124cnORANGE_FONT_COLOR:/pw c\124r.')
-		GameTooltip:AddLine('Toggle favs/all: \124cnORANGE_FONT_COLOR:/pw f\124r | Status: \124cnORANGE_FONT_COLOR:/pw s\124r | Help: \124cnORANGE_FONT_COLOR:/pw h\124r')
+		GameTooltip:AddLine('Select this to use per-character favorites, or toggle with \124cnORANGE_FONT_COLOR:/pw c\124r.')
+		GameTooltip:AddLine('Toggle favs/all: \124cnORANGE_FONT_COLOR:/pw f\124r | Status: \124cnORANGE_FONT_COLOR:/pw s\124r | Help & all commands: \124cnORANGE_FONT_COLOR:/pw h\124r')
 		GameTooltip:Show()
 	end)
-	return f, label
-end
-
-function ns.create_cfavs_checkbox(self)
-	local f, label = self:create_checkbox_base()
-	f:SetPoint('BOTTOMLEFT', PetJournal, 'BOTTOMLEFT', 400, 1)
-	f:SetChecked(ns.dbc.charFavsEnabled)
-	f:SetScript('OnClick', function()
+	btn:SetScript('OnClick', function()
 		ns.dbc.charFavsEnabled = not ns.dbc.charFavsEnabled
 		ns:cfavs_update()
 	end)
+	btn:SetScript('OnLeave', function() GameTooltip:Hide() end)
+	local label = btn:CreateFontString(nil, 'OVERLAY')
+	label:SetFontObject(GameFontNormal)
+	label:SetPoint('LEFT', btn, 'RIGHT', 0, 0)
 	label:SetText 'Char Favs (PW)'
-	return f
+	return btn, label
 end
 
 
