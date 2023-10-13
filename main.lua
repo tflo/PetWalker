@@ -179,11 +179,13 @@ if player_faction == 'Alliance' then
 	unsummonable_species = {
 		[2777] = true, -- Gillvanas
 		[342] = true, -- Festival Lantern
+		[332] = true, -- Horde Balloon
 	}
 else
 	unsummonable_species = {
 		[2778] = true, -- Finduin
 		[341] = true, -- Lunar Lantern
+		[331] = true, -- Alliance Balloon
 	}
 end
 
