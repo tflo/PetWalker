@@ -464,13 +464,15 @@ function ns:ADDON_LOADED(addon)
 		end)
 
 		hooksecurefunc(C_PetJournal, 'SummonPetByGUID', function()
-			-- ns.time_summonspell = GetTime() -- Debug
-			ns:debugprint('Hook: SummonPetByGUID runs; in_battlesleep: ' .. tostring(ns.in_battlesleep))
-			-- 			if ns.skipNextSave then ns.skipNextSave = false return end
-			if ns.in_battlesleep then return end
-			ns:debugprint 'Hook: SummonPetByGUID --> register COMPANION_UPDATE'
-			ns.events:RegisterEvent 'COMPANION_UPDATE' -- Timer better?
-			-- 			C_Timer.After(0.2, ns.save_pet) -- 0.2 is the minimum
+			if ns.db.debugMode then ns.time_summonspell = GetTime() end
+			ns:debugprint(format(
+				'Hook: `SummonPetByGUID` runs; `in_battlesleep`: %s (if false --> register `COMPANION_UPDATE`)',
+				ns.in_battlesleep))
+			-- if ns.skipNextSave then ns.skipNextSave = false return end
+			if not ns.in_battlesleep then
+				ns.events:RegisterEvent 'COMPANION_UPDATE' -- Timer better?
+				-- C_Timer.After(0.2, ns.save_pet) -- 0.2 is the tested minimum!
+			end
 		end)
 
 		C_PetJournalSummonPetByGUID = _G.C_PetJournal.SummonPetByGUID
@@ -484,7 +486,7 @@ function ns:ADDON_LOADED(addon)
 		end
 
 		function ns:PET_BATTLE_OPENING_START()
-			ns:debugprint 'Event: PET_BATTLE_OPENING_START --> Unregister events'
+			ns:debugprint 'Event: PET_BATTLE_OPENING_START'
 			ns.events:unregister_pw_events()
 			ns.events:RegisterEvent 'PET_BATTLE_OVER' -- Alternative: PET_BATTLE_CLOSE (fires twice)
 			ns.in_battlesleep = true
@@ -499,8 +501,6 @@ function ns:ADDON_LOADED(addon)
 			)
 			C_Timer.After(delay_after_battle, function()
 				if C_PetBattlesIsInBattle() then return end
-				ns:debugprint 'Re-registering events now'
--- 				ns.events:register_summon_events()
 				ns.events:UnregisterEvent 'PET_BATTLE_OVER'
 				ns.in_battlesleep = false
 				ns.events:register_pw_events()
@@ -759,15 +759,19 @@ end
 --------------------------------------------------------------------------------------------------------------------]]--
 
 function ns.transitioncheck()
+	-- TODO: When we have finished our throttle and aura check rework, review if this is still needed here!
 	if not ns.db.autoEnabled or ns.pet_verified or UnitAffectingCombat 'player' or IsFlying() or UnitOnTaxi 'player' then
-		ns:debugprint 'transitioncheck() returned early'
+		ns:debugprint(format('`transitioncheck` returned early (autoEnabled: %s; pet_verified: %s; other conditions: combat, flying, taxi)', ns.db.autoEnabled, ns.pet_verified))
 		return
 	end
 	local now = GetTime()
 	--[[ If toon starts moving immediately after transition, then restore_pet
 	might come before us. Also prevents redundant run in case we use both events
 	NEW_AREA and ENTERING_WORLD. ]]
-	if now - time_restore_pet < 6 then return end
+	if now - time_restore_pet < 6 then
+		ns:debugprint('`transitioncheck` aborted bc less than 6s since `restore_pet`')
+		return
+	end
 	ns.current_zone = C_MapGetBestMapForUnit 'player'
 	local savedpet
 	ns:cfavs_update()
@@ -809,8 +813,11 @@ end
 ---------------------------------------------------------------------------]]--
 
 function ns.save_pet()
-	ns:debugprint('save_pet() runs now: ' .. (GetTime() - ns.time_summonspell))
-	if not ns.pet_verified then return end
+	ns:debugprint(format('`save_pet` runs now (%.3fs since summon spell)', GetTime() - ns.time_summonspell))
+	if not ns.pet_verified then
+		ns:debugprint('save_pet() returned early bc of `not pet_verified`')
+		return
+	end
 	local actpet = C_PetJournalGetSummonedPetGUID()
 	-- local now = GetTime()
 	if
