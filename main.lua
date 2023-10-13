@@ -951,6 +951,7 @@ local C_PetJournalPetIsFavorite1, C_PetJournalSetFavorite1, C_PetJournalGetPetIn
 
 -- Largely unaltered code from NugMiniPet
 function ns.cfavs_update()
+	ns:debugprint('Running `cfavs_update`')
 	if ns.dbc.charFavsEnabled then
 		C_PetJournalPetIsFavorite1 = C_PetJournalPetIsFavorite1 or C_PetJournalPetIsFavorite
 		C_PetJournalSetFavorite1 = C_PetJournalSetFavorite1 or C_PetJournalSetFavorite
@@ -963,7 +964,7 @@ function ns.cfavs_update()
 				ns.dbc.charFavs[petGUID] = nil
 			end
 			if PetJournal then PetJournal_OnEvent(PetJournal, 'PET_JOURNAL_LIST_UPDATE') end
-			ns:PET_JOURNAL_LIST_UPDATE()
+			ns:PET_JOURNAL_LIST_UPDATE() -- Do not remove this
 		end
 		local gpi = C_PetJournalGetPetInfoByIndex1
 		C_PetJournalGetPetInfoByIndex = function(...)
@@ -980,7 +981,7 @@ function ns.cfavs_update()
 	_G.C_PetJournal.SetFavorite = C_PetJournalSetFavorite
 	_G.C_PetJournal.GetPetInfoByIndex = C_PetJournalGetPetInfoByIndex
 	if PetJournal then PetJournal_OnEvent(PetJournal, 'PET_JOURNAL_LIST_UPDATE') end
-	ns:PET_JOURNAL_LIST_UPDATE()
+	ns:PET_JOURNAL_LIST_UPDATE() -- Do not remove this
 end
 
 

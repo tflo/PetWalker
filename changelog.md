@@ -1,3 +1,14 @@
+#### 2.1 (2023-10-13)
+
+- Proper handling of pets that require a specific faction (Issue [#7](https://github.com/tflo/PetWalker/issues/7)). This should fix all glitches and incorrect messages when…
+  - …switching between an Alliance and Horde toon and the last pet was a faction-restricted pet.
+  - …random summoning with faction-restricted pets set as favorites.
+  - Special thanks to [@gizzmo](https://github.com/gizzmo) for discovering anomalies with certain (presumably bugged) faction-restricted pets and bringing this to my attention.
+- More robust behavior after login, reload, and instance/map transitions (pet detection and restore).
+- Tweaks to the PetWalker Char Favs checkbox (in the Pet Journal) and improved tooltip.
+- Squished a fat bug that could prevent a pet summoned via PW from being correctly saved as valid 'current pet'.
+- Note: The event throttling and summoning prevention rework (see 2.0.8) is still WiP (but don't worry, the current system is fully functional and bugfree™️; the rework is just for efficiency).
+
 #### 2.0.8 (2023-09-06)
 
 - Code preparations for a revamped event throttling and summoning prevention implementation (coming soon).
