@@ -174,7 +174,7 @@ end
 local unsummonable_species
 local player_faction = UnitFactionGroup 'player'
 
--- Add only pets here that are bugged, i.e. not detectable as unsummonable by `GetPetSummonInfo`.
+-- Add only pets here that are bugged, i.e. not detected as unsummonable by `GetPetSummonInfo`.
 if player_faction == 'Alliance' then
 	unsummonable_species = {
 		[2777] = true, -- Gillvanas
@@ -281,6 +281,13 @@ ns.events:SetScript('OnEvent', function(self, event, ...)
 end)
 
 ns.events:RegisterEvent 'ADDON_LOADED'
+
+-- Groups
+
+-- Used events that are not in any group:
+-- ADDON_LOADED
+-- PET_BATTLE_OVER (registered after PET_BATTLE_OPENING_START)
+-- COMPANION_UPDATE (registered with the `SummonPetByGUID` hook)
 
 function ns.events:register_summon_events()
 	ns:debugprint 'Registering summon events.'
@@ -454,7 +461,7 @@ function ns:ADDON_LOADED(addon)
 		end
 
 --[[---------------------------------------------------------------------------
-	§ Pet battle and misc
+	§ Pet battle, hooks, and misc
 ---------------------------------------------------------------------------]]--
 
 		--[[ TOOD: Check if we really have to set the flag here. We could modify autoaction() to always check against
@@ -469,7 +476,7 @@ function ns:ADDON_LOADED(addon)
 			if ns.db.debugMode then ns.time_summonspell = GetTime() end
 			ns:debugprint(format(
 				'Hook: `SummonPetByGUID` runs; `in_battlesleep`: %s (if false --> register `COMPANION_UPDATE`)',
-				ns.in_battlesleep))
+				tostring(ns.in_battlesleep)))
 			-- if ns.skipNextSave then ns.skipNextSave = false return end
 			if not ns.in_battlesleep then
 				ns.events:RegisterEvent 'COMPANION_UPDATE' -- Timer better?
@@ -482,7 +489,7 @@ function ns:ADDON_LOADED(addon)
 		function ns:COMPANION_UPDATE(what)
 			if what == 'CRITTER' then
 				ns.events:UnregisterEvent 'COMPANION_UPDATE'
-				ns:debugprint('Event: COMPANION_UPDATE (actpet: ' .. ns.id_to_name(C_PetJournalGetSummonedPetGUID()) .. ') --> save_pet')
+				ns:debugprint('Event: `COMPANION_UPDATE` (`actpet`: ' .. ns.id_to_name(C_PetJournalGetSummonedPetGUID()) .. ') --> `save_pet`')
 				ns.save_pet()
 			end
 		end
@@ -789,13 +796,13 @@ function ns.transitioncheck()
 		end
 	end
 	if savedpet and savedpet_is_summonable then
-		ns:debugprint 'transitioncheck() is restoring saved pet'
+		ns:debugprint '`transitioncheck` is restoring saved pet'
 		ns.set_sum_msg_to_transcheck(savedpet)
 		ns:safesummon(savedpet, false)
 	--[[ Should only come into play if savedpet is still nil due to a slow
 	loading process ]]
 	elseif not actpet then
-		ns:debugprint 'transitioncheck() could not find saved pet --> summoning new pet'
+		ns:debugprint '`transitioncheck` could not find saved pet --> summoning new pet'
 		ns.msg_no_saved_pet()
 		ns:new_pet(now, false)
 	end
@@ -805,7 +812,7 @@ function ns.transitioncheck()
 	-- Because we are unregistering now with every type of PLAYER_ENTERING_WORLD
 	-- HACK: Called separately after entering world, bc of the possible early return
 	-- ns.events:register_summon_events()
-	ns:debugprint 'transitioncheck() complete'
+	ns:debugprint '`transitioncheck` completed'
 end
 
 
@@ -817,7 +824,7 @@ end
 function ns.save_pet()
 	ns:debugprint(format('`save_pet` runs now (%.3fs since summon spell)', GetTime() - ns.time_summonspell))
 	if not ns.pet_verified then
-		ns:debugprint('save_pet() returned early bc of `not pet_verified`')
+		ns:debugprint('`save_pet` returned early bc of `not pet_verified`')
 		return
 	end
 	local actpet = C_PetJournalGetSummonedPetGUID()
@@ -827,7 +834,7 @@ function ns.save_pet()
 		-- or now - time_save_pet < 3
 		or is_excluded_by_id(actpet)
 	then
-		ns:debugprint 'save_pet(): No actpet or actpet is excluded'
+		ns:debugprint '`save_pet`: No `actpet` or `actpet` is excluded'
 		return
 	end
 	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
@@ -839,7 +846,7 @@ function ns.save_pet()
 		ns.db.previousPet = ns.db.currentPet
 		ns.db.currentPet = actpet
 	end
-	ns:debugprint_pet 'save_pet() completed'
+	ns:debugprint_pet '`save_pet` completed'
 	-- time_save_pet = now
 end
 
@@ -853,7 +860,7 @@ end
 
 function ns:safesummon(pet, resettimer)
 	if not pet then -- TODO: needed?
-		ns:debugprint "safesummon was called without 'pet' argument!"
+		ns:debugprint '`safesummon` was called without `pet` argument!'
 		return
 	end
 	if ns.db.debugMode then
