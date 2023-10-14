@@ -337,8 +337,8 @@ function SlashCmdList.PetWalker(cmd)
 	elseif cmd == 'h' or cmd == 'help' then
 		ns.help_display()
 	elseif cmd == '' then
-		ns.status_display()
 		ns.help_display()
+		ns.status_display()
 	else
 		chat_user_notification(format('%sInvalid command or arguments. Enter %s/pw help %sfor a list of commands.', CO.bw, CO.c, CO.bw))
 	end
