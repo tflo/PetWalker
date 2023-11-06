@@ -60,10 +60,12 @@ local time_restore_pet = 0
 local time_save_pet = 0
 local time_pool_msg = 0
 local time_transitioncheck = 0
-local delay_after_login = 14
+-- C_Timers launched at PLAYER_ENTERING_WORLD
+local delay_after_login = 16
 local delay_after_reload = 10
 local delay_after_instance = 8
-local delay_login_msg = 22 -- Timer starts with ADDON_LOADED
+-- C_Timer launched at ADDON_LOADED
+local delay_login_msg = 22
 local delay_after_battle = 15 -- Post-petbattle sleep
 local instasummon_after_battlesleep = true -- Summon without waiting for trigger event
 local msg_onlyfavisactive_alreadydisplayed = false
