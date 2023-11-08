@@ -1,3 +1,13 @@
+#### 2.1.2 (2023-11-08)
+
+- Added two aura exclusions (i.e. no pet summoning when aura is present):
+  - Eye of Kilrogg in the context of the Eye See You quest (Azsuna); thanks @gizzmo for reporting.
+  - Jerry the Snail (Gastropod Shell toy).
+- `/pw` now prints help first, then status (it used to be the other way around). So you don't have to scroll up to see the status info (you can still get it individually with `/pw h` and `/pw s`).
+- Slightly longer delay after login.
+- `debugprint` changes.
+- toc updated for 10.2.
+
 #### 2.1.1 (2023-10-13)
 
 - Fixed wrong type.
