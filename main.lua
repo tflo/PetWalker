@@ -136,7 +136,19 @@ local function forbidden_instance()
 end
 
 
--- TODO: WiP
+--[[---------------------------------------------------------------------------
+	BEGIN: This function is WiP and not yet in use!
+---------------------------------------------------------------------------]]--
+
+--TODO: Probably better strategy for combat lockdown:
+--[[
+if InCombatLockdown() then <unregister summon events>; RegisterEvent("PLAYER_REGEN_ENABLED") end
+PLAYER_REGEN_ENABLED --> <Re-register summon events>
+
+In the function below, we could also replace the whole throttle system with…
+<unregister events>; C_TimerAfter(<throttle>, <re-register events>)
+]]
+
 local function forbidden_or_throttled()
 	-- if not not ns.db.autoEnabled then return true end
 	-- Always-active throttle
@@ -174,6 +186,19 @@ local function forbidden_or_throttled()
 	end
 	return forbidden
 end
+
+--[[---------------------------------------------------------------------------
+	END: WiP function
+---------------------------------------------------------------------------]]--
+
+--[[---------------------------------------------------------------------------
+	Unsummonable pets (faction-locked pets)
+---------------------------------------------------------------------------]]--
+
+--[[ This can happen when…
+- Restore: Logging in to other-faction toon and the saved pet is locked to the previous toon's faction
+- Random summon: A faction-locked pet that is not detectable as such (Blizz bug, see below) gets selected from the pool
+]]
 
 local unsummonable_species
 local player_faction = UnitFactionGroup 'player'

@@ -1,3 +1,7 @@
+#### 2.1.3 (2024-01-16)
+
+- Just a toc bump for 10.2.5. Compatibility update will follow if needed.
+
 #### 2.1.2 (2023-11-08)
 
 - Added two aura exclusions (i.e. no pet summoning when aura is present):
