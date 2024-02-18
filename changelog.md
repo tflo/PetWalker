@@ -3,7 +3,7 @@
 - Added a keybinding for ‘Summon Previous Pet’
   - You can set it in Options > Game > Keybindings > PetWalker, along with the other 4 keybindings.
   - This does the same as the command `/pw p` (which still exists).
-  - This function is more useful as you may think. A few tips:
+  - This function is more useful than you may think. A few tips:
     - If you're a Blacksmith or Engi, you probably have Alvin the Anvil on your action bar or OPie ring. Well, Alvin is useful, but, let's face it, a bit boring as a companion. So when you are done with your work, say thanks to Alvin and hit the Previous Pet key and you will have your previous companion back.
     - Press the key repeatedly to toggle between two pets. This allows you to have two temporary favorites (or "favorites of the day") without changing your Pet Journal favorites: Disable the autosummon timer (`/pw 0`), summon the first pet, and then the second pet. Now you can switch between them with a single keystroke.
     - ‘Previous Pet’ also works in conjunction with the autosummon timer, and it resets the timer. So if the timer summons a new pet, but you'd like to have the other one for a little longer, just press the Previous Pet key and you'll have it for another 30 minutes (or whatever your timer is set to).
