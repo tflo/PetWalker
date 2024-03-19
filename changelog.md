@@ -1,3 +1,7 @@
+#### 2.1.5 (2024-03-19)
+
+- toc bump only. If necessary, the addon will be updated in the next days.
+
 #### 2.1.4 (2024-02-17)
 
 - Added a keybinding for ‘Summon Previous Pet’
