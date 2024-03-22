@@ -124,7 +124,7 @@ end
 
 function ns.msg_saved_pet_unsummonable(reason, number)
 	if ns.db.verbosityLevel < 1 then return end
-	chat_user_notification(format('%sThe saved Current Pet is not summonable. Reason: %s(%s) %s%s\n--> Checking other saved pets (char/global pet, previous pet, etc.) now.', CO.bw, CO.e, number, reason, CO.bw))
+	chat_user_notification(format('%sThe saved Current Pet is not summonable. Reason: %s(%s) %s%s\n--> Checking other saved pets (char/global pet, previous pet, etc.) now.', CO.bw, CO.e, number or '?', reason or 'unknown', CO.bw))
 end
 
 function ns.msg_previous_pet_unsummonable()

@@ -1,3 +1,7 @@
+#### 2.1.6 (2024-03-22)
+
+- Fixed a nil value in a notification that could occur when PW tried to summon a saved pet that is no longer summonable (e.g. removed from the collection).
+
 #### 2.1.5 (2024-03-19)
 
 - toc bump only. If necessary, the addon will be updated in the next days.
