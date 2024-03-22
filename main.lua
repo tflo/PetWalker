@@ -225,15 +225,15 @@ local EnumPetJournalError = _G.Enum.PetJournalError
 local ERROR_TEXT_WRONG_PET_FACTION = 'You are not the right faction for this companion.'
 
 local function is_pet_summonable(guid)
-	local is_summonable, error, error_text
+	local is_summonable, error_num, error_text
 	local species_id = ns.id_to_species(guid)
 	if unsummonable_species[species_id] then
-		is_summonable, error, error_text = false, EnumPetJournalError.InvalidFaction, ERROR_TEXT_WRONG_PET_FACTION
+		is_summonable, error_num, error_text = false, EnumPetJournalError.InvalidFaction, ERROR_TEXT_WRONG_PET_FACTION
 	else
-		is_summonable, error, error_text = C_PetJournalGetPetSummonInfo(guid)
+		is_summonable, error_num, error_text = C_PetJournalGetPetSummonInfo(guid)
 	end
 	if not is_summonable then
-		return false, error, error_text
+		return false, error_num, error_text
 	end
 	return true
 end
@@ -260,10 +260,10 @@ local function saved_pet_summonability_check() --- After login
 
 	for i, guid in ipairs(priorities) do
 		if guid then
-			local is_summonable, error, error_text = is_pet_summonable(guid)
+			local is_summonable, error_num, error_text = is_pet_summonable(guid)
 			if i == 1 then
 				if is_summonable then return end
-				ns.msg_saved_pet_unsummonable(error_text, error)
+				ns.msg_saved_pet_unsummonable(error_text, error_num)
 			else
 				if is_summonable then
 					if perchar then
@@ -903,9 +903,9 @@ function ns:safesummon(pet, resettimer)
 		return
 	end
 	if ns.db.debugMode then
-		local isSummonable, error, errorText = C_PetJournalGetPetSummonInfo(pet)
-		if not isSummonable then
-			ns:debugprint('`safesummon`: Something is wrong with our summonability check: pet cannot be summoned, `GetPetSummonInfo` returned', isSummonable, error, errorText)
+		local is_summonable, error_num, error_text = C_PetJournalGetPetSummonInfo(pet)
+		if not is_summonable then
+			ns:debugprint('`safesummon`: Something is wrong with our summonability check: pet cannot be summoned, `GetPetSummonInfo` returned', is_summonable, error_num, error_text)
 			return
 		end
 	end
