@@ -1,3 +1,8 @@
+#### 2.1.8 (2024-07-24)
+
+- Seems to work fine with TWW 110000 — so far; further tests will follow.
+- toc updated for TWW 110000.
+
 #### 2.1.7 (2024-05-08)
 
 - toc bump only (100207). Addon update will follow as needed.
