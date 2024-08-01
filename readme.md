@@ -139,21 +139,21 @@ This is a fairly common event. I have experimented with several other events, bu
 
 On rare occasions, a summoning action can interfere with other casts (GCD conflict), e.g. Druids who shape-shift immediately after they start moving. But since PetWalker does nothing in combat (and other sensitive situations), it should be pretty safe.
 
-### Should I disable “auto-summoning while mounted in a Dragonriding zone” (`/pw r`)?
+### Should I disable “auto-summoning while mounted for Skyriding” (`/pw sr`)?
 
-__As of version 1.2.0 (March 2023),__ automatic pet summoning can also happen while you are mounted (not flying).
+Since version 1.2.0 (March 2023), automatic pet summoning can also happen while you are mounted (not flying).
 
-With normal mounts, this is clearly a good thing, because: A problem with (auto-)summoning pets can be that it triggers the Global Cooldown (GCD), which can prevent you from casting a spell or using an ability at that moment. You are usually less likely to want to cast a spell while mounted, so it is good if the pet is summoned before you dismount. This reduces the chance of a GCD conflict later.
+With ground mounts or on ground and in Steady Flight mode, this is clearly a good thing, because: A problem with (auto-)summoning pets can be that it triggers the Global Cooldown (GCD), which can prevent you from casting a spell or using an ability until the GCD is over (1–1.5s). You are usually less likely to want to cast a spell while mounted, so it is good if the pet is summoned before you dismount. This reduces the chance of a GCD conflict later.
 
-With Dragonriding mounts, it’s a bit different: The Dragonriding abilities require you to be off GCD. While on the ground, this applies to “Lift Off” and “Skyward Ascent”. This means that, unlike with normal mounts, the GCD triggered by summoning a pet while DR-mounted has a realistic chance of interfering with other abilities (the DR abilities), especially when landing, moving a few yards, and quickly taking off again.
+With Skyriding, it’s a bit different: The Skyriding abilities require you to be off GCD. While on the ground, this applies to “Lift Off” and “Skyward Ascent”. This means that, unlike with ground mounts or in Steady Flight mode, the GCD triggered by summoning a pet while Skyride-mounted has a realistic chance of interfering with other abilities (the Skyride abilities), especially when landing, moving a few meters, and quickly taking off again.
 
-So I’ve added the possibility to allow/disallow auto-summoning while mounted in a Dragonriding zone. The toggle command is `/pw r` or `/pw drsum`. I recommend experimenting with this to see if it produces more or less GCD conflicts for you. As with most PW settings, this is an account-wide setting.
+So I’ve added the possibility to allow/disallow auto-summoning while mounted for Skyriding. The toggle command is `/pw sr`. I recommend experimenting with this to see if it produces more or less GCD conflicts for you. As with most PW settings, this is an account-wide setting.
 
-By default, this setting is _enabled,_ so auto-summoning while mounted in a Dragonriding zone will happen. Depending on user feedback, I may change the default setting in the future.
+By default, this setting is _enabled,_ so auto-summoning while mounted for Skyriding will happen.
 
-Personally, I’m using it because even if I have an occasional GCD conflict with a Dragonriding ability, it still reduces the chance of a GCD conflict after dismounting. But your experience may vary depending on your personal Dragonriding landing/lift-off “style”.
+Personally, I’m using it because even if I have an occasional GCD conflict with a Skyriding ability, it still reduces the chance of a GCD conflict after dismounting. But your experience may vary depending on your personal Skyriding landing/lift-off “style”.
 
-To be clear, the GCD is not caused by PetWalker, it’s a Blizz thing: any summoning of a pet triggers the GCD. It’s stupid IMO, but there’s nothing we can do about it. The summoning-while-mounted feature is meant to reduce the chance of GCD conflicts, but it cannot be eliminated.
+To be clear, the GCD is not caused by PetWalker, it’s a Blizz thing: any pet summoning, no matter how it is done, triggers the GCD. It’s stupid IMO, but there’s nothing we can do about it. The summoning-while-mounted feature is meant to reduce the chance of GCD conflicts, but it cannot be eliminated.
 
 ---
 
