@@ -37,7 +37,7 @@ local IsStealthed = _G.IsStealthed
 local UnitIsControlling = _G.UnitIsControlling
 local UnitChannelInfo = _G.UnitChannelInfo
 local GetTime = _G.GetTime
-
+local C_PlayerInfoGetGlidingInfo = C_PlayerInfo.GetGlidingInfo
 
 --[[===========================================================================
 	§ Some Variables/Constants
@@ -114,6 +114,12 @@ local excluded_auras = {
 	142372, -- Jerry the Snail (Gastropod Shell toy)
 	5384, -- Hunter: Feign Death (only useful to avoid accidental summoning via keybind, or if we use a different event than PLAYER_STARTED_MOVING)
 } -- More exclusions in the Summon function itself
+
+
+-- Other possibility: UnitPowerBarID('player') == 631
+local function is_skyride_mounted()
+	return select(2, C_PlayerInfoGetGlidingInfo())
+end
 
 local function offlimits_aura()
 	for _, aura in ipairs(excluded_auras) do
@@ -466,7 +472,7 @@ function ns:ADDON_LOADED(addon)
 			if
 				UnitAffectingCombat 'player'
 				or IsFlying()
-				or IsMounted() and IsAdvancedFlyableArea() and not ns.db.drSummoning -- API since 10.0.7
+				or not ns.db.drSummoning and is_skyride_mounted()
 			then
 				return
 			end
