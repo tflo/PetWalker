@@ -102,35 +102,12 @@ See the extra checks in is_excluded_by_species() and transitioncheck(). ]]
 -- Debug
 ns.time_summonspell = 0
 
-local excluded_auras = {
-	32612, -- Mage: Invisibility
-	110960, -- Mage: Greater Invisibility
-	131347, -- DH: Gliding -- Prolly not needed, should be caught by IsFlying() (?)
-	311796, -- Pet: Daisy as backpack (/beckon)
-	312993, -- Carrying Forbidden Tomes (Scrivener Lenua event, Revendreth)
-	43880, -- Ramstein's Swift Work Ram (Brewfest daily; important bc the quest cannot be restarted if messed up)
-	43883, -- Rental Racing Ram (Brewfest daily)
-	290460, -- Battlebot Champion (Forbidden Reach: Zskera Vault)
-	212754, -- Eye of Kilrogg aura in the context of the Eye See You quest (Azsuna)
-	142372, -- Jerry the Snail (Gastropod Shell toy)
-	5384, -- Hunter: Feign Death (only useful to avoid accidental summoning via keybind, or if we use a different event than PLAYER_STARTED_MOVING)
-} -- More exclusions in the Summon function itself
-
 
 -- Other possibility: UnitPowerBarID('player') == 631
 local function is_skyride_mounted()
 	return select(2, C_PlayerInfoGetGlidingInfo())
 end
 
-local function offlimits_aura()
-	for _, aura in ipairs(excluded_auras) do
-		if C_UnitAurasGetPlayerAuraBySpellID(aura) then
-			ns.debugprint 'Excluded aura found!'
-			return true
-		end
-	end
-	return false
-end
 
 local function forbidden_instance()
 	local in_instance, instance_type = IsInInstance()
@@ -143,45 +120,38 @@ local function forbidden_instance()
 end
 
 
---[[---------------------------------------------------------------------------
-	BEGIN: This function is WiP and not yet in use!
----------------------------------------------------------------------------]]--
+-- TODO: Other possible strategy for combat lockdown:
+-- if InCombatLockdown() then <unregister summon events>; RegisterEvent("PLAYER_REGEN_ENABLED") end
+-- PLAYER_REGEN_ENABLED --> <Re-register summon events>
+-- In the function below, we could also replace the whole throttle system with…
+-- <unregister events>; C_TimerAfter(<throttle>, <re-register events>)
 
---TODO: Probably better strategy for combat lockdown:
---[[
-if InCombatLockdown() then <unregister summon events>; RegisterEvent("PLAYER_REGEN_ENABLED") end
-PLAYER_REGEN_ENABLED --> <Re-register summon events>
-
-In the function below, we could also replace the whole throttle system with…
-<unregister events>; C_TimerAfter(<throttle>, <re-register events>)
-]]
-
----[[
-local function do_not_summon()
+local function prevent_summon()
 	-- if not not ns.db.autoEnabled then return true end
 	-- Always-active throttle
 	if not bypass_throttle then
 		throttle = max(throttle, throttle_min)
-		local now = time()
-		if now - time_responded_to_summoning_event < throttle then return true end
+		local now = now or time()
+		if now - time_responded_to_summoning_event < throttle then
+			ns.debugprint '`prevent_summon`: existing throttle found'
+			return true
+		end
 		time_responded_to_summoning_event, throttle = now, 0
 	end
-	local forbidden = false
 	if check_against_flying and
 		-- We need these tests only at events that can occure during it
 		(IsFlying() or UnitOnTaxi 'player') then
-		forbidden, throttle = true, 20
-	elseif forbidden_instance then
-		forbidden, throttle = true, 120
+		throttle = 20
 	elseif UnitAffectingCombat 'player'
+		or not ns.db.drSummoning and is_skyride_mounted()
 		or IsStealthed() -- Includes Hunter Camouflage
 		or C_UnitAurasGetPlayerAuraBySpellID(32612) -- Mage: Invisibility
 		or C_UnitAurasGetPlayerAuraBySpellID(110960) -- Mage: Greater Invisibility
 		or C_UnitAurasGetPlayerAuraBySpellID(131347) -- DH: Gliding -- Prolly not needed, should be caught by IsFlying() (?)
-		or C_UnitAurasGetPlayerAuraBySpellID(5384) -- Hunter: Feign Death (only useful to avoid accidental summoning via keybind, or if we use a different event than PLAYER_STARTED_MOVING)
+-- 		or C_UnitAurasGetPlayerAuraBySpellID(5384) -- Hunter: Feign Death (only useful if we use a different event than PLAYER_STARTED_MOVING)
 		or (UnitIsControlling 'player' and UnitChannelInfo 'player')
 	then
-		forbidden, throttle = true, 8
+		throttle = 8
 	elseif UnitIsGhost 'player'
 		or UnitHasVehicleUI 'player'
 		or C_UnitAurasGetPlayerAuraBySpellID(311796) -- Pet: Daisy as backpack (/beckon)
@@ -189,15 +159,19 @@ local function do_not_summon()
 		or C_UnitAurasGetPlayerAuraBySpellID(43880) -- Ramstein's Swift Work Ram (Brewfest daily; important bc the quest cannot be restarted if messed up)
 		or C_UnitAurasGetPlayerAuraBySpellID(43883) -- Rental Racing Ram (Brewfest daily)
 		or C_UnitAurasGetPlayerAuraBySpellID(290460) -- Battlebot Champion (Forbidden Reach: Zskera Vault)
+		or C_UnitAurasGetPlayerAuraBySpellID(212754) -- Eye of Kilrogg aura in the context of the Eye See You quest (Azsuna)
+		or C_UnitAurasGetPlayerAuraBySpellID(142372) -- Jerry the Snail (Gastropod Shell toy)
 	then
-		forbidden, throttle = true, 40
+		throttle = 40
+	elseif forbidden_instance() then
+		throttle = 120
 	end
-	return forbidden
+	if throttle > 0 then
+		ns.debugprint('`prevent_summon`: new throttle:', throttle)
+		return true
+	end
 end
---]]
---[[---------------------------------------------------------------------------
-	END: WiP function
----------------------------------------------------------------------------]]--
+
 
 --[[---------------------------------------------------------------------------
 	Unsummonable pets (faction-locked pets)
@@ -470,30 +444,20 @@ function ns:ADDON_LOADED(addon)
 
 		-- Regular main event
 		function ns:PLAYER_STARTED_MOVING()
-			if
-				UnitAffectingCombat 'player'
-				or IsFlying()
-				or not ns.db.drSummoning and is_skyride_mounted()
-			then
-				return
-			end
 			ns.debugprint 'Event: PLAYER_STARTED_MOVING --> `autoaction`'
 			ns.autoaction()
 		end
 
 		-- Experimental alternative events
 		function ns:ZONE_CHANGED()
-			if UnitAffectingCombat 'player' or IsFlying() then return end
 			ns.debugprint 'Event: ZONE_CHANGED --> `autoaction`'
 			ns.autoaction()
 		end
 		function ns:ZONE_CHANGED_INDOORS()
-			if UnitAffectingCombat 'player' or IsFlying() then return end
 			ns.debugprint 'Event: ZONE_CHANGED_INDOORS --> `autoaction`'
 			ns.autoaction()
 		end
 		function ns:PLAYER_MOUNT_DISPLAY_CHANGED()
-			if UnitAffectingCombat 'player' or IsFlying() then return end
 			ns.debugprint 'Event: PLAYER_MOUNT_DISPLAY_CHANGED --> `autoaction`'
 			ns.autoaction()
 		end
@@ -643,8 +607,7 @@ end
 ---------------------------------------------------------------------------]]--
 
 function ns.autoaction()
-	-- 	Moved this to the event, because we use a C_Timer now if the player is mounted
-	-- 	if not ns.db.autoEnabled or UnitAffectingCombat("player") then return end
+	if prevent_summon() then return end
 	if ns.db.newPetTimer ~= 0 then
 		local now = time()
 		if ns.remaining_timer(now) == 0 and now - time_safesummon_failed > 40 then
@@ -916,31 +879,11 @@ function ns:safesummon(pet, resettimer)
 			return
 		end
 	end
-	-- if pet_not_summonable(pet) then return end
 	local now = time()
-	if
-		not UnitAffectingCombat 'player'
-		-- and not IsMounted() -- Not needed
-		--[[ 'IsFlying()' is checked in autoaction and transitioncheck, for
-		early return from any event-triggered action. Since it seems to be
-		impossible to summon while flying, we don't need it here or in the
-		manual summon functions. ]]
-		and not offlimits_aura()
-		and not IsStealthed() -- Includes Hunter Camouflage
-		and not (UnitIsControlling 'player' and UnitChannelInfo 'player')
-		and not UnitHasVehicleUI 'player'
-		and not UnitIsGhost 'player'
-		and not forbidden_instance()
-	then
-		ns.pet_verified = true
-		-- ns.skipNextSave = true
-		if resettimer then ns.time_newpet_success = now end
-		ns.msg_pet_summon_success()
-		C_PetJournalSummonPetByGUID(pet)
-	else
-		-- ns.msg_pet_summon_failed() -- Too spammy, remove that
-		time_safesummon_failed = now
-	end
+	ns.pet_verified = true
+	if resettimer then ns.time_newpet_success = now end
+	ns.msg_pet_summon_success()
+	C_PetJournalSummonPetByGUID(pet)
 end
 
 
