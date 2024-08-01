@@ -224,7 +224,7 @@ function ns.help_display()
 	local body = {
 		CO.c .. '\nd', ': ', CO.k .. 'Dismiss ', 'current pet and ', CO.k .. 'disable auto-summoning ', '(new pet / restore).',
 		CO.c .. '\na', ': ', 'Toggle ', CO.k .. 'auto-summoning ', '(new pet / restore).',
-		CO.c .. '\nr', ': ', 'Toggle ', CO.k .. 'auto-summoning ', 'also ', CO.k .. 'while mounted in a Dragonriding zone: ', CO.s .. 'allowed / not allowed', '.',
+		CO.c .. '\nsr', ': ', 'Toggle ', CO.k .. 'auto-summoning ', 'also ', CO.k .. 'while mounted for Skyriding: ', CO.s .. 'allowed / not allowed', '.',
 		CO.c .. '\nn', ': ', 'Summon ', CO.k .. 'new pet ', 'from pool.',
 		CO.c .. '\nf', ': ', 'Toggle ', CO.k .. 'pet pool: ', CO.s .. 'Favorites Only', ', or ', CO.s .. 'All Pets', '.',
 		CO.c .. '\nc', ': ', 'Toggle ', CO.k .. 'favorites: ', CO.s .. 'Per-character', ', or ', CO.s .. 'Global Favorites', '.',
@@ -256,7 +256,7 @@ function ns.status_display()
 	local body = {
 		CO.k ..'\nAutomatic Random-summoning / Restore ', 'is ', CO.s .. (ns.db.autoEnabled and 'enabled' or CO.bw .. 'disabled'), '.',
 		CO.k .. '\nSummon Timer ', 'is ', CO.s .. (ns.db.newPetTimer > 0 and (ns.db.newPetTimer/60) .. CO.bn .. ' minutes' or 'disabled'), '. Next random pet in ', CO.e .. ns.remaining_timer_for_display(), '.',
-		CO.k ..'\nAutomatic summoning while mounted in a Dragonriding zone ', 'is ', CO.s .. (ns.db.drSummoning and 'allowed' or 'not allowed'), '.',
+		CO.k ..'\nAutomatic summoning while mounted for Skyriding ', 'is ', CO.s .. (ns.db.drSummoning and 'allowed' or 'not allowed'), '.',
 		CO.k .. '\nVerbosity ', 'level of messages: ', CO.s .. ns.db.verbosityLevel, ' (of 3).',
 		CO.k .. '\nPet Pool ', 'is set to ', CO.s .. (ns.db.favsOnly and 'Favorites Only' or 'All Pets'), '. Eligible pets: ', CO.e .. #ns.pet_pool, '.',
 		CO.k .. '\nPer-character Favorites ', 'are ', CO.s .. (ns.dbc.charFavsEnabled and 'enabled' or 'disabled'), ' for ', CO.e .. this_char, '.',
@@ -330,7 +330,7 @@ function SlashCmdList.PetWalker(cmd)
 		ns.status_display()
 	elseif tonumber(cmd) then
 		ns:timer_slash_cmd(cmd)
-	elseif cmd == 'r' or cmd == 'drsum' then
+	elseif cmd == 'sr' then
 		ns.dr_summoning_toggle()
 	elseif cmd == 't' or cmd == 'target' then
 		ns.summon_targetpet()
@@ -422,7 +422,7 @@ end
 
 function ns.dr_summoning_toggle()
 	ns.db.drSummoning = not ns.db.drSummoning
-	chat_user_notification(format('%sSummoning while mounted in Dragonriding zones %s.', CO.bn, ns.db.drSummoning and 'enabled' or 'disabled'))
+	chat_user_notification(format('%sSummoning while mounted for Skyriding %s.', CO.bn, ns.db.drSummoning and 'enabled' or 'disabled'))
 end
 
 function ns.debugmode_toggle() -- for slash command only
