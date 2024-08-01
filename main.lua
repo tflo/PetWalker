@@ -133,7 +133,7 @@ local function prevent_summon()
 		throttle = max(throttle, throttle_min)
 		local now = now or time()
 		if now - time_responded_to_summoning_event < throttle then
-			ns.debugprint '`prevent_summon`: existing throttle found'
+			ns.debugprint('`prevent_summon`: existing throttle found:', throttle)
 			return true
 		end
 		time_responded_to_summoning_event, throttle = now, 0
@@ -829,11 +829,8 @@ end
 ---------------------------------------------------------------------------]]--
 
 function ns.save_pet()
-	if ns.db.debugMode then
-		ns.debugprint '`save_pet` runs now'
-	end
 	if not ns.pet_verified then
-		ns.debugprint '`save_pet` returned early bc of `not pet_verified`'
+		ns.debugprint '`save_pet` FAILURE bc of `not pet_verified`'
 		return
 	end
 	local actpet = C_PetJournalGetSummonedPetGUID()
@@ -843,7 +840,7 @@ function ns.save_pet()
 		-- or now - time_save_pet < 3
 		or is_excluded_by_id(actpet)
 	then
-		ns.debugprint '`save_pet`: No `actpet` or `actpet` is excluded'
+		ns.debugprint '`save_pet` FAILURE: No `actpet` or `actpet` is excluded'
 		return
 	end
 	if ns.dbc.charFavsEnabled and ns.db.favsOnly then

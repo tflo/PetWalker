@@ -3,20 +3,22 @@ local addon_name, ns = ...
 local C_PetJournalGetPetInfoByPetID = C_PetJournal.GetPetInfoByPetID
 local C_PetJournalGetBattlePetLink = C_PetJournal.GetBattlePetLink
 
+local COLOR_DEBUG = '|cffEE82EE'
+
 function ns.id_to_name(id)
-	if not id then return '"no ID!" from id_to_name' end
+	if not id then return '"no ID!" from `id_to_name`' end
 	local name = select(8, C_PetJournalGetPetInfoByPetID(id))
 	return name
 end
 
 function ns.id_to_species(id)
-	if not id then return '"no ID!" from id_to_species' end
+	if not id then return '"no ID!" from `id_to_species`' end
 	local spec = C_PetJournalGetPetInfoByPetID(id)
 	return spec
 end
 
 function ns.id_to_link(id)
-	if not id then return '"no ID!" from id_to_link' end
+	if not id then return '"no ID!" from `id_to_link`' end
 	local link = C_PetJournalGetBattlePetLink(id)
 	return link
 end
@@ -24,32 +26,34 @@ end
 
 function ns.debug_display()
 	ns.status_display()
-	print(
-		'|cffEE82EEDebug:\n  DB current pet: ', (ns.id_to_name(ns.db.currentPet) or '<nil>'),
-		'\n  DB previous pet: ', (ns.id_to_name(ns.db.previousPet) or '<nil>'),
-		'\n  Char DB current pet: ', (ns.id_to_name(ns.dbc.currentPet) or '<nil>'),
-		'\n  Char DB previous pet: ', (ns.id_to_name(ns.dbc.previousPet) or '<nil>'),
-		'\n  pet_verified: ', ns.pet_verified, '\n'
-	)
+	local lines = {
+		format('%sPW Debug:', COLOR_DEBUG),
+		format('%sDB current pet|r: %s', COLOR_DEBUG, ns.id_to_name(ns.db.currentPet)),
+		format('%sDB previous pet|r: %s', COLOR_DEBUG, ns.id_to_name(ns.db.previousPet)),
+		format('%sChar DB current pet|r: %s', COLOR_DEBUG, ns.id_to_name(ns.dbc.currentPet)),
+		format('%sChar DB previous pet|r: %s', COLOR_DEBUG, ns.id_to_name(ns.dbc.previousPet)),
+		format('%spet_verified|r: %s', COLOR_DEBUG, tostring(ns.pet_verified)),
+	}
+	for _, l in ipairs(lines) do print(l) end
 end
 
 -- without pet info
 function ns.debugprint(...)
 	if ns.db.debugMode then
 		local a, b = strsplit('.', GetTimePreciseSec())
-		print(format('[%s.%s] %s:', a:sub(-3), b:sub(1, 3), '|cffEE82EEPetWalker Debug|r'), ...)
+		print(format('[%s.%s] %s%s:', a:sub(-3), b:sub(1, 3), COLOR_DEBUG, 'PetWalker Debug|r'), ...)
 	end
 end
 
 -- with pet info
 function ns.debugprint_pet(msg)
 	if ns.db.debugMode then
-		print(
-			'|cffEE82EEPetWalker Debug: '
-				.. msg
-				.. ' # Current DB ' .. (ns.dbc.charFavsEnabled and ns.db.favsOnly and '(char)' or '(global)') .. ' pet: '
-				.. ns.id_to_name(ns.dbc.charFavsEnabled and ns.db.favsOnly and ns.dbc.currentPet or ns.db.currentPet)
-		)
+	local a, b = strsplit('.', GetTimePreciseSec())
+	local lines = {
+		format('[%s.%s] %sPW Debug|r: %s', a:sub(-3), b:sub(1, 3), COLOR_DEBUG, msg),
+		format('%sCurrent DB (%s) pet|r: %s', COLOR_DEBUG, ns.dbc.charFavsEnabled and ns.db.favsOnly and 'char' or 'global', ns.id_to_name(ns.dbc.charFavsEnabled and ns.db.favsOnly and ns.dbc.currentPet or ns.db.currentPet)),
+	}
+	for _, l in ipairs(lines) do print(l) end
 	end
 end
 
