@@ -303,7 +303,7 @@ function SlashCmdList.PetWalker(cmd)
 		ns:dismiss_and_disable()
 	elseif cmd == 'dd' or cmd == 'debd' then
 		ns:debug_display()
-	elseif cmd == 'dm' or cmd == 'debm' then
+	elseif cmd == 'dm' or cmd == 'debug' then
 		ns.debugmode_toggle()
 	elseif cmd == 'vvv' then
 		ns.verbosity_full()
