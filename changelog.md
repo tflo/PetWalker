@@ -1,3 +1,17 @@
+To see all commits, including all alpha changes, go [here](https://github.com/tflo/PetWalker/commits/master/).
+
+---
+
+## Releases
+
+#### 2.2.0-alpha (2024-08-01)
+
+- Adapted to modern times: Properly detect if we are in Skyride mode and mounted on a Skyride mount. Needed for the `/pw sr` toggle to allow/disallow pet summoning in this situation (while still on ground, of course).
+- Changed the Dragonride/Skyride Allow toggle from `/pw r`/`/pw drsum` to `/pw sr`.
+- Removed PDF version of the readme.md. I think nowadays most people know how to preview a Markdown document, and a rendered view is on the [GitHub page](https://github.com/tflo/PetWalker?tab=readme-ov-file#petwalker) anyway.
+- Changes to the readme/description.
+
+
 #### 2.1.8 (2024-07-24)
 
 - Seems to work fine with TWW 110000 — so far; further tests will follow.
