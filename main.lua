@@ -1053,7 +1053,7 @@ end
 function ns.debugprint(...)
 	if ns.db.debugMode then
 		local a, b = strsplit('.', GetTimePreciseSec())
-		print(format('[%s.%s] %s:', a:sub(-3), b:sub(1, 2), '|cffEE82EEPetWalker Debug|r'), ...)
+		print(format('[%s.%s] %s:', a:sub(-3), b:sub(1, 3), '|cffEE82EEPetWalker Debug|r'), ...)
 	end
 end
 
