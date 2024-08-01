@@ -156,13 +156,13 @@ In the function below, we could also replace the whole throttle system with…
 <unregister events>; C_TimerAfter(<throttle>, <re-register events>)
 ]]
 
---[[
-local function forbidden_or_throttled()
+---[[
+local function do_not_summon()
 	-- if not not ns.db.autoEnabled then return true end
 	-- Always-active throttle
 	if not bypass_throttle then
 		throttle = max(throttle, throttle_min)
-		local now = GetTime()
+		local now = time()
 		if now - time_responded_to_summoning_event < throttle then return true end
 		time_responded_to_summoning_event, throttle = now, 0
 	end
@@ -418,7 +418,7 @@ function ns:ADDON_LOADED(addon)
 		end
 		]]
 
-		ns.time_newpet_success = GetTime() - (ns.db.newPetTimer - ns.db.remainingTimer)
+		ns.time_newpet_success = time() - (ns.db.newPetTimer - ns.db.remainingTimer)
 
 		-- *Not* with PLAYER_ENTERING_WORLD so that it is not affected when all events get unregistered via /pw a
 		C_Timer.After(delay_login_msg, ns.msg_login)
@@ -512,7 +512,7 @@ function ns:ADDON_LOADED(addon)
 
 		hooksecurefunc(C_PetJournal, 'SummonPetByGUID', function()
 			if ns.db.debugMode then
-				ns.time_summonspell = GetTime()
+				ns.time_summonspell = time()
 				ns.debugprint(format(
 					'Hook: `SummonPetByGUID` runs; `in_battlesleep`: %s (if false --> register `COMPANION_UPDATE`)',
 					tostring(ns.in_battlesleep)))
@@ -573,7 +573,7 @@ function ns:ADDON_LOADED(addon)
 		end
 
 		function ns:PLAYER_LOGOUT()
-			ns.db.remainingTimer = ns.remaining_timer(GetTime())
+			ns.db.remainingTimer = ns.remaining_timer(time())
 		end
 
 
@@ -646,7 +646,7 @@ function ns.autoaction()
 	-- 	Moved this to the event, because we use a C_Timer now if the player is mounted
 	-- 	if not ns.db.autoEnabled or UnitAffectingCombat("player") then return end
 	if ns.db.newPetTimer ~= 0 then
-		local now = GetTime()
+		local now = time()
 		if ns.remaining_timer(now) == 0 and now - time_safesummon_failed > 40 then
 			ns.debugprint_pet '`autoaction` decided for new_pet'
 			ns:new_pet(now, false)
@@ -674,7 +674,7 @@ end
 ---------------------------------------------------------------------------]]--
 
 function ns:restore_pet()
-	local now = GetTime()
+	local now = time()
 	if now - time_safesummon_failed < 10 or now - time_restore_pet < 3 then return end
 	local savedpet
 	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
@@ -704,7 +704,7 @@ function ns:new_pet(time, via_hotkey)
 	if ns.db.debugMode then
 		ns.debugprint(format('`new_pet` runs with args %s, %s ', tostring(time), tostring(via_hotkey)))
 	end
-	local now = time or GetTime()
+	local now = time or time()
 	if now - ns.time_newpet_success < 1.5 then return end
 	local actpet = C_PetJournalGetSummonedPetGUID()
 	if actpet and is_excluded_by_id(actpet) then
@@ -817,7 +817,7 @@ function ns.transitioncheck()
 		end
 		return
 	end
-	local now = GetTime()
+	local now = time()
 	--[[ If toon starts moving immediately after transition, then restore_pet
 	might come before us. Also prevents redundant run in case we use both events
 	NEW_AREA and ENTERING_WORLD. ]]
@@ -874,7 +874,7 @@ function ns.save_pet()
 		return
 	end
 	local actpet = C_PetJournalGetSummonedPetGUID()
-	-- local now = GetTime()
+	-- local now = time()
 	if
 		not actpet
 		-- or now - time_save_pet < 3
@@ -917,7 +917,7 @@ function ns:safesummon(pet, resettimer)
 		end
 	end
 	-- if pet_not_summonable(pet) then return end
-	local now = GetTime()
+	local now = time()
 	if
 		not UnitAffectingCombat 'player'
 		-- and not IsMounted() -- Not needed
@@ -985,7 +985,7 @@ function ns.initialize_pool(self)
 		index = index + 1
 	end
 	ns.pool_initialized = true -- Condition in ns:new_pet and ns.ManualSummonNew
-	local now = GetTime()
+	local now = time()
 	if #ns.pet_pool <= 0 and ns.db.newPetTimer ~= 0 and now - time_pool_msg > 30 then
 		ns.msg_low_petpool(#ns.pet_pool)
 		time_pool_msg = now
@@ -1138,7 +1138,7 @@ local function sec_to_min(seconds)
 end
 
 function ns.remaining_timer_for_display()
-	local rem = ns.time_newpet_success + ns.db.newPetTimer - GetTime()
+	local rem = ns.time_newpet_success + ns.db.newPetTimer - time()
 	rem = rem > 0 and rem or 0
 	return sec_to_min(rem)
 end
