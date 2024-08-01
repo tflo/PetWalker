@@ -37,6 +37,7 @@ local IsStealthed = _G.IsStealthed
 local UnitIsControlling = _G.UnitIsControlling
 local UnitChannelInfo = _G.UnitChannelInfo
 local GetTime = _G.GetTime
+local GetTimePreciseSec = _G.GetTimePreciseSec
 local C_PlayerInfoGetGlidingInfo = C_PlayerInfo.GetGlidingInfo
 
 --[[===========================================================================
@@ -124,7 +125,7 @@ end
 local function offlimits_aura()
 	for _, aura in ipairs(excluded_auras) do
 		if C_UnitAurasGetPlayerAuraBySpellID(aura) then
-			ns:debugprint 'Excluded aura found!'
+			ns.debugprint 'Excluded aura found!'
 			return true
 		end
 	end
@@ -328,7 +329,7 @@ ns.events:RegisterEvent 'ADDON_LOADED'
 -- COMPANION_UPDATE (registered with the `SummonPetByGUID` hook)
 
 function ns.events:register_summon_events()
-	ns:debugprint 'Registering summon events.'
+	ns.debugprint 'Registering summon events.'
 	if ns.db.eventAlt then -- Alt events, experimental
 		--[[ Pointless if it fires while flying, which is quite often. But this doesn't harm either. ]]
 		self:RegisterEvent 'ZONE_CHANGED'
@@ -346,7 +347,7 @@ function ns.events:register_summon_events()
 end
 
 function ns.events:unregister_summon_events()
-	ns:debugprint 'Unregistering summon events.'
+	ns.debugprint 'Unregistering summon events.'
 	self:UnregisterEvent 'ZONE_CHANGED'
 	self:UnregisterEvent 'ZONE_CHANGED_INDOORS'
 	self:UnregisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED'
@@ -354,7 +355,7 @@ function ns.events:unregister_summon_events()
 end
 
 function ns.events:register_meta_events()
-	ns:debugprint 'Registering meta events.'
+	ns.debugprint 'Registering meta events.'
 	self:RegisterEvent 'PLAYER_ENTERING_WORLD'
 	self:RegisterEvent 'PET_JOURNAL_LIST_UPDATE'
 	self:RegisterEvent 'PET_BATTLE_OPENING_START'
@@ -362,7 +363,7 @@ function ns.events:register_meta_events()
 end
 
 function ns.events:unregister_meta_events()
-	ns:debugprint 'Unregistering meta events.'
+	ns.debugprint 'Unregistering meta events.'
 	self:UnregisterEvent 'PLAYER_ENTERING_WORLD'
 	self:UnregisterEvent 'PET_JOURNAL_LIST_UPDATE'
 	self:UnregisterEvent 'PET_BATTLE_OPENING_START'
@@ -370,13 +371,13 @@ function ns.events:unregister_meta_events()
 end
 
 function ns.events:register_pw_events()
-	ns:debugprint 'Registering PW events.'
+	ns.debugprint 'Registering PW events.'
 	self:register_meta_events()
 	self:register_summon_events()
 end
 
 function ns.events:unregister_pw_events()
-	ns:debugprint 'Unregistering PW events (`UnregisterAllEvents`).'
+	ns.debugprint 'Unregistering PW events (`UnregisterAllEvents`).'
 	self:UnregisterAllEvents()
 end
 
@@ -446,16 +447,16 @@ function ns:ADDON_LOADED(addon)
 			-- We do not want summon events before transitioncheck has finished
 			ns.events:unregister_summon_events()
 			if is_login then
-				ns:debugprint 'Event: PLAYER_ENTERING_WORLD: Login'
+				ns.debugprint 'Event: PLAYER_ENTERING_WORLD: Login'
 				delay = delay_after_login
 				-- This must run before transitioncheck
 				C_Timer.After(delay - 1, saved_pet_summonability_check)
 			elseif is_reload then
-				ns:debugprint 'Event: PLAYER_ENTERING_WORLD: Reload'
+				ns.debugprint 'Event: PLAYER_ENTERING_WORLD: Reload'
 				delay = delay_after_reload
 			else
 				-- Needed for zone-specific pet exclusions
-				ns:debugprint 'Event: PLAYER_ENTERING_WORLD: Instance change'
+				ns.debugprint 'Event: PLAYER_ENTERING_WORLD: Instance change'
 				delay = delay_after_instance
 			end
 			ns.pet_verified = false
@@ -476,24 +477,24 @@ function ns:ADDON_LOADED(addon)
 			then
 				return
 			end
-			ns:debugprint 'Event: PLAYER_STARTED_MOVING --> `autoaction`'
+			ns.debugprint 'Event: PLAYER_STARTED_MOVING --> `autoaction`'
 			ns.autoaction()
 		end
 
 		-- Experimental alternative events
 		function ns:ZONE_CHANGED()
 			if UnitAffectingCombat 'player' or IsFlying() then return end
-			ns:debugprint 'Event: ZONE_CHANGED --> `autoaction`'
+			ns.debugprint 'Event: ZONE_CHANGED --> `autoaction`'
 			ns.autoaction()
 		end
 		function ns:ZONE_CHANGED_INDOORS()
 			if UnitAffectingCombat 'player' or IsFlying() then return end
-			ns:debugprint 'Event: ZONE_CHANGED_INDOORS --> `autoaction`'
+			ns.debugprint 'Event: ZONE_CHANGED_INDOORS --> `autoaction`'
 			ns.autoaction()
 		end
 		function ns:PLAYER_MOUNT_DISPLAY_CHANGED()
 			if UnitAffectingCombat 'player' or IsFlying() then return end
-			ns:debugprint 'Event: PLAYER_MOUNT_DISPLAY_CHANGED --> `autoaction`'
+			ns.debugprint 'Event: PLAYER_MOUNT_DISPLAY_CHANGED --> `autoaction`'
 			ns.autoaction()
 		end
 
@@ -505,14 +506,14 @@ function ns:ADDON_LOADED(addon)
 		the saved pet if pet_verified is true. ]]
 		hooksecurefunc(C_PetJournal, 'SetPetLoadOutInfo', function()
 			-- Note that SetPetLoadOutInfo summons the slot pet, but it does so _not_ via SummonPetByGUID
-			ns:debugprint 'Hook: `SetPetLoadOutInfo` --> setting `pet_verified` to false'
+			ns.debugprint 'Hook: `SetPetLoadOutInfo` --> setting `pet_verified` to false'
 			ns.pet_verified = false
 		end)
 
 		hooksecurefunc(C_PetJournal, 'SummonPetByGUID', function()
 			if ns.db.debugMode then
 				ns.time_summonspell = GetTime()
-				ns:debugprint(format(
+				ns.debugprint(format(
 					'Hook: `SummonPetByGUID` runs; `in_battlesleep`: %s (if false --> register `COMPANION_UPDATE`)',
 					tostring(ns.in_battlesleep)))
 			end
@@ -529,7 +530,7 @@ function ns:ADDON_LOADED(addon)
 			if what == 'CRITTER' then
 				ns.events:UnregisterEvent 'COMPANION_UPDATE'
 				if ns.db.debugMode then
-					ns:debugprint('Event: COMPANION_UPDATE (`actpet`: ' ..
+					ns.debugprint('Event: COMPANION_UPDATE (`actpet`: ' ..
 					ns.id_to_name(C_PetJournalGetSummonedPetGUID()) .. ') --> `save_pet`')
 				end
 				ns.save_pet()
@@ -537,14 +538,14 @@ function ns:ADDON_LOADED(addon)
 		end
 
 		function ns:PET_BATTLE_OPENING_START()
-			ns:debugprint 'Event: PET_BATTLE_OPENING_START'
+			ns.debugprint 'Event: PET_BATTLE_OPENING_START'
 			ns.events:unregister_pw_events()
 			ns.events:RegisterEvent 'PET_BATTLE_OVER' -- Alternative: PET_BATTLE_CLOSE (fires twice)
 			ns.in_battlesleep = true
 		end
 
 		function ns:PET_BATTLE_OVER()
-			ns:debugprint(
+			ns.debugprint(
 				format(
 					'Event: PET_BATTLE_OVER --> Re-register events in %ss, unless we are in the next battle',
 					delay_after_battle
@@ -567,7 +568,7 @@ function ns:ADDON_LOADED(addon)
 		--> This seems to work, so far!
 		]]
 		function ns:PET_JOURNAL_LIST_UPDATE()
-			ns:debugprint 'Event: PET_JOURNAL_LIST_UPDATE --> setting `pool_initialized` to false'
+			ns.debugprint 'Event: PET_JOURNAL_LIST_UPDATE --> setting `pool_initialized` to false'
 			ns.pool_initialized = false
 		end
 
@@ -647,19 +648,19 @@ function ns.autoaction()
 	if ns.db.newPetTimer ~= 0 then
 		local now = GetTime()
 		if ns.remaining_timer(now) == 0 and now - time_safesummon_failed > 40 then
-			ns:debugprint_pet '`autoaction` decided for new_pet'
+			ns.debugprint_pet '`autoaction` decided for new_pet'
 			ns:new_pet(now, false)
 			return
 		end
 	end
 	if not ns.pet_verified then
-		ns:debugprint_pet '`autoaction` decided for `transitioncheck` (`pet_verified` is false)'
+		ns.debugprint_pet '`autoaction` decided for `transitioncheck` (`pet_verified` is false)'
 		ns.transitioncheck()
 		return
 	end
 	local actpet = C_PetJournalGetSummonedPetGUID()
 	if not actpet then
-		ns:debugprint_pet '`autoaction` decided for `restore_pet`'
+		ns.debugprint_pet '`autoaction` decided for `restore_pet`'
 		ns:restore_pet()
 	end
 end
@@ -683,11 +684,11 @@ function ns:restore_pet()
 	end
 	time_restore_pet = now
 	if savedpet then
-		ns:debugprint '`restore_pet` is restoring saved pet'
+		ns.debugprint '`restore_pet` is restoring saved pet'
 		ns.set_sum_msg_to_restore_pet(savedpet)
 		ns:safesummon(savedpet, false)
 	else
-		ns:debugprint '`restore_pet` could not find saved pet --> summoning new pet'
+		ns.debugprint '`restore_pet` could not find saved pet --> summoning new pet'
 		ns.msg_no_saved_pet()
 		ns:new_pet(now, false)
 	end
@@ -701,17 +702,17 @@ end
 
 function ns:new_pet(time, via_hotkey)
 	if ns.db.debugMode then
-		ns:debugprint(format('`new_pet` runs with args %s, %s ', tostring(time), tostring(via_hotkey)))
+		ns.debugprint(format('`new_pet` runs with args %s, %s ', tostring(time), tostring(via_hotkey)))
 	end
 	local now = time or GetTime()
 	if now - ns.time_newpet_success < 1.5 then return end
 	local actpet = C_PetJournalGetSummonedPetGUID()
 	if actpet and is_excluded_by_id(actpet) then
-		ns:debugprint '`new_pet`: `actpet` is excluded'
+		ns.debugprint '`new_pet`: `actpet` is excluded'
 		return
 	end
 	if not ns.pool_initialized then
-		ns:debugprint '`new_pet` --> `initialize_pool`'
+		ns.debugprint '`new_pet` --> `initialize_pool`'
 		ns.initialize_pool()
 	end
 	local npool = #ns.pet_pool
@@ -810,7 +811,7 @@ function ns.transitioncheck()
 	-- TODO: When we have finished our throttle and aura check rework, review if this is still needed here!
 	if not ns.db.autoEnabled or ns.pet_verified or UnitAffectingCombat 'player' or IsFlying() or UnitOnTaxi 'player' then
 		if ns.db.debugMode then
-			ns:debugprint(format(
+			ns.debugprint(format(
 				'`transitioncheck` returned early (`autoEnabled`: %s; `pet_verified`: %s; other conditions: combat, flying, taxi)',
 				tostring(ns.db.autoEnabled), tostring(ns.pet_verified)))
 		end
@@ -821,7 +822,7 @@ function ns.transitioncheck()
 	might come before us. Also prevents redundant run in case we use both events
 	NEW_AREA and ENTERING_WORLD. ]]
 	if now - time_restore_pet < 6 then
-		ns:debugprint('`transitioncheck` aborted bc less than 6s since `restore_pet`')
+		ns.debugprint('`transitioncheck` aborted bc less than 6s since `restore_pet`')
 		return
 	end
 	ns.current_zone = C_MapGetBestMapForUnit 'player'
@@ -839,13 +840,13 @@ function ns.transitioncheck()
 		end
 	end
 	if savedpet and savedpet_is_summonable then
-		ns:debugprint '`transitioncheck` is restoring saved pet'
+		ns.debugprint '`transitioncheck` is restoring saved pet'
 		ns.set_sum_msg_to_transcheck(savedpet)
 		ns:safesummon(savedpet, false)
 	--[[ Should only come into play if savedpet is still nil due to a slow
 	loading process ]]
 	elseif not actpet then
-		ns:debugprint '`transitioncheck` could not find saved pet --> summoning new pet'
+		ns.debugprint '`transitioncheck` could not find saved pet --> summoning new pet'
 		ns.msg_no_saved_pet()
 		ns:new_pet(now, false)
 	end
@@ -855,7 +856,7 @@ function ns.transitioncheck()
 	-- Because we are unregistering now with every type of PLAYER_ENTERING_WORLD
 	-- HACK: Called separately after entering world, bc of the possible early return
 	-- ns.events:register_summon_events()
-	ns:debugprint '`transitioncheck` completed'
+	ns.debugprint '`transitioncheck` completed'
 end
 
 
@@ -866,10 +867,10 @@ end
 
 function ns.save_pet()
 	if ns.db.debugMode then
-		ns:debugprint(format('`save_pet` runs now (%.3fs since summon spell)', GetTime() - ns.time_summonspell))
+		ns.debugprint '`save_pet` runs now'
 	end
 	if not ns.pet_verified then
-		ns:debugprint '`save_pet` returned early bc of `not pet_verified`'
+		ns.debugprint '`save_pet` returned early bc of `not pet_verified`'
 		return
 	end
 	local actpet = C_PetJournalGetSummonedPetGUID()
@@ -879,7 +880,7 @@ function ns.save_pet()
 		-- or now - time_save_pet < 3
 		or is_excluded_by_id(actpet)
 	then
-		ns:debugprint '`save_pet`: No `actpet` or `actpet` is excluded'
+		ns.debugprint '`save_pet`: No `actpet` or `actpet` is excluded'
 		return
 	end
 	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
@@ -891,7 +892,7 @@ function ns.save_pet()
 		ns.db.previousPet = ns.db.currentPet
 		ns.db.currentPet = actpet
 	end
-	ns:debugprint_pet '`save_pet` completed'
+	ns.debugprint_pet '`save_pet` completed'
 	-- time_save_pet = now
 end
 
@@ -905,13 +906,13 @@ end
 
 function ns:safesummon(pet, resettimer)
 	if not pet then -- TODO: needed?
-		ns:debugprint '`safesummon` was called without `pet` argument!'
+		ns.debugprint '`safesummon` was called without `pet` argument!'
 		return
 	end
 	if ns.db.debugMode then
 		local is_summonable, error_num, error_text = C_PetJournalGetPetSummonInfo(pet)
 		if not is_summonable then
-			ns:debugprint('`safesummon`: Something is wrong with our summonability check: pet cannot be summoned, `GetPetSummonInfo` returned', is_summonable, error_num, error_text)
+			ns.debugprint('`safesummon`: Something is wrong with our summonability check: pet cannot be summoned, `GetPetSummonInfo` returned', is_summonable, error_num, error_text)
 			return
 		end
 	end
@@ -967,7 +968,7 @@ local function clean_charfavs()
 end
 
 function ns.initialize_pool(self)
-	ns:debugprint 'Running `initialize_pool`'
+	ns.debugprint 'Running `initialize_pool`'
 	table.wipe(ns.pet_pool)
 	clean_charfavs()
 	local index = 1
@@ -1000,7 +1001,7 @@ local C_PetJournalPetIsFavorite1, C_PetJournalSetFavorite1, C_PetJournalGetPetIn
 
 -- Largely unaltered code from NugMiniPet
 function ns.cfavs_update()
-	ns:debugprint 'Running `cfavs_update`'
+	ns.debugprint 'Running `cfavs_update`'
 	if ns.dbc.charFavsEnabled then
 		C_PetJournalPetIsFavorite1 = C_PetJournalPetIsFavorite1 or C_PetJournalPetIsFavorite
 		C_PetJournalSetFavorite1 = C_PetJournalSetFavorite1 or C_PetJournalSetFavorite
@@ -1094,7 +1095,7 @@ function ns.id_to_link(id)
 end
 
 
-function ns:debug_display()
+function ns.debug_display()
 	ns.status_display()
 	print(
 		'|cffEE82EEDebug:\n  DB current pet: ', (ns.id_to_name(ns.db.currentPet) or '<nil>'),
@@ -1106,12 +1107,15 @@ function ns:debug_display()
 end
 
 -- without pet info
-function ns:debugprint(...)
-	if ns.db.debugMode then print('|cffEE82EEPetWalker Debug:', ...) end
+function ns.debugprint(...)
+	if ns.db.debugMode then
+		local a, b = strsplit('.', GetTimePreciseSec())
+		print(format('[%s.%s] %s:', a:sub(-3), b:sub(1, 2), '|cffEE82EEPetWalker Debug|r'), ...)
+	end
 end
 
 -- with pet info
-function ns:debugprint_pet(msg)
+function ns.debugprint_pet(msg)
 	if ns.db.debugMode then
 		print(
 			'|cffEE82EEPetWalker Debug: '
