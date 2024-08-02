@@ -154,7 +154,8 @@ local function prevent_summon()
 		throttle = 8
 	elseif UnitIsGhost 'player'
 		or UnitHasVehicleUI 'player'
-		or C_UnitAurasGetPlayerAuraBySpellID(311796) -- Pet: Daisy as backpack (/beckon)
+		-- With Daisy as backpack, we *can* summon other pets w/o loosing her. We just must not summon Daisy herself.
+-- 		or C_UnitAurasGetPlayerAuraBySpellID(311796) -- Pet: Daisy as backpack (/beckon)
 		or C_UnitAurasGetPlayerAuraBySpellID(312993) -- Carrying Forbidden Tomes (Scrivener Lenua event, Revendreth)
 		or C_UnitAurasGetPlayerAuraBySpellID(43880) -- Ramstein's Swift Work Ram (Brewfest daily; important bc the quest cannot be restarted if messed up)
 		or C_UnitAurasGetPlayerAuraBySpellID(43883) -- Rental Racing Ram (Brewfest daily)
