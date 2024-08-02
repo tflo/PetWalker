@@ -276,6 +276,8 @@ BINDING_NAME_PETWALKER_PREVIOUS_PET = 'Summon Previous Pet'
 BINDING_NAME_PETWALKER_TARGET_PET = 'Summon Same Pet as Target'
 BINDING_NAME_PETWALKER_DISMISS_PET = 'Dismiss Pet & Disable Auto-Summoning'
 
+-- TODO: Check where exactly we need a `InCombatLockdown` check to prevent taint!
+-- Or only in the final summon function?
 function PetWalker_binding_toggle_autosummon() ns:auto_toggle() end
 function PetWalker_binding_new_pet() ns:new_pet(nil, true) end
 function PetWalker_binding_previous_pet() ns.previous_pet() end
@@ -611,12 +613,15 @@ function ns.autoaction()
 	if prevent_summon() then return end
 	if ns.db.newPetTimer ~= 0 then
 		local now = time()
+		-- TODO: Remove all the old throttles throughout the code!
 		if ns.remaining_timer(now) == 0 and now - time_safesummon_failed > 40 then
 			ns.debugprint_pet '`autoaction` decided for new_pet'
 			ns:new_pet(now, false)
 			return
 		end
 	end
+	-- TODO: How reliably is the pet_verified flag set?!
+	-- I have the impression `transitioncheck` isn't always called when it should…
 	if not ns.pet_verified then
 		ns.debugprint_pet '`autoaction` decided for `transitioncheck` (`pet_verified` is false)'
 		ns.transitioncheck()
@@ -772,7 +777,9 @@ end
 --------------------------------------------------------------------------------------------------------------------]]--
 
 function ns.transitioncheck()
-	-- TODO: When we have finished our throttle and aura check rework, review if this is still needed here!
+-- 	Can be called via the entering-world events, or via `autoaction`, so we
+-- 	don't need the entire `prevent_summon` function here. Also, any running
+-- 	throttle via `prevent_summon` would stop `transitioncheck` in the tracks.
 	if ns.pet_verified or UnitAffectingCombat 'player' or IsFlying() or UnitOnTaxi 'player' then
 		if ns.db.debugMode then
 			ns.debugprint(format(
@@ -813,6 +820,7 @@ function ns.transitioncheck()
 		ns.msg_no_saved_pet()
 		ns:new_pet(now, false)
 	end
+	-- TODO: Do we still need this timestamp?
 	time_restore_pet = now
 	--[[ This is not 100% reliable here, but should do the trick most of the time. ]]
 	ns.pet_verified, savedpet_is_summonable = true, true

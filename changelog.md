@@ -4,12 +4,15 @@ To see all commits, including all alpha changes, go [here](https://github.com/tf
 
 ## Releases
 
-#### 2.2.0-alpha (2024-08-01)
+#### 2.2.0-alpha2 (2024-08-01)
 
+- First implementation of the reworked summoning prevention and throttling system (probably still buggy!)
 - Adapted to modern times: Properly detect if we are in Skyride mode and mounted on a Skyride mount. Needed for the `/pw sr` toggle to allow/disallow pet summoning in this situation (while still on ground, of course).
 - Changed the Dragonride/Skyride Allow toggle from `/pw r`/`/pw drsum` to `/pw sr`.
 - Removed PDF version of the readme.md. I think nowadays most people know how to preview a Markdown document, and a rendered view is on the [GitHub page](https://github.com/tflo/PetWalker?tab=readme-ov-file#petwalker) anyway.
 - Changes to the readme/description.
+- Added `debug` as debug mode toggle, in addition to `dm` (replaces `debm`)
+- Various optimizations.
 
 
 #### 2.1.8 (2024-07-24)
