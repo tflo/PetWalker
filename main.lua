@@ -126,14 +126,14 @@ end
 -- In the function below, we could also replace the whole throttle system with…
 -- <unregister events>; C_TimerAfter(<throttle>, <re-register events>)
 
-local function prevent_summon()
+local function stop_auto_summon()
 	-- if not not ns.db.autoEnabled then return true end
 	-- Always-active throttle
 	if not bypass_throttle then
 		throttle = max(throttle, throttle_min)
 		local now = now or time()
 		if now - time_responded_to_summoning_event < throttle then
-			ns.debugprint('`prevent_summon`: existing throttle found:', throttle)
+			ns.debugprint('`stop_auto_summon`: existing throttle found:', throttle)
 			return true
 		end
 		time_responded_to_summoning_event, throttle = now, 0
@@ -168,12 +168,12 @@ local function prevent_summon()
 		throttle = 120
 	end
 	if throttle > 0 then
-		ns.debugprint('`prevent_summon`: new throttle:', throttle)
+		ns.debugprint('`stop_auto_summon`: new throttle:', throttle)
 		return true
 	end
 end
 
--- For a manual action, we don't want all the checks from `prevent_summon` or a throttle.
+-- For a manual action, we don't want all the checks from `stop_auto_summon` or a throttle.
 -- Combat check is needed though to not generate errors.
 local function stop_manual_summon()
 	if InCombatLockdown() then
@@ -618,7 +618,7 @@ end
 ---------------------------------------------------------------------------]]--
 
 function ns.autoaction()
-	if prevent_summon() then return end
+	if stop_auto_summon() then return end
 	if ns.db.newPetTimer ~= 0 then
 		local now = time()
 		-- TODO: Remove all the old throttles throughout the code!
@@ -663,7 +663,7 @@ function ns:restore_pet()
 	if savedpet then
 		ns.debugprint '`restore_pet` is restoring saved pet'
 		ns.set_sum_msg_to_restore_pet(savedpet)
-		ns:safesummon(savedpet, false)
+		ns:summon_pet(savedpet, false)
 	else
 		ns.debugprint '`restore_pet` could not find saved pet --> summoning new pet'
 		ns.msg_no_saved_pet()
@@ -717,7 +717,7 @@ function ns:new_pet(time, via_hotkey)
 			until actpet ~= newpet
 		end
 		ns.set_sum_msg_to_newpet(actpet, newpet, npool)
-		ns:safesummon(newpet, true)
+		ns:summon_pet(newpet, true)
 	end
 end
 
@@ -736,7 +736,7 @@ function ns.previous_pet()
 	end
 	if prevpet then
 		ns.set_sum_msg_to_previouspet(prevpet)
-		ns:safesummon(prevpet, true)
+		ns:summon_pet(prevpet, true)
 	else
 		ns.msg_no_previous_pet()
 	end
@@ -770,7 +770,7 @@ function ns.summon_targetpet()
 	local current_pet = C_PetJournalGetSummonedPetGUID()
 
 	if not current_pet or C_PetJournalGetPetInfoByPetID(current_pet) ~= target_species_id then
-		ns:safesummon(tarpet, true)
+		ns:summon_pet(tarpet, true)
 		ns.msg_target_summoned(target_pet_link)
 	else
 		ns.msg_target_is_same(target_pet_link) -- Without web link
@@ -789,8 +789,8 @@ end
 
 function ns.transitioncheck()
 -- 	Can be called via the entering-world events, or via `autoaction`, so we
--- 	don't need the entire `prevent_summon` function here. Also, any running
--- 	throttle via `prevent_summon` would stop `transitioncheck` in the tracks.
+-- 	don't need the entire `stop_auto_summon` function here. Also, any running
+-- 	throttle via `stop_auto_summon` would stop `transitioncheck` in the tracks.
 	if ns.pet_verified or InCombatLockdown() or IsFlying() or UnitOnTaxi 'player' then
 		if ns.db.debugMode then
 			ns.debugprint(format(
@@ -823,7 +823,7 @@ function ns.transitioncheck()
 	if savedpet and savedpet_is_summonable then
 		ns.debugprint '`transitioncheck` is restoring saved pet'
 		ns.set_sum_msg_to_transcheck(savedpet)
-		ns:safesummon(savedpet, false)
+		ns:summon_pet(savedpet, false)
 	--[[ Should only come into play if savedpet is still nil due to a slow
 	loading process ]]
 	elseif not actpet then
@@ -883,15 +883,15 @@ end
 ---------------------------------------------------------------------------]]--
 
 
-function ns:safesummon(pet, resettimer)
+function ns:summon_pet(pet, resettimer)
 	if not pet then -- TODO: needed?
-		ns.debugprint '`safesummon` was called without `pet` argument!'
+		ns.debugprint '`summon_pet` was called without `pet` argument!'
 		return
 	end
 	if ns.db.debugMode then
 		local is_summonable, error_num, error_text = C_PetJournalGetPetSummonInfo(pet)
 		if not is_summonable then
-			ns.debugprint('`safesummon`: Something is wrong with our summonability check: pet cannot be summoned, `GetPetSummonInfo` returned', is_summonable, error_num, error_text)
+			ns.debugprint('`summon_pet`: Something is wrong with our summonability check: pet cannot be summoned, `GetPetSummonInfo` returned', is_summonable, error_num, error_text)
 			return
 		end
 	end
