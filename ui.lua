@@ -132,6 +132,11 @@ function ns.msg_previous_pet_unsummonable()
 	chat_user_notification(CO.bw .. 'The saved Previous Pet or other saved pets are not summonable either.\n--> Saving the currently active pet or summoning a new one.')
 end
 
+function ns.msg_manual_summon_stopped()
+	if ns.db.verbosityLevel < 1 then return end
+	chat_user_notification(CO.bw .. 'You are in combat lockdown, pet summoning aborted.')
+end
+
 
 -- Summon Target Pet messages
 

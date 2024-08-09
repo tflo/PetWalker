@@ -173,6 +173,14 @@ local function prevent_summon()
 	end
 end
 
+-- For a manual action, we don't want all the checks from `prevent_summon` or a throttle.
+-- Combat check is needed though to not generate errors.
+local function stop_manual_summon()
+	if InCombatLockdown() then
+		ns.msg_manual_summon_stopped()
+		return true
+	end
+end
 
 --[[---------------------------------------------------------------------------
 	Unsummonable pets (faction-locked pets)
@@ -670,6 +678,7 @@ end
 ---------------------------------------------------------------------------]]--
 
 function ns:new_pet(time, via_hotkey)
+	if via_hotkey and stop_manual_summon() then return end
 	if ns.db.debugMode then
 		ns.debugprint(format('`new_pet` runs with args %s, %s ', tostring(time), tostring(via_hotkey)))
 	end
@@ -718,6 +727,7 @@ end
 ---------------------------------------------------------------------------]]--
 
 function ns.previous_pet()
+	if stop_manual_summon() then return end
 	local prevpet
 	if ns.dbc.charFavsEnabled then
 		prevpet = ns.dbc.previousPet
@@ -737,6 +747,7 @@ end
 ---------------------------------------------------------------------------]]--
 
 function ns.summon_targetpet()
+	if stop_manual_summon() then return end
 	if not UnitIsBattlePet 'target' then
 		ns.msg_target_is_not_battlepet()
 		return
