@@ -120,12 +120,6 @@ local function forbidden_instance()
 end
 
 
--- TODO: Other possible strategy for combat lockdown:
--- if InCombatLockdown() then <unregister summon events>; RegisterEvent("PLAYER_REGEN_ENABLED") end
--- PLAYER_REGEN_ENABLED --> <Re-register summon events>
--- In the function below, we could also replace the whole throttle system with…
--- <unregister events>; C_TimerAfter(<throttle>, <re-register events>)
-
 local function stop_auto_summon()
 	-- if not not ns.db.autoEnabled then return true end
 	-- Always-active throttle
@@ -477,8 +471,8 @@ function ns:ADDON_LOADED(addon)
 	§ Pet battle, hooks, and misc
 ---------------------------------------------------------------------------]]--
 
-		--[[ TOOD: Check if we really have to set the flag here. We could modify autoaction() to always check against
-		the saved pet if pet_verified is true. ]]
+		--[[ TOOD: Check if we really have to set the flag here. We could modify `autoaction` to always check against
+		the saved pet if `pet_verified` is true. ]]
 		hooksecurefunc(C_PetJournal, 'SetPetLoadOutInfo', function()
 			-- Note that SetPetLoadOutInfo summons the slot pet, but it does so _not_ via SummonPetByGUID
 			ns.debugprint 'Hook: `SetPetLoadOutInfo` --> setting `pet_verified` to false'
@@ -559,7 +553,6 @@ function ns:ADDON_LOADED(addon)
 	elseif addon == 'Blizzard_Collections' then
 		ns.events:UnregisterEvent 'ADDON_LOADED'
 		--[[ -- Currently disabled due to DF changes
-		-- TODO: the same for Rematch
 		for i, btn in ipairs(PetJournal.listScroll.buttons) do
 		for i, btn in ipairs(PetJournal.ScrollBox.ScrollTarget) do
 			btn:SetScript('OnClick', function(self, button)
@@ -573,8 +566,6 @@ function ns:ADDON_LOADED(addon)
 		end
 		--]]
 
-
-		-- TODO: the same for Rematch
 		ns.cfavs_button = ns:create_cfavs_checkbox()
 		hooksecurefunc('CollectionsJournal_UpdateSelectedTab', function(self)
 			local selected = PanelTemplates_GetSelectedTab(self)
@@ -680,7 +671,7 @@ end
 function ns:new_pet(the_time, manually_called)
 	if manually_called and stop_manual_summon() then return end
 	if ns.db.debugMode then
-		ns.debugprint(format('`new_pet` runs with args %s, %s ', tostring(time), tostring(manually_called)))
+		ns.debugprint(format('`new_pet` called with args %s, %s ', tostring(the_time), tostring(manually_called)))
 	end
 	local now = the_time or time()
 	if now - ns.time_newpet_success < 1.5 then return end
@@ -799,7 +790,7 @@ function ns.transitioncheck()
 		return
 	end
 	local now = time()
-	--[[ If toon starts moving immediately after transition, then restore_pet
+	--[[ If toon starts moving immediately after transition, then `restore_pet`
 	might come before us. Also prevents redundant run in case we use both events
 	NEW_AREA and ENTERING_WORLD. ]]
 	if now - time_restore_pet < 6 then
