@@ -70,7 +70,7 @@ local delay_login_msg = 22
 local delay_after_battle = 15 -- Post-petbattle sleep
 local instasummon_after_battlesleep = true -- Summon without waiting for trigger event
 local msg_onlyfavisactive_alreadydisplayed = false
-local check_against_flying = false
+local check_against_flying = true
 local time_responded_to_summoning_event = 0
 local throttle_min = 3
 local throttle = 0 --  throttle_min * 2
@@ -176,7 +176,7 @@ end
 -- For a manual action, we don't want all the checks from `stop_auto_summon` or a throttle.
 -- Combat check is needed though to not generate errors.
 local function stop_manual_summon()
-	if InCombatLockdown() then
+	if InCombatLockdown() or check_against_flying and (IsFlying() or UnitOnTaxi 'player') then
 		ns.msg_manual_summon_stopped()
 		return true
 	end

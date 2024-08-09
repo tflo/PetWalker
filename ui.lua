@@ -134,7 +134,7 @@ end
 
 function ns.msg_manual_summon_stopped()
 	if ns.db.verbosityLevel < 1 then return end
-	chat_user_notification(CO.bw .. 'You are in combat lockdown, pet summoning aborted.')
+	chat_user_notification(CO.bw .. 'You are in combat lockdown or flying; pet summoning aborted.')
 end
 
 
