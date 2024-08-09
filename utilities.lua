@@ -2,6 +2,7 @@ local addon_name, ns = ...
 
 local C_PetJournalGetPetInfoByPetID = C_PetJournal.GetPetInfoByPetID
 local C_PetJournalGetBattlePetLink = C_PetJournal.GetBattlePetLink
+local GetTimePreciseSec = _G.GetTimePreciseSec
 
 local COLOR_DEBUG = '|cffEE82EE'
 

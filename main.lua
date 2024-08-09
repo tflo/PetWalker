@@ -26,7 +26,6 @@ local C_UnitAurasGetPlayerAuraBySpellID = _G.C_UnitAuras.GetPlayerAuraBySpellID
 local InCombatLockdown = _G.InCombatLockdown
 local IsFlying = _G.IsFlying
 local IsMounted = _G.IsMounted
-local IsAdvancedFlyableArea = _G.IsAdvancedFlyableArea
 local UnitOnTaxi = _G.UnitOnTaxi
 local UnitHasVehicleUI = _G.UnitHasVehicleUI
 local UnitIsGhost = _G.UnitIsGhost
@@ -36,8 +35,7 @@ local IsInInstance = _G.IsInInstance
 local IsStealthed = _G.IsStealthed
 local UnitIsControlling = _G.UnitIsControlling
 local UnitChannelInfo = _G.UnitChannelInfo
-local GetTime = _G.GetTime
-local GetTimePreciseSec = _G.GetTimePreciseSec
+local time = _G.time
 local C_PlayerInfoGetGlidingInfo = C_PlayerInfo.GetGlidingInfo
 
 --[[===========================================================================
