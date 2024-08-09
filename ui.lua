@@ -321,8 +321,7 @@ function SlashCmdList.PetWalker(cmd)
 	elseif cmd == 'a' or cmd == 'auto' then
 		ns:auto_toggle()
 	elseif cmd == 'n' or cmd == 'new' then
-		local actpet = C_PetJournalGetSummonedPetGUID()
-		ns:new_pet()
+		ns:new_pet(nil, true)
 	elseif cmd == 'f' or cmd == 'fav' then
 		ns:favs_toggle()
 	elseif cmd == 'aev' or cmd == 'altevents' then -- Probably better to leave this undocumented

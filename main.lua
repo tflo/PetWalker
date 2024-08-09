@@ -677,10 +677,10 @@ end
 	Called by autoaction when timer is due
 ---------------------------------------------------------------------------]]--
 
-function ns:new_pet(time, via_hotkey)
-	if via_hotkey and stop_manual_summon() then return end
+function ns:new_pet(time, manually_called)
+	if manually_called and stop_manual_summon() then return end
 	if ns.db.debugMode then
-		ns.debugprint(format('`new_pet` runs with args %s, %s ', tostring(time), tostring(via_hotkey)))
+		ns.debugprint(format('`new_pet` runs with args %s, %s ', tostring(time), tostring(manually_called)))
 	end
 	local now = time or time()
 	if now - ns.time_newpet_success < 1.5 then return end
@@ -705,7 +705,7 @@ function ns:new_pet(time, via_hotkey)
 		if npool == 1 then
 			newpet = ns.pet_pool[1]
 			if actpet == newpet then
-				if not msg_onlyfavisactive_alreadydisplayed or via_hotkey then
+				if not msg_onlyfavisactive_alreadydisplayed or manually_called then
 					ns.msg_onlyfavisactive(actpet)
 					msg_onlyfavisactive_alreadydisplayed = true
 				end
