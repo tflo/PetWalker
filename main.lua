@@ -677,12 +677,12 @@ end
 	Called by autoaction when timer is due
 ---------------------------------------------------------------------------]]--
 
-function ns:new_pet(time, manually_called)
+function ns:new_pet(the_time, manually_called)
 	if manually_called and stop_manual_summon() then return end
 	if ns.db.debugMode then
 		ns.debugprint(format('`new_pet` runs with args %s, %s ', tostring(time), tostring(manually_called)))
 	end
-	local now = time or time()
+	local now = the_time or time()
 	if now - ns.time_newpet_success < 1.5 then return end
 	local actpet = C_PetJournalGetSummonedPetGUID()
 	if actpet and is_excluded_by_id(actpet) then
