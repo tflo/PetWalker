@@ -4,15 +4,23 @@ To see all commits, including all alpha changes, go [here](https://github.com/tf
 
 ## Releases
 
-#### 2.2.0-alpha2 (2024-08-01)
+#### 2.2.0 (2024-08-10)
 
-- First implementation of the reworked summoning prevention and throttling system (probably still buggy!)
+- Implemented the totally reworked summoning prevention and throttling system (probably needs finetuning).
+    - This is the thing I started almost 12 months ago (see the change notes for v2.0.8!) and then fell victim to my laziness.
+    - This doesn’t bring any groundbreaking changes, but we will save a few CPU milliseconds.
+    - New or changed Summon Check throttle times for some situations: e.g. 20s when flying, 8s when in combat or with certain auras, 40s for certain other auras, 120s when in certain instance types.
 - Adapted to modern times: Properly detect if we are in Skyride mode and mounted on a Skyride mount. Needed for the `/pw sr` toggle to allow/disallow pet summoning in this situation (while still on ground, of course).
-- Changed the Dragonride/Skyride Allow toggle from `/pw r`/`/pw drsum` to `/pw sr`.
+- Changed the Dragonride/Skyride ‘Allow Summoning’ toggle from `/pw r`/`/pw drsum` to `/pw sr`.
+- Manually summoning a new pet via slash command (`/pw n`) now correctly sets the “manual” parameter (like it does with hotkey summoning). This should prevent errors when you accidentally try to summon in combat.
+- Added flying/taxi check also to the manual summoning methods. This should prevent false “summoned pet” messages.
+- Removed “Daisy as backpack (/beckon)” aura from the blacklist:
+    - It was on the blacklist because if you summon Daisy while she is on your back, she will disappear.
+    - Removed because it is perfectly fine to summon other pets while Daisy is on your back (she will not disappear).
 - Removed PDF version of the readme.md. I think nowadays most people know how to preview a Markdown document, and a rendered view is on the [GitHub page](https://github.com/tflo/PetWalker?tab=readme-ov-file#petwalker) anyway.
 - Changes to the readme/description.
-- Added `debug` as debug mode toggle, in addition to `dm` (replaces `debm`)
-- Various optimizations.
+- Added `debug` word as debug mode toggle, in addition to `dm` (replaces `debm`)
+- Various optimizations; cleanup.
 
 
 #### 2.1.8 (2024-07-24)

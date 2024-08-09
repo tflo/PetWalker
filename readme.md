@@ -51,7 +51,7 @@ PetWalker has a rich chat console interface:
 - __`/pw r`:__ Allow/disallow automatic summoning of pets while _mounted_ (and on the ground) _in a Dragonriding zone._
     - As of version 1.2.0 (March 2023), automatic pet summoning can also happen while you are mounted. With “normal” mounts, this behavior is trouble-free and only beneficial, but with Dragonriding mounts it can cause occasional glitches. Therefore, you can disable it with this toggle. _It is enabled by default._ Please read the 1.1.8 change notes, or the explanation in the FAQ below!
 - __`/pw d`:__ Dismiss current pet and disable auto-summoning. A kind of emergency command, if you want to get rid of your pet immediately and prevent all automatic summoning. Re-enable with `/pw a`.
-- __`/pw 〈number〉`:__ Interval [minutes] for summoning a new pet. ‘0’ disables summoning of new pets, though the pet-_restore_ functionality is still active (use `/pw a` to disable it).
+- __`/pw <number>`:__ Interval [minutes] for summoning a new pet. ‘0’ disables summoning of new pets, though the pet-_restore_ functionality is still active (use `/pw a` to disable it).
 - __`/pw f`:__ Toggle the random-summon pool between Favorites and All Pets.
     - With the All Pets setting, the currently active filters of the Pet Journal still apply (Pet Family and Sources). Since these filters can be combined, this offers quite some possibilities to create varied pools for random summoning, without the need to select favorites.
     - Hint: You can also use the search box of the Pet Journal as filter: If your summon pool is set to All Pets and the search box contains “rabbit”, PetWalker will only summon pets with “rabbit” in their name.
@@ -159,9 +159,9 @@ To be clear, the GCD is not caused by PetWalker, it’s a Blizz thing: any pet s
 
 ## Known Issues / To Do
 
-- Remove erroneous “summoned” messages in a few situations where actually no pet was summoned.
-- <s>As mentioned in the FAQ, there is a chance that after a pet battle your previous companion is not re-summoned. This needs to be improved.</s>
-- <s>Add an optional login message.</s>
+- ~~Remove erroneous “summoned” messages in a few situations where actually no pet was summoned.~~
+- ~~As mentioned in the FAQ, there is a chance that after a pet battle your previous companion is not re-summoned. This needs to be improved.~~
+- ~~Add an optional login message.~~
 
 ---
 
@@ -170,15 +170,15 @@ __Please do not post issues or suggestions in the comments on Curseforge.__
 
 ---
 
-__My other addons:__
+__Other addons by me:__
 
 - [___Auto Quest Tracker Mk III___](https://www.curseforge.com/wow/addons/auto-quest-tracker-mk-iii): Continuation of
   the one and only original. Up to date and new features.
-- [___Move ‘em All___](https://www.curseforge.com/wow/addons/move-em-all): Mass move items/stacks from your bags to
-  wherever. Works also with bag addons.
-- [___Auto-Confirm Equip___](https://www.curseforge.com/wow/addons/auto-confirm-equip): Less (or no) confirmation
-  prompts for BoE gear.
-- [___Action Bar Button Growth Direction___](https://www.curseforge.com/wow/addons/action-bar-button-growth-direction):
-  Fix the button growth direction of multi-row action bars to what is was before Dragonflight (top --> bottom).
-- [___EditBox Font Improver___](https://www.curseforge.com/wow/addons/editbox-font-improver): Better fonts for
-  your macro/script edit boxes.
+- [___Move 'em All___](https://www.curseforge.com/wow/addons/move-em-all): Mass move items/stacks from your bags to wherever. Works also with bag addons.
+- [___Auto-Confirm Equip___](https://www.curseforge.com/wow/addons/auto-confirm-equip): Less (or no) confirmation prompts for BoE gear.
+- [___Action Bar Button Growth Direction___](https://www.curseforge.com/wow/addons/action-bar-button-growth-direction): Fix the button growth direction of multi-row action bars to what is was before Dragonflight (top --> bottom).
+- [___EditBox Font Improver___](https://www.curseforge.com/wow/addons/editbox-font-improver): Better fonts for your macro/script edit boxes.
+
+__WeakAuras:__
+
+- [___Stats Mini___](https://wago.io/S4023p3Im): A *very* compact but beautiful and feature-loaded stats display: primary/secondary stats, *all* defensive stats (also against target), GCD, speed (rating/base/actual/Skyriding), iLevel (equipped/overall/difference), char level +progress.
