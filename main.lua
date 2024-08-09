@@ -23,7 +23,7 @@ local C_PetJournalGetPetSummonInfo = _G.C_PetJournal.GetPetSummonInfo
 local C_PetBattlesIsInBattle = _G.C_PetBattles.IsInBattle
 local C_MapGetBestMapForUnit = _G.C_Map.GetBestMapForUnit
 local C_UnitAurasGetPlayerAuraBySpellID = _G.C_UnitAuras.GetPlayerAuraBySpellID
-local UnitAffectingCombat = _G.UnitAffectingCombat
+local InCombatLockdown = _G.InCombatLockdown
 local IsFlying = _G.IsFlying
 local IsMounted = _G.IsMounted
 local IsAdvancedFlyableArea = _G.IsAdvancedFlyableArea
@@ -142,7 +142,7 @@ local function prevent_summon()
 		-- We need these tests only at events that can occure during it
 		(IsFlying() or UnitOnTaxi 'player') then
 		throttle = 20
-	elseif UnitAffectingCombat 'player'
+	elseif InCombatLockdown()
 		or not ns.db.drSummoning and is_skyride_mounted()
 		or IsStealthed() -- Includes Hunter Camouflage
 		or C_UnitAurasGetPlayerAuraBySpellID(32612) -- Mage: Invisibility
@@ -791,7 +791,7 @@ function ns.transitioncheck()
 -- 	Can be called via the entering-world events, or via `autoaction`, so we
 -- 	don't need the entire `prevent_summon` function here. Also, any running
 -- 	throttle via `prevent_summon` would stop `transitioncheck` in the tracks.
-	if ns.pet_verified or UnitAffectingCombat 'player' or IsFlying() or UnitOnTaxi 'player' then
+	if ns.pet_verified or InCombatLockdown() or IsFlying() or UnitOnTaxi 'player' then
 		if ns.db.debugMode then
 			ns.debugprint(format(
 				'`transitioncheck` returned early (`pet_verified`: %s; other conditions: combat, flying, taxi)', tostring(ns.pet_verified)))
