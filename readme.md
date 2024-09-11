@@ -126,7 +126,7 @@ See also [issue#6](https://github.com/tflo/PetWalker/issues/6).
 
 ### Where/when does PetWalker fail to keep my pet out?
 
-<s>The most difficult situation is when you select a team for a pet battle. If you are using Rematch, you should select the “Keep Companion” option (in “Miscellaneous Options”). This will definitely help, but it is not guaranteed that, after the pet battle, you have the same pet out as before.</s>
+~~The most difficult situation is when you select a team for a pet battle. If you are using Rematch, you should select the “Keep Companion” option (in “Miscellaneous Options”). This will definitely help, but it is not guaranteed that, after the pet battle, you have the same pet out as before.~~
 
 __As of version 2.0.0 (April 2023),__ PetWalker’s behavior in the context of pet battles has dramatically improved. For the gory details, see the change notes of version 2.0.0 from 2023-04-28.
 
