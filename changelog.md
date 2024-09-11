@@ -1,8 +1,16 @@
-To see all commits, including all alpha changes, go [here](https://github.com/tflo/PetWalker/commits/master/).
+To see all commits, including all alpha changes, [***go here***](https://github.com/tflo/PetWalker/commits/master/).
 
 ---
 
 ## Releases
+
+#### 2.2.1 (2024-09-11)
+
+- Added `IsPossessBarVisible` to the summoning prevention checks. (Thanks to [Legolando](https://www.curseforge.com/members/legolando/projects)!; [Issue #11](https://github.com/tflo/PetWalker/issues/11))
+    - This replaces a couple of previously blacklisted auras by ID.
+    - This also covers most controller-style toys that weren’t excluded before.
+    - *Note 1:* The purpose of the summoning prevention checks is to ensure that PW does not summon pets in situations where it may be disruptive or undesirable (e.g. arena, M+, stealth, invisibility, vehicle, certain quest-related or toy-related auras). This update should significantly improve behavior in the toy department.
+    - *Note 2:* However, it is likely that not all situations where auto-summoning is unwanted are covered. In such a case, remember that you can always quickly toggle PW’s auto-summoning with the `/pw a` command or your hotkey.
 
 #### 2.2.0 (2024-08-10)
 

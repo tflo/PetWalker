@@ -146,8 +146,9 @@ local function stop_auto_summon()
 	then
 		throttle = 8
 	elseif UnitIsGhost 'player'
-		or UnitHasVehicleUI 'player'
-		or IsPossessBarVisible()
+		or UnitHasVehicleUI 'player' -- Alternative(?): `HasOverrideActionBar()`
+		-- Potentially useful: 	`HasExtraActionBar()`
+		or IsPossessBarVisible() -- Seems to often coincide with `HasVehicleActionBar()` (not in case of aura 212754!)
 		-- With Daisy as backpack, we *can* summon other pets w/o loosing her. We just must not summon Daisy herself.
 -- 		or C_UnitAurasGetPlayerAuraBySpellID(311796) -- Pet: Daisy as backpack (/beckon)
 		or C_UnitAurasGetPlayerAuraBySpellID(312993) -- Carrying Forbidden Tomes (Scrivener Lenua event, Revendreth)
@@ -477,7 +478,7 @@ function ns:ADDON_LOADED(addon)
 		the saved pet if `pet_verified` is true. ]]
 		hooksecurefunc(C_PetJournal, 'SetPetLoadOutInfo', function()
 			-- Note that SetPetLoadOutInfo summons the slot pet, but it does so _not_ via SummonPetByGUID
-			ns.debugprint 'Hook: `SetPetLoadOutInfo` --> setting `pet_verified` to false'
+			ns.debugprint 'Hook: `SetPetLoadOutInfo` --> Setting `pet_verified` to false'
 			ns.pet_verified = false
 		end)
 
@@ -537,9 +538,10 @@ function ns:ADDON_LOADED(addon)
 		Unset the 'pool_initialized' var with that event, and initialize only when
 		needed, that is before selecting a random pet.
 		--> This seems to work, so far!
+		TODO: Just noticed that this fires each time I hover over a pet in the AH listing(!). Find out if this is triggered by an addon, or if it is Blizz crap. If needed, unregister PW events when the AH is opened.
 		]]
 		function ns:PET_JOURNAL_LIST_UPDATE()
-			ns.debugprint 'Event: PET_JOURNAL_LIST_UPDATE --> setting `pool_initialized` to false'
+			ns.debugprint 'Event: PET_JOURNAL_LIST_UPDATE --> Setting `pool_initialized` to false'
 			ns.pool_initialized = false
 		end
 
