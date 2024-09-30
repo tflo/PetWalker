@@ -9,19 +9,19 @@ local COLOR_DEBUG = '|cffEE82EE'
 function ns.id_to_name(id)
 	if not id then return '"no ID!" from `id_to_name`' end
 	local name = select(8, C_PetJournalGetPetInfoByPetID(id))
-	return name
+	return name or '?petname?'
 end
 
 function ns.id_to_species(id)
 	if not id then return '"no ID!" from `id_to_species`' end
 	local spec = C_PetJournalGetPetInfoByPetID(id)
-	return spec
+	return spec or '?petspecies?'
 end
 
 function ns.id_to_link(id)
 	if not id then return '"no ID!" from `id_to_link`' end
 	local link = C_PetJournalGetBattlePetLink(id)
-	return link
+	return link or '?petlink?'
 end
 
 
