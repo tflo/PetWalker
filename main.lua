@@ -501,12 +501,20 @@ function ns:ADDON_LOADED(addon)
 -- 		C_PetJournalSummonPetByGUID = _G.C_PetJournal.SummonPetByGUID
 
 		-- This event fires always 2 times, so let's throttle
-		local eventthrottle_companionupdate
+		local eventthrottle_companionupdate, pet_restored
 		function ns:COMPANION_UPDATE(what)
 			if what == 'CRITTER' then
 				if not eventthrottle_companionupdate then
 					eventthrottle_companionupdate = true
 -- 					ns.events:UnregisterEvent 'COMPANION_UPDATE'
+					if pet_restored then
+						pet_restored = false
+						if ns.db.debugMode then
+							ns.debugprint('Event: COMPANION_UPDATE (`actpet`: ' ..
+							ns.id_to_name(C_PetJournalGetSummonedPetGUID()) .. '): not saving bc `pet_restored`')
+						end
+						return
+					end
 					if ns.db.debugMode then
 						ns.debugprint('Event: COMPANION_UPDATE (`actpet`: ' ..
 						ns.id_to_name(C_PetJournalGetSummonedPetGUID()) .. ') --> `save_pet`')
@@ -666,6 +674,7 @@ function ns:restore_pet()
 	if savedpet then
 		ns.debugprint '`restore_pet` is restoring saved pet'
 		ns.set_sum_msg_to_restore_pet(savedpet)
+		pet_restored = true
 		ns:summon_pet(savedpet, false)
 	else
 		ns.debugprint '`restore_pet` could not find saved pet --> summoning new pet'
