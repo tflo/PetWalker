@@ -284,7 +284,7 @@ function ns.msg_low_petpool(nPool)
 	if ns.db.verbosityLevel < 0 then return end
 	local R = CO.bw
 	local content = {
-		(nPool < 1 and CO.k .. '0 (zero) ' ..R.. ' pets ' or R.. 'Only ' ..CO.k .. '1 ' ..R.. 'pet '),
+		(nPool < 1 and CO.k .. '0 (zero) ' ..R.. 'pets ' or R.. 'Only ' ..CO.k .. '1 ' ..R.. 'pet '),
 		'eligible as random summon!',
 		'\nYou should either ' .. (ns.db.favsOnly and 'flag more pets as favorite, or set the ramdom pool to ' .. CO.s ..'All Pets' or 'collect more pets'), ', or set the random-summon timer to ', CO.s .. '0', '.',
 		'\nAlso check your ', CO.k .. 'Filter ', 'settings in the ', CO.k .. 'Blizz Pet Journal ', '(not in Rematch!), as they are affecting the pool of available pets!',
