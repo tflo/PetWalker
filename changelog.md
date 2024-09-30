@@ -4,7 +4,7 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
-#### 2.3.0-beta1 (2024-09-30)
+#### 2.3.0-beta2 (2024-10-01)
 
 - Reworked the logic behind “when should a pet that was not summoned by PetWalker be saved as the ‘correct’ pet” from *including* to *excluding*.
     - This beta is the first attempt to fix [Issue #12](https://github.com/tflo/PetWalker/issues/12). If you experience  glitches, please report them to Issue #12 and (optionally) revert to the latest non-beta version.

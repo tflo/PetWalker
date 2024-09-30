@@ -75,7 +75,7 @@ local throttle_min = 3
 local throttle = 0 --  throttle_min * 2
 local bypass_throttle = false
 local savedpet_is_summonable = true
-
+local eventthrottle_companionupdate, pet_restored
 local excluded_species = {
 --[[  Pet is vendor and goes on CD when summoned ]]
 	280, -- Guild Page, Alliance
@@ -484,47 +484,27 @@ function ns:ADDON_LOADED(addon)
 			ns.pet_verified = false
 		end)
 
--- 		hooksecurefunc(C_PetJournal, 'SummonPetByGUID', function()
--- 			if ns.db.debugMode then
--- 				ns.time_summonspell = time()
--- 				ns.debugprint(format(
--- 					'Hook: `SummonPetByGUID` runs; `in_battlesleep`: %s (if false --> register `COMPANION_UPDATE`)',
--- 					tostring(ns.in_battlesleep)))
--- 			end
--- 			-- if ns.skipNextSave then ns.skipNextSave = false return end
--- 			if not ns.in_battlesleep then
--- 				ns.events:RegisterEvent 'COMPANION_UPDATE' -- Timer better?
--- 				-- C_Timer.After(0.2, ns.save_pet) -- 0.2 is the tested minimum!
--- 			end
--- 		end)
-
--- 		C_PetJournalSummonPetByGUID = _G.C_PetJournal.SummonPetByGUID
-
-		-- This event fires always 2 times, so let's throttle
-		local eventthrottle_companionupdate, pet_restored
 		function ns:COMPANION_UPDATE(what)
-			if what == 'CRITTER' then
-				if not eventthrottle_companionupdate then
-					eventthrottle_companionupdate = true
--- 					ns.events:UnregisterEvent 'COMPANION_UPDATE'
-					if pet_restored then
-						pet_restored = false
-						if ns.db.debugMode then
-							ns.debugprint('Event: COMPANION_UPDATE (`actpet`: ' ..
-							ns.id_to_name(C_PetJournalGetSummonedPetGUID()) .. '): not saving bc `pet_restored`')
-						end
-						return
-					end
-					if ns.db.debugMode then
-						ns.debugprint('Event: COMPANION_UPDATE (`actpet`: ' ..
-						ns.id_to_name(C_PetJournalGetSummonedPetGUID()) .. ') --> `save_pet`')
-					end
-					ns.save_pet()
-					C_TimerAfter(0.5, function()
-						eventthrottle_companionupdate = nil
-					end)
+			-- This event fires always 2 times, so let's just listen to the first one
+			if what ~= 'CRITTER' or eventthrottle_companionupdate then return end
+			eventthrottle_companionupdate = true
+			if pet_restored then
+				pet_restored = false
+				if ns.db.debugMode then
+					ns.debugprint('Event: COMPANION_UPDATE (`actpet`: ' ..
+					ns.id_to_name(C_PetJournalGetSummonedPetGUID()) .. '): not saving bc `pet_restored`')
 				end
+				return
 			end
+			if ns.db.debugMode then
+				ns.debugprint('Event: COMPANION_UPDATE (`actpet`: ' ..
+				ns.id_to_name(C_PetJournalGetSummonedPetGUID()) .. ') --> `save_pet`')
+			end
+			-- It *seems* the pet is already summoned when the event fires the 1st time, so no need to delay the save
+			ns.save_pet()
+			C_TimerAfter(0.5, function()
+				eventthrottle_companionupdate = nil
+			end)
 		end
 
 		function ns:PET_BATTLE_OPENING_START()
@@ -640,8 +620,7 @@ function ns.autoaction()
 			return
 		end
 	end
-	-- TODO: How reliably is the pet_verified flag set?!
-	-- I have the impression `transitioncheck` isn't always called when it should…
+	-- TODO: Could we not simply check against the saved db pet, and restore if it isn't correct or missing?
 	if not ns.pet_verified then
 		ns.debugprint_pet '`autoaction` decided for `transitioncheck`, bc not `pet_verified`'
 		ns.transitioncheck()
@@ -889,11 +868,10 @@ end
 
 
 --[[---------------------------------------------------------------------------
-	§ Safe-summon
-	Used in the AutoSummon function, and currently also in the
+	Summon Pet
+	Used in the Auto Summon function, and currently also in the
 	Manual Summon function
 ---------------------------------------------------------------------------]]--
-
 
 function ns:summon_pet(pet, resettimer)
 	if not pet then -- TODO: needed?
