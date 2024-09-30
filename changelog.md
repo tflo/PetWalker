@@ -4,6 +4,14 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.3.0-beta1 (2024-09-30)
+
+- Reworked the logic behind “when should a pet that was not summoned by PetWalker be saved as the ‘correct’ pet” from *including* to *excluding*.
+    - This beta is the first attempt to fix [Issue #12](https://github.com/tflo/PetWalker/issues/12). If you experience  glitches, please report them to Issue #12 and (optionally) revert to the latest non-beta version.
+    - PetWalker now considers any pet that is summoned by the user, no matter how, as “intentionally summoned” (aka ‘correct’) and saves it for later restore.
+    - *This namely includes pets that are summoned using an action bar button,* as well as pets summoned via the “Summon Random Favorite Pet” button in the Pet Journal or the `/randompet` slash command, and possibly other summoning methods
+    - A pet that is force-summoned because you put in a pet battle slot (Pet Journal), or because Rematch loads a pet battle team, is excluded from this. *So, you should still get back your ‘correct’ (previous) pet after a pet battle.*
+
 #### 2.2.1 (2024-09-11)
 
 - Added `IsPossessBarVisible` to the summoning prevention checks. (Thanks to [Legolando](https://www.curseforge.com/members/legolando/projects)!; [Issue #11](https://github.com/tflo/PetWalker/issues/11))

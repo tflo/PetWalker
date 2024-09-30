@@ -12,7 +12,7 @@ local C_PetJournalPetIsFavorite = _G.C_PetJournal.PetIsFavorite
 local C_PetJournalSetFavorite = _G.C_PetJournal.SetFavorite
 local C_PetJournalGetPetInfoByIndex = _G.C_PetJournal.GetPetInfoByIndex
 
-local C_PetJournalSummonPetByGUID -- We have a hook further down!
+local C_PetJournalSummonPetByGUID  = _G.C_PetJournal.SummonPetByGUID
 local C_PetJournalGetSummonedPetGUID = _G.C_PetJournal.GetSummonedPetGUID
 local C_PetJournalGetPetInfoByPetID = _G.C_PetJournal.GetPetInfoByPetID
 local C_PetJournalGetPetInfoBySpeciesID = _G.C_PetJournal.GetPetInfoBySpeciesID
@@ -38,6 +38,7 @@ local UnitIsControlling = _G.UnitIsControlling
 local UnitChannelInfo = _G.UnitChannelInfo
 local time = _G.time
 local C_PlayerInfoGetGlidingInfo = C_PlayerInfo.GetGlidingInfo
+local C_TimerAfter = _G.C_Timer.After
 
 --[[===========================================================================
 	§ Some Variables/Constants
@@ -340,6 +341,7 @@ function ns.events:register_meta_events()
 	ns.debugprint 'Registering meta events.'
 	self:RegisterEvent 'PLAYER_ENTERING_WORLD'
 	self:RegisterEvent 'PET_JOURNAL_LIST_UPDATE'
+	self:RegisterEvent 'COMPANION_UPDATE'
 	self:RegisterEvent 'PET_BATTLE_OPENING_START'
 	self:RegisterEvent 'PLAYER_LOGOUT'
 end
@@ -348,6 +350,7 @@ function ns.events:unregister_meta_events()
 	ns.debugprint 'Unregistering meta events.'
 	self:UnregisterEvent 'PLAYER_ENTERING_WORLD'
 	self:UnregisterEvent 'PET_JOURNAL_LIST_UPDATE'
+	self:UnregisterEvent 'COMPANION_UPDATE'
 	self:UnregisterEvent 'PET_BATTLE_OPENING_START'
 	self:UnregisterEvent 'PLAYER_LOGOUT'
 end
@@ -482,30 +485,38 @@ function ns:ADDON_LOADED(addon)
 			ns.pet_verified = false
 		end)
 
-		hooksecurefunc(C_PetJournal, 'SummonPetByGUID', function()
-			if ns.db.debugMode then
-				ns.time_summonspell = time()
-				ns.debugprint(format(
-					'Hook: `SummonPetByGUID` runs; `in_battlesleep`: %s (if false --> register `COMPANION_UPDATE`)',
-					tostring(ns.in_battlesleep)))
-			end
-			-- if ns.skipNextSave then ns.skipNextSave = false return end
-			if not ns.in_battlesleep then
-				ns.events:RegisterEvent 'COMPANION_UPDATE' -- Timer better?
-				-- C_Timer.After(0.2, ns.save_pet) -- 0.2 is the tested minimum!
-			end
-		end)
+-- 		hooksecurefunc(C_PetJournal, 'SummonPetByGUID', function()
+-- 			if ns.db.debugMode then
+-- 				ns.time_summonspell = time()
+-- 				ns.debugprint(format(
+-- 					'Hook: `SummonPetByGUID` runs; `in_battlesleep`: %s (if false --> register `COMPANION_UPDATE`)',
+-- 					tostring(ns.in_battlesleep)))
+-- 			end
+-- 			-- if ns.skipNextSave then ns.skipNextSave = false return end
+-- 			if not ns.in_battlesleep then
+-- 				ns.events:RegisterEvent 'COMPANION_UPDATE' -- Timer better?
+-- 				-- C_Timer.After(0.2, ns.save_pet) -- 0.2 is the tested minimum!
+-- 			end
+-- 		end)
 
-		C_PetJournalSummonPetByGUID = _G.C_PetJournal.SummonPetByGUID
+-- 		C_PetJournalSummonPetByGUID = _G.C_PetJournal.SummonPetByGUID
 
+		-- This event fires always 2 times, so let's throttle
+		local eventthrottle_companionupdate
 		function ns:COMPANION_UPDATE(what)
 			if what == 'CRITTER' then
-				ns.events:UnregisterEvent 'COMPANION_UPDATE'
-				if ns.db.debugMode then
-					ns.debugprint('Event: COMPANION_UPDATE (`actpet`: ' ..
-					ns.id_to_name(C_PetJournalGetSummonedPetGUID()) .. ') --> `save_pet`')
+				if not eventthrottle_companionupdate then
+					eventthrottle_companionupdate = true
+-- 					ns.events:UnregisterEvent 'COMPANION_UPDATE'
+					if ns.db.debugMode then
+						ns.debugprint('Event: COMPANION_UPDATE (`actpet`: ' ..
+						ns.id_to_name(C_PetJournalGetSummonedPetGUID()) .. ') --> `save_pet`')
+					end
+					ns.save_pet()
+					C_TimerAfter(0.5, function()
+						eventthrottle_companionupdate = nil
+					end)
 				end
-				ns.save_pet()
 			end
 		end
 
@@ -626,7 +637,7 @@ function ns.autoaction()
 	-- TODO: How reliably is the pet_verified flag set?!
 	-- I have the impression `transitioncheck` isn't always called when it should…
 	if not ns.pet_verified then
-		ns.debugprint_pet '`autoaction` decided for `transitioncheck` (`pet_verified` is false)'
+		ns.debugprint_pet '`autoaction` decided for `transitioncheck`, bc not `pet_verified`'
 		ns.transitioncheck()
 		return
 	end
@@ -647,6 +658,7 @@ end
 
 function ns:restore_pet()
 	local now = time()
+	-- TODO: lockout still needed?
 	if now - time_safesummon_failed < 10 or now - time_restore_pet < 3 then return end
 	local savedpet
 	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
@@ -844,7 +856,7 @@ end
 
 function ns.save_pet()
 	if not ns.pet_verified then
-		ns.debugprint '`save_pet` FAILURE bc of `not pet_verified`'
+		ns.debugprint '`save_pet` FAILURE, bc not `pet_verified`'
 		return
 	end
 	local actpet = C_PetJournalGetSummonedPetGUID()
