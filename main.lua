@@ -55,7 +55,6 @@ being saved.
 ns.pet_verified = false
 -- ns.skipNextSave = false
 ns.in_battlesleep = false
-local time_safesummon_failed = 0
 --[[ Last time AutoRestore() was called. ]]
 local time_restore_pet = 0
 local time_save_pet = 0
@@ -627,8 +626,7 @@ function ns.autoaction()
 	if stop_auto_summon() then return end
 	if ns.db.newPetTimer ~= 0 then
 		local now = time()
-		-- TODO: Remove all the old throttles throughout the code!
-		if ns.remaining_timer(now) == 0 and now - time_safesummon_failed > 40 then
+		if ns.remaining_timer(now) == 0 then
 			ns.debugprint_pet '`autoaction` decided for new_pet'
 			ns:new_pet(now, false)
 			return
@@ -658,8 +656,6 @@ end
 
 function ns:restore_pet()
 	local now = time()
-	-- TODO: lockout still needed?
-	if now - time_safesummon_failed < 10 or now - time_restore_pet < 3 then return end
 	local savedpet
 	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
 		savedpet = ns.dbc.currentPet
