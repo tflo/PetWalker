@@ -488,20 +488,26 @@ function ns:ADDON_LOADED(addon)
 			-- This event fires always 2 times, so let's just listen to the first one
 			if what ~= 'CRITTER' or eventthrottle_companionupdate then return end
 			eventthrottle_companionupdate = true
-			if pet_restored then
-				pet_restored = false
+			if not pet_restored then
+				ns.save_pet()
 				if ns.db.debugMode then
-					ns.debugprint('Event: COMPANION_UPDATE (`actpet`: ' ..
-					ns.id_to_name(C_PetJournalGetSummonedPetGUID()) .. '): not saving bc `pet_restored`')
+					ns.debugprint(
+						'Event: COMPANION_UPDATE (`actpet`: '
+							.. ns.id_to_name(C_PetJournalGetSummonedPetGUID())
+							.. ') --> `save_pet`'
+					)
 				end
-				return
-			end
-			if ns.db.debugMode then
-				ns.debugprint('Event: COMPANION_UPDATE (`actpet`: ' ..
-				ns.id_to_name(C_PetJournalGetSummonedPetGUID()) .. ') --> `save_pet`')
+			else
+				pet_restored = nil
+				if ns.db.debugMode then
+					ns.debugprint(
+						'Event: COMPANION_UPDATE (`actpet`: '
+							.. ns.id_to_name(C_PetJournalGetSummonedPetGUID())
+							.. '): not saving bc `pet_restored`'
+					)
+				end
 			end
 			-- It *seems* the pet is already summoned when the event fires the 1st time, so no need to delay the save
-			ns.save_pet()
 			C_TimerAfter(0.5, function()
 				eventthrottle_companionupdate = nil
 			end)
