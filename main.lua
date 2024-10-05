@@ -3,7 +3,7 @@ local addon_name, ns = ...
 local db_version = 1
 
 --[[===========================================================================
-	§ API references
+	API references
 ===========================================================================]]--
 
 local _
@@ -41,7 +41,7 @@ local C_PlayerInfoGetGlidingInfo = C_PlayerInfo.GetGlidingInfo
 local C_TimerAfter = _G.C_Timer.After
 
 --[[===========================================================================
-	§ Some Variables/Constants
+	Some Variables/Constants
 ===========================================================================]]--
 
 ns.pet_pool = {}
@@ -49,8 +49,9 @@ ns.pool_initialized = false
 --[[ This prevents the "wrong" active pet from being saved. We get a "wrong" pet
 mainly after login, if the game summons the last active pet on this toon,
 instead of the last saved pet in our DB (which can be the last active pet of the
-alt we just logged out). Caution, to not lock out manually summoned pets from
-being saved.
+alt we just logged out). Also when slotting a pet into a team in the Pet Journal
+(slot#1 gets force-summoned). Caution, to not lock out manually summoned pets
+from being saved.
 ]]
 ns.pet_verified = false
 -- ns.skipNextSave = false
@@ -66,6 +67,7 @@ local delay_after_reload = 10
 local delay_after_instance = 8
 -- C_Timer launched at ADDON_LOADED
 local delay_login_msg = 22
+-- TODO: Should we delay also after we change or select pet teams in Rematch / PJ
 local delay_after_battle = 15 -- Post-petbattle sleep
 local instasummon_after_battlesleep = true -- Summon without waiting for trigger event
 local msg_onlyfavisactive_alreadydisplayed = false
@@ -77,24 +79,24 @@ local bypass_throttle = false
 local savedpet_is_summonable = true
 local eventthrottle_companionupdate, pet_restored
 local excluded_species = {
---[[  Pet is vendor and goes on CD when summoned ]]
+-- Pet is vendor and goes on CD when summoned
 	280, -- Guild Page, Alliance
 	281, -- Guild Page, Horde
 	282, -- Guild Herald, Alliance
 	283, -- Guild Herald, Horde
---[[ Pet is vendor/bank/mail, if the char has the Pony Bridle achiev (ID 3736).
-But it should be safe, bc CD starts only after activating the ability via dialog. ]]
+-- Pet is vendor/bank/mail, if the char has the Pony Bridle achievement (ID 3736).
+-- But it should be safe, bc CD starts only after activating the ability via dialog.
 -- 	214, -- Argent Squire (Alliance)
 -- 	216, -- Argent Gruntling (Horde)
---[[ Self-unspawns outside of Winter Veil. Makes no sense to summon these. ]]
+-- Self-despawns outside of Winter Veil event. Makes no sense to summon these.
 	1349, -- Rotten Little Helper
 	117, -- Tiny Snowman
 	119, -- Father Winter's Helper
 	120, -- Winter's Little Helper
---[[ Pocopoc is special: he cannot be summoned in Zereth Mortis (1970)).
-See the extra checks in is_excluded_by_species() and transitioncheck(). ]]
+-- Pocopoc is special: he cannot be summoned in Zereth Mortis (1970)).
+-- See the extra checks in is_excluded_by_species() and transitioncheck().
 	3247, -- Pocopoc
---[[ Dummy ID for debugging. Keep this commented out! ]]
+-- Dummy ID for debugging. Keep this commented out!
 -- 	2403, -- Abyssal Eel
 }
 
@@ -184,8 +186,8 @@ end
 ---------------------------------------------------------------------------]]--
 
 --[[ This can happen when…
-- Restore: Logging in to other-faction toon and the saved pet is locked to the previous toon's faction
-- Random summon: A faction-locked pet that is not detectable as such (Blizz bug, see below) gets selected from the pool
+- Restore: Logging in to other-faction alt and the saved pet is locked to the previous toon's faction.
+- Random summon: A faction-locked pet that is not detectable as such (Blizz bug, see below) gets selected from the pool.
 ]]
 
 local unsummonable_species
@@ -271,7 +273,7 @@ end
 
 
 --[[---------------------------------------------------------------------------
-	§ For the Bindings file
+	For the Bindings file
 ---------------------------------------------------------------------------]]--
 
 -- BINDING_HEADER_PETWALKER = "PetWalker  "
@@ -281,8 +283,6 @@ BINDING_NAME_PETWALKER_PREVIOUS_PET = 'Summon Previous Pet'
 BINDING_NAME_PETWALKER_TARGET_PET = 'Summon Same Pet as Target'
 BINDING_NAME_PETWALKER_DISMISS_PET = 'Dismiss Pet & Disable Auto-Summoning'
 
--- TODO: Check where exactly we need a `InCombatLockdown` check to prevent taint!
--- Or only in the final summon function?
 function PetWalker_binding_toggle_autosummon() ns:auto_toggle() end
 function PetWalker_binding_new_pet() ns:new_pet(nil, true) end
 function PetWalker_binding_previous_pet() ns.previous_pet() end
@@ -291,10 +291,9 @@ function PetWalker_binding_dismiss_and_disable() ns:dismiss_and_disable() end
 
 
 --[[===========================================================================
-	§ Event frame
+	Event frame
 ===========================================================================]]--
 
----@class frame Our event frame
 ns.events = CreateFrame 'Frame'
 
 ns.events:SetScript('OnEvent', function(self, event, ...)
@@ -366,13 +365,13 @@ function ns.events:unregister_pw_events()
 end
 
 --[[===========================================================================
-	§ Loading and event handlers
+	Loading and event handlers
 ===========================================================================]]--
 
 function ns:ADDON_LOADED(addon)
 
 --[[---------------------------------------------------------------------------
-	§ Our addon has loaded (init)
+	Our addon has loaded (init)
 ---------------------------------------------------------------------------]]--
 
 	if addon == addon_name then
@@ -408,7 +407,7 @@ function ns:ADDON_LOADED(addon)
 		C_Timer.After(delay_login_msg, ns.msg_login)
 
 --[[---------------------------------------------------------------------------
-	§ Events
+	Events
 ---------------------------------------------------------------------------]]--
 
 		-- The summon events are now registered with transitioncheck or delayed after PLAYER_ENTERING_WORLD
@@ -444,7 +443,6 @@ function ns:ADDON_LOADED(addon)
 				delay = delay_after_instance
 			end
 			ns.pet_verified = false
-			-- C_Timer.After(delay, ns.transitioncheck)
 			C_Timer.After(delay, function()
 				ns.transitioncheck()
 				-- For the moment, calling this separately, since `transitioncheck` in its current form is abortable
@@ -473,13 +471,11 @@ function ns:ADDON_LOADED(addon)
 		end
 
 --[[---------------------------------------------------------------------------
-	§ Pet battle, hooks, and misc
+	Pet battle, hooks, and misc
 ---------------------------------------------------------------------------]]--
 
-		--[[ TOOD: Check if we really have to set the flag here. We could modify `autoaction` to always check against
-		the saved pet if `pet_verified` is true. ]]
 		hooksecurefunc(C_PetJournal, 'SetPetLoadOutInfo', function()
-			-- Note that SetPetLoadOutInfo summons the slot pet, but it does so _not_ via SummonPetByGUID
+			-- Note that SetPetLoadOutInfo summons the slot #1 pet, but it does so _not_ via SummonPetByGUID
 			ns.debugprint 'Hook: `SetPetLoadOutInfo` --> Setting `pet_verified` to false'
 			ns.pet_verified = false
 		end)
@@ -507,7 +503,7 @@ function ns:ADDON_LOADED(addon)
 					)
 				end
 			end
-			-- It *seems* the pet is already summoned when the event fires the 1st time, so no need to delay the save
+			-- It *seems* the pet is already summoned when the event fires the 1st time, so no need to delay the saving itself
 			C_TimerAfter(0.5, function()
 				eventthrottle_companionupdate = nil
 			end)
@@ -555,7 +551,7 @@ function ns:ADDON_LOADED(addon)
 
 
 --[[---------------------------------------------------------------------------
-	§ Blizzard_Collections has loaded
+	Blizzard_Collections has loaded
 ---------------------------------------------------------------------------]]--
 
 	elseif addon == 'Blizzard_Collections' then
@@ -589,7 +585,7 @@ end
 
 
 --[[===========================================================================
-	§ Main actions
+	Main actions
 ===========================================================================]]--
 
 --[[ To be used only in func initialize_pool and is_excluded_by_id ]]
@@ -611,7 +607,7 @@ local function is_excluded_by_id(id)
 end
 
 --[[---------------------------------------------------------------------------
-	§ Auto action
+	Auto action
 	The main function that runs when player started moving. It decides whether to
 	restore a lost pet, or summon a new one (if the timer is set and due).
 ---------------------------------------------------------------------------]]--
@@ -640,7 +636,7 @@ function ns.autoaction()
 end
 
 --[[---------------------------------------------------------------------------
-	§ Restore pet
+	Restore pet
 	Pet is lost --> restore it.
 	To be called only by autoaction func!
 	No need to check against the current pet, since by definition, if we do have a
@@ -670,8 +666,8 @@ end
 
 
 --[[---------------------------------------------------------------------------
-	§ New pet
-	Called by autoaction when timer is due
+	New pet
+	Called by autoaction when timer is due, or via command/key
 ---------------------------------------------------------------------------]]--
 
 function ns:new_pet(the_time, manually_called)
@@ -720,7 +716,7 @@ end
 
 
 --[[---------------------------------------------------------------------------
-	§ Summon previous
+	Summon previous
 ---------------------------------------------------------------------------]]--
 
 function ns.previous_pet()
@@ -740,7 +736,7 @@ function ns.previous_pet()
 end
 
 --[[---------------------------------------------------------------------------
-	§ Summon targeted pet
+	Summon targeted pet
 ---------------------------------------------------------------------------]]--
 
 function ns.summon_targetpet()
@@ -777,7 +773,7 @@ end
 
 
 --[[--------------------------------------------------------------------------------------------------------------------
-	§ Transition check
+	Transition check
 	One time action, after big transitions, like login, portals, entering instance, etc. Basically a standalone
 	restore_pet func; in addition, it not only checks for presence of a pet, but also against the saved pet. This makes
 	sure that a newly logged toon gets the same pet as the previous toon had at logout. We need more checks here than
@@ -840,20 +836,22 @@ end
 
 
 --[[---------------------------------------------------------------------------
-	§ Save pet
-	Save a newly summoned pet, no matter how it was summoned.
+	Save pet
+	Save any summoned pet.
+	Called by the COMPANION_UPDATE event func.
 ---------------------------------------------------------------------------]]--
 
 function ns.save_pet()
+	-- Flag must be unset …
+	-- when a pet is force-summoned by the Pet Journal when we put in a team slot,
+	-- after entering world events.
 	if not ns.pet_verified then
 		ns.debugprint '`save_pet` FAILURE, bc not `pet_verified`'
 		return
 	end
 	local actpet = C_PetJournalGetSummonedPetGUID()
-	-- local now = time()
 	if
 		not actpet
-		-- or now - time_save_pet < 3
 		or is_excluded_by_id(actpet)
 	then
 		ns.debugprint '`save_pet` FAILURE: No `actpet` or `actpet` is excluded'
@@ -869,7 +867,6 @@ function ns.save_pet()
 		ns.db.currentPet = actpet
 	end
 	ns.debugprint_pet '`save_pet` completed'
-	-- time_save_pet = now
 end
 
 
@@ -900,7 +897,7 @@ end
 
 
 --[[===========================================================================
-	§ Pet pool
+	Pet pool
 	Creating the POOL, from where the random pet is summoned.
 	This can be, depending on user setting:
 	— Global favorites
@@ -949,7 +946,7 @@ end
 
 
 --[[===========================================================================
-	§ Char Favs
+	Char Favs
 ===========================================================================]]--
 
 local C_PetJournalPetIsFavorite1, C_PetJournalSetFavorite1, C_PetJournalGetPetInfoByIndex1
@@ -991,7 +988,7 @@ end
 
 
 --[[===========================================================================
-	§ GUI stuff for Pet Journal
+	GUI stuff for Pet Journal
 ===========================================================================]]--
 
 --[[

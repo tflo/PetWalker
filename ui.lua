@@ -26,7 +26,7 @@ local function get_link_savedpet()
 end
 
 --[[===========================================================================
-Colors
+	Colors
 ===========================================================================]]--
 
 local colscheme_green = {
@@ -196,14 +196,14 @@ function ns.set_sum_msg_to_transcheck(pet)
 	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 3 and format('%sSummoned your last saved pet %s.', CO.bn, ns.id_to_link(pet) or '???') or nil
 end
 
--- Called by the safesummon func
+-- Called by the summon func
 function ns.msg_pet_summon_success()
 	if ns.msg_pet_summoned_content then
 		chat_user_notification(ns.msg_pet_summoned_content)
 	end
 end
 
--- Called by the safesummon func
+-- Called by the summon func
 function ns.msg_pet_summon_failed()
 	if ns.db.verbosityLevel < 1 then return end
 	chat_user_notification(CO.bw .. "You don't meet the conditions for summoning a pet right now.")
@@ -299,7 +299,7 @@ end
 
 
 --[[===========================================================================
-Slash UI
+	Slash UI
 ===========================================================================]]--
 
 SLASH_PetWalker1, SLASH_PetWalker2 = '/pw', '/petwalker'
