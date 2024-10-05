@@ -156,11 +156,6 @@ local function stop_auto_summon()
 		or C_UnitAurasGetPlayerAuraBySpellID(312993) -- Carrying Forbidden Tomes (Scrivener Lenua event, Revendreth)
 		or C_UnitAurasGetPlayerAuraBySpellID(43880) -- Ramstein's Swift Work Ram (Brewfest daily; important bc the quest cannot be restarted if messed up)
 		or C_UnitAurasGetPlayerAuraBySpellID(43883) -- Rental Racing Ram (Brewfest daily)
-		-- *Probably* Covered by `IsPossessBarVisible` (untested):
--- 		or C_UnitAurasGetPlayerAuraBySpellID(290460) -- Battlebot Champion (Forbidden Reach: Zskera Vault)
-		-- Covered by `IsPossessBarVisible`:
--- 		or C_UnitAurasGetPlayerAuraBySpellID(212754) -- Eye of Kilrogg aura in the context of the Eye See You quest (Azsuna)
--- 		or C_UnitAurasGetPlayerAuraBySpellID(142372) -- Jerry the Snail (Gastropod Shell toy)
 	then
 		throttle = 40
 	elseif forbidden_instance() then
