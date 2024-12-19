@@ -4,6 +4,12 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.3.1 (2024-12-19)
+
+- toc bump to 110007 (WoW Retail 11.0.7).
+- No content changes. If I notice that the addon needs an update for 11.0.7, I will release one.
+- I currently do not have much time to play, so if you notice weird/unusual behavior with 11.0.7 and don’t see an update from my part, please let me know [here](https://github.com/tflo/PetWalker/issues).
+
 #### 2.3.0 (2024-10-05)
 
 - Reworked the logic behind “when should a pet that was not summoned by PetWalker be saved as the ‘correct’ pet” from *including* to *excluding*.
