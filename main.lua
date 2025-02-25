@@ -151,8 +151,14 @@ local function stop_auto_summon()
 		or UnitHasVehicleUI 'player' -- Alternative(?): `HasOverrideActionBar()`
 		-- Potentially useful: 	`HasExtraActionBar()`
 		or IsPossessBarVisible() -- Seems to often coincide with `HasVehicleActionBar()` (not in case of aura 212754!)
-		-- With Daisy as backpack, we *can* summon other pets w/o loosing her. We just must not summon Daisy herself.
--- 		or C_UnitAurasGetPlayerAuraBySpellID(311796) -- Pet: Daisy as backpack (/beckon)
+
+		 -- Daisy pet as backpack (/beckon). Disappears when Daisy is summoned.
+		or C_UnitAurasGetPlayerAuraBySpellID(311796)
+		 -- Pets on shoulder (/whistle). Disappears when any of the "shoulder pets" is summoned.
+		 or C_UnitAurasGetPlayerAuraBySpellID(302954) -- Feathers
+		or C_UnitAurasGetPlayerAuraBySpellID(232871) -- Crackers
+		or C_UnitAurasGetPlayerAuraBySpellID(286268) -- Cap'n Crackers
+
 		or C_UnitAurasGetPlayerAuraBySpellID(312993) -- Carrying Forbidden Tomes (Scrivener Lenua event, Revendreth)
 		or C_UnitAurasGetPlayerAuraBySpellID(43880) -- Ramstein's Swift Work Ram (Brewfest daily; important bc the quest cannot be restarted if messed up)
 		or C_UnitAurasGetPlayerAuraBySpellID(43883) -- Rental Racing Ram (Brewfest daily)
