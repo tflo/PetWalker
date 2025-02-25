@@ -120,6 +120,29 @@ local function forbidden_instance()
 	end
 end
 
+-- To test against if pet-on-back aura is found (AFAIK, only Daisy)
+local function saved_pet_is_backpet()
+	local backpet = 2780 -- Daisy
+	if ns.dbc.charFavsEnabled then
+		return ns.id_to_species(ns.dbc.currentPet) == backpet
+	else
+		return ns.id_to_species(ns.db.currentPet) == backpet
+	end
+end
+
+-- To test against if pet-on-shoulder aura is found
+local function saved_pet_is_shoulderpet()
+	local shoulderpets = { 2526, 1997, 2185 } -- Feathers, Crackers, Cap'n Crackers
+	if ns.dbc.charFavsEnabled then
+		for _, species in ipairs(shoulderpets) do
+			if ns.id_to_species(ns.dbc.currentPet) == species then return true end
+		end
+	else
+		for _, species in ipairs(shoulderpets) do
+			if ns.id_to_species(ns.db.currentPet) == species then return true end
+		end
+	end
+end
 
 local function stop_auto_summon()
 	-- if not not ns.db.autoEnabled then return true end
@@ -153,11 +176,11 @@ local function stop_auto_summon()
 		or IsPossessBarVisible() -- Seems to often coincide with `HasVehicleActionBar()` (not in case of aura 212754!)
 
 		 -- Daisy pet as backpack (/beckon). Disappears when Daisy is summoned.
-		or C_UnitAurasGetPlayerAuraBySpellID(311796)
+		or C_UnitAurasGetPlayerAuraBySpellID(311796) and saved_pet_is_backpet()
 		 -- Pets on shoulder (/whistle). Disappears when any of the "shoulder pets" is summoned.
-		 or C_UnitAurasGetPlayerAuraBySpellID(302954) -- Feathers
-		or C_UnitAurasGetPlayerAuraBySpellID(232871) -- Crackers
-		or C_UnitAurasGetPlayerAuraBySpellID(286268) -- Cap'n Crackers
+		or C_UnitAurasGetPlayerAuraBySpellID(302954) and saved_pet_is_shoulderpet() -- Feathers
+		or C_UnitAurasGetPlayerAuraBySpellID(232871) and saved_pet_is_shoulderpet() -- Crackers
+		or C_UnitAurasGetPlayerAuraBySpellID(286268) and saved_pet_is_shoulderpet() -- Cap'n Crackers
 
 		or C_UnitAurasGetPlayerAuraBySpellID(312993) -- Carrying Forbidden Tomes (Scrivener Lenua event, Revendreth)
 		or C_UnitAurasGetPlayerAuraBySpellID(43880) -- Ramstein's Swift Work Ram (Brewfest daily; important bc the quest cannot be restarted if messed up)
