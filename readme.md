@@ -48,8 +48,8 @@ ___If you are reading this description on CurseForge, be aware that CF’s Markd
 PetWalker has a rich chat console interface:
 
 - __`/pw a`:__ Toggle all automatic summoning of pets. Basically the main switch of the addon (all events are unregistered/registered), but manual summoning via keybind or slash command (see below) is still available.
-- __`/pw r`:__ Allow/disallow automatic summoning of pets while _mounted_ (and on the ground) _in a Dragonriding zone._
-    - As of version 1.2.0 (March 2023), automatic pet summoning can also happen while you are mounted. With “normal” mounts, this behavior is trouble-free and only beneficial, but with Dragonriding mounts it can cause occasional glitches. Therefore, you can disable it with this toggle. _It is enabled by default._ Please read the 1.1.8 change notes, or the explanation in the FAQ below!
+- __`/pw sr`:__ Allow/disallow automatic summoning of pets while _mounted_ (and on the ground) _and in Skyride mode._
+    - As of version 1.2.0 (March 2023), automatic pet summoning can also happen while you are mounted. With “normal” mounts, this behavior is trouble-free and only beneficial, but in Skyride mode it can cause occasional GCD glitches. Therefore, you can disable it with this toggle. _It is enabled by default._ More on that topic in the FAQ below!
 - __`/pw d`:__ Dismiss current pet and disable auto-summoning. A kind of emergency command, if you want to get rid of your pet immediately and prevent all automatic summoning. Re-enable with `/pw a`.
 - __`/pw <number>`:__ Interval [minutes] for summoning a new pet. ‘0’ disables summoning of new pets, though the pet-_restore_ functionality is still active (use `/pw a` to disable it).
 - __`/pw f`:__ Toggle the random-summon pool between Favorites and All Pets.
@@ -154,6 +154,12 @@ By default, this setting is _enabled,_ so auto-summoning while mounted for Skyri
 Personally, I’m using it because even if I have an occasional GCD conflict with a Skyriding ability, it still reduces the chance of a GCD conflict after dismounting. But your experience may vary depending on your personal Skyriding landing/lift-off “style”.
 
 To be clear, the GCD is not caused by PetWalker, it’s a Blizz thing: any pet summoning, no matter how it is done, triggers the GCD. It’s stupid IMO, but there’s nothing we can do about it. The summoning-while-mounted feature is meant to reduce the chance of GCD conflicts, but it cannot be eliminated.
+
+### Pet auras (Daisy, Feathers, Crackers, and Cap’n Crackers) prevent PW from summoning pets
+
+Yes, this is working as intended. If you /whistle for example Crackers (to have him on the shoulder), and then resummon Crackers or summon Feathers or Cap’n Crackers, the Crackers aura would be cancelled. So, if PW detects that one of the auras is active, and your last saved pet is a competing one (which is usually the case, since you had to summon Crackers before /whistle’ing him), it will stop autosummoning/restoring.
+
+If you want to have another pet out while Crackers sits on your shoulder, just summon one from the Pet Journal, or press your Previous Pet shortcut (if the previous pet is not competing with the aura). From that moment on, PW will resume working as normal, e.g the pet will be restored as usual when lost. (If your random summon timer is active, you should make sure that there is no competing pet in the pool.) See also [issue 18](https://github.com/tflo/PetWalker/issues/18).
 
 ---
 

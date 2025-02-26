@@ -1,13 +1,24 @@
-## Interface: 110007
+## Interface: 110100
 ## Title: PetWalker
-## Version: 2.3.1
+## Version: 2.4.0
 ## IconTexture: Interface/AddOns/PetWalker/icon.png
-## X-Flavor: Mainline
-## Notes: Automatically re-summons your lost companion pet, or auto-summons a random or a favorite one.
+## Notes: Automatically re-summons your lost companion pet, or auto-summons a random or favorite one.
+## Category: Collections
+## Category-enUS: Collections
+## Category-deDE: Kriegsmeutesammlungen
+## Category-esES: Colecciones de banda guerrera
+## Category-esMX: Colecciones de tropa
+## Category-frFR: Collections du bataillon
+## Category-itIT: Collezioni della Brigata
+## Category-koKR: 전투부대 수집품
+## Category-ptBR: Coleções do Bando de Guerra
+## Category-ruRU: Коллекции отряда
+## Category-zhCN: 战团藏品
+## Category-zhTW: 戰隊收藏
 ## Author: Mot (@6mot, @tflo)
 ## X-Wago-ID: qv63aZGb
 ## X-Curse-Project-ID: 784734
-## X-Category: Companions, Pets
+## X-Flavor: Mainline
 ## X-License: GPLv3
 ## X-Localizations: enUS
 ## SavedVariables: PetWalkerDB

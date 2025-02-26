@@ -4,6 +4,13 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.4.0 (2025-02-26)
+
+- Added a protection for the Daisy, Feathers, Crackers, and Cap’n Crackers auras. See [issue 18](https://github.com/tflo/PetWalker/issues/18). Thanks to @gizzmo on GitHub for the aura list and suggestion.
+- Updated readme/description.
+- Added category to toc.
+- toc bump to 110100.
+
 #### 2.3.1 (2024-12-19)
 
 - toc bump to 110007 (WoW Retail 11.0.7).
