@@ -1049,7 +1049,7 @@ end
 
 --[[ License ===================================================================
 
-	Copyright © 2022–2024 Thomas Floeren
+	Copyright © 2022–2025 Thomas Floeren
 
 	This file is part of PetWalker.
 

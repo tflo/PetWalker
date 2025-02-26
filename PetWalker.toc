@@ -37,7 +37,7 @@ utilities.lua
 
 # License ======================================================================
 #
-# Copyright © 2022–2024 Thomas Floeren
+# Copyright © 2022–2025 Thomas Floeren
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
