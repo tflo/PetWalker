@@ -77,7 +77,7 @@ local throttle_min = 3
 local throttle = 0 --  throttle_min * 2
 local bypass_throttle = false
 local savedpet_is_summonable = true
-local eventthrottle_companionupdate, pet_restored
+local eventthrottle_companionupdate, pet_restored, ignoreevent_listupdate
 local excluded_species = {
 -- Pet is vendor and goes on CD when summoned
 	280, -- Guild Page, Alliance
@@ -453,6 +453,18 @@ function ns:ADDON_LOADED(addon)
 			local delay
 			-- We do not want summon events before transitioncheck has finished
 			ns.events:unregister_summon_events()
+			-- Prevent event spam caused by BattlePetBreedID
+			if is_login or is_reload then
+				if C_AddOns.IsAddOnLoaded('BattlePetBreedID') then
+					hooksecurefunc('BPBID_SetBreedTooltip', function(parent)
+						-- Same conditions as used by the func to trigger `ClearSearchFilter`
+						if BPBID_Options.Breedtip.Collected and (not PetJournalPetCardPetInfo or not PetJournalPetCardPetInfo:IsVisible() or parent == FloatingBattlePetTooltip) then
+							ignoreevent_listupdate = true
+							ns.debugprint 'Hook: BPBID_SetBreedTooltip --> ignoreevent_listupdate'
+						end
+					end)
+				end
+			end
 			if is_login then
 				ns.debugprint 'Event: PLAYER_ENTERING_WORLD: Login'
 				delay = delay_after_login
@@ -565,8 +577,19 @@ function ns:ADDON_LOADED(addon)
 		TODO: Just noticed that this fires each time I hover over a pet in the AH listing(!). Find out if this is triggered by an addon, or if it is Blizz crap. If needed, unregister PW events when the AH is opened.
 		]]
 		function ns:PET_JOURNAL_LIST_UPDATE()
-			ns.debugprint 'Event: PET_JOURNAL_LIST_UPDATE --> Setting `pool_initialized` to false'
-			ns.pool_initialized = false
+			-- Hovering over any pet in the bags or the AH triggers the event.
+			-- This is caused by the BattlePetBreedID addon: if the 'collected pets' option is active,
+			-- it calls `C_PetJournal.ClearSearchFilter()`, in order to make the collected pets info fetchable.
+			-- BreedTooltips.lua, line 116
+			-- We set the `ignoreevent_listupdate` flag via a hook to BPBID's `BPBID_SetBreedTooltip` at login/reload.
+			-- Works fine w/o timer (and with timer it gets out of sync if the spam rate is high).
+			if ignoreevent_listupdate then
+				ns.debugprint 'Event: PET_JOURNAL_LIST_UPDATE --> Ignored'
+				ignoreevent_listupdate = nil
+			else
+				ns.debugprint 'Event: PET_JOURNAL_LIST_UPDATE --> Setting `pool_initialized` to false'
+				ns.pool_initialized = false
+			end
 		end
 
 		function ns:PLAYER_LOGOUT()

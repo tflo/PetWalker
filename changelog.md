@@ -4,6 +4,12 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.4.2 (2025-02-27)
+
+- Added protection against event spam caused by the BattlePetBreedID addon.
+    - If a pet tooltip is displayed and you have BattlePetBreedID’s “Current pet’s collected breeds” option enabled, BPBID calls an API function which in turn triggers the PET_JOURNAL_LIST_UPDATE event (for every single tooltip). PetWalker relies on this event to know if the pet pool needs to be reinitialized, but BPBID triggers the event also without any actual pet list changes.
+    - To avoid the unnecessary load caused by this, we hook into the responsible BPBID function and set a flag that tells PetWalker to ignore the next PET_JOURNAL_LIST_UPDATE.
+
 #### 2.4.1 (2025-02-26)
 
 - Fixed an oversight in the aura protection (see 2.4.0) that leads to failure if per-char favs are enabled but not favs-only.
