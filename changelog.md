@@ -4,6 +4,10 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.4.1 (2025-02-26)
+
+- Fixed an oversight in the aura protection (see 2.4.0) that leads to failure if per-char favs are enabled but not favs-only.
+
 #### 2.4.0 (2025-02-26)
 
 - Added a protection for the Daisy, Feathers, Crackers, and Cap’n Crackers auras. See [issue 18](https://github.com/tflo/PetWalker/issues/18). Thanks to @gizzmo on GitHub for the aura list and suggestion.

@@ -123,7 +123,7 @@ end
 -- To test against if pet-on-back aura is found (AFAIK, only Daisy)
 local function saved_pet_is_backpet()
 	local backpet = 2780 -- Daisy
-	if ns.dbc.charFavsEnabled then
+	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
 		return ns.id_to_species(ns.dbc.currentPet) == backpet
 	else
 		return ns.id_to_species(ns.db.currentPet) == backpet
@@ -133,7 +133,7 @@ end
 -- To test against if pet-on-shoulder aura is found
 local function saved_pet_is_shoulderpet()
 	local shoulderpets = { 2526, 1997, 2185 } -- Feathers, Crackers, Cap'n Crackers
-	if ns.dbc.charFavsEnabled then
+	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
 		for _, species in ipairs(shoulderpets) do
 			if ns.id_to_species(ns.dbc.currentPet) == species then return true end
 		end
