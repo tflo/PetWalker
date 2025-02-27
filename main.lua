@@ -144,6 +144,7 @@ local function saved_pet_is_shoulderpet()
 	end
 end
 
+-- To be called from autoaction (and - testwise- from transitioncheck)
 local function stop_auto_summon()
 	-- if not not ns.db.autoEnabled then return true end
 	-- Always-active throttle
@@ -831,9 +832,9 @@ end
 
 function ns.transitioncheck()
 -- 	Can be called via the entering-world events, or via `autoaction`, so we
--- 	don't need the entire `stop_auto_summon` function here. Also, any running
--- 	throttle via `stop_auto_summon` would stop `transitioncheck` in the tracks.
-	if ns.pet_verified or InCombatLockdown() or IsFlying() or UnitOnTaxi 'player' then
+-- 	if ns.pet_verified or InCombatLockdown() or IsFlying() or UnitOnTaxi 'player' then
+	-- TODO: Observe if stop_auto_summon works as expected here!
+	if stop_auto_summon() then
 		if ns.db.debugMode then
 			ns.debugprint(format(
 				'`transitioncheck` returned early (`pet_verified`: %s; other conditions: combat, flying, taxi)', tostring(ns.pet_verified)))
