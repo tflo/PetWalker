@@ -104,6 +104,10 @@ local excluded_species = {
 ns.time_summonspell = 0
 
 
+--[[---------------------------------------------------------------------------
+	Summoning prevention
+---------------------------------------------------------------------------]]--
+
 -- Other possibility: UnitPowerBarID('player') == 631
 local function is_skyride_mounted()
 	return select(2, C_PlayerInfoGetGlidingInfo())
@@ -146,8 +150,7 @@ end
 
 -- To be called from autoaction (and - testwise- from transitioncheck)
 local function stop_auto_summon()
-	-- if not not ns.db.autoEnabled then return true end
-	-- Always-active throttle
+	-- Base/existing throttle
 	if not bypass_throttle then
 		throttle = max(throttle, throttle_min)
 		local now = now or time()
@@ -157,10 +160,12 @@ local function stop_auto_summon()
 		end
 		time_responded_to_summoning_event, throttle = now, 0
 	end
+	-- Prevent summoning and add extra throttle
 	if check_against_flying and
 		-- We need these tests only at events that can occure during it
 		(IsFlying() or UnitOnTaxi 'player') then
 		throttle = 20
+		ns.debugprint 'Summoning stopped becaue of flying/taxi.'
 	elseif InCombatLockdown()
 		or not ns.db.drSummoning and is_skyride_mounted()
 		or IsStealthed() -- Includes Hunter Camouflage
