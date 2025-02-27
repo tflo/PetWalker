@@ -598,7 +598,7 @@ function ns:ADDON_LOADED(addon)
 
 
 --[[---------------------------------------------------------------------------
-	Blizzard_Collections has loaded
+	Blizzard_Collections loaded
 ---------------------------------------------------------------------------]]--
 
 	elseif addon == 'Blizzard_Collections' then
