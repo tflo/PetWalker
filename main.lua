@@ -188,7 +188,9 @@ local function stop_auto_summon()
 	then
 		throttle = 40
 	elseif forbidden_instance() then
-		throttle = 120
+		-- These will be re-enabled at the next PLAYER_ENTERING_WORLD
+		ns.events:unregister_summon_events()
+		throttle = 1 -- Must be > 0 to stop the autoaction in process
 	end
 	if throttle > 0 then
 		ns.debugprint('`stop_auto_summon`: new throttle:', throttle)
