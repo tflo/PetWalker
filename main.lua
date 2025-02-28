@@ -71,7 +71,6 @@ local delay_login_msg = 22
 local delay_after_battle = 15 -- Post-petbattle sleep
 local instasummon_after_battlesleep = true -- Summon without waiting for trigger event
 local msg_onlyfavisactive_alreadydisplayed = false
-local check_against_flying = true
 local time_responded_to_summoning_event = 0
 local throttle_min = 3
 local throttle = 0 --  throttle_min * 2
@@ -107,6 +106,12 @@ ns.time_summonspell = 0
 --[[---------------------------------------------------------------------------
 	Summoning prevention
 ---------------------------------------------------------------------------]]--
+
+local function is_flying()
+	-- The taxi condition should only ever trigger if we use zone events, since we cannot "move" while on taxi,
+	-- or when manually calling `new_pet`
+	return IsFlying() or UnitOnTaxi 'player'
+end
 
 -- Other possibility: UnitPowerBarID('player') == 631
 local function is_skyride_mounted()
@@ -150,7 +155,9 @@ end
 
 -- To be called from autoaction (and - testwise- from transitioncheck)
 local function stop_auto_summon()
+
 	-- Base/existing throttle
+
 	if not bypass_throttle then
 		throttle = max(throttle, throttle_min)
 		local now = now or time()
@@ -160,12 +167,13 @@ local function stop_auto_summon()
 		end
 		time_responded_to_summoning_event, throttle = now, 0
 	end
+
 	-- Prevent summoning and add extra throttle
-	if check_against_flying and
-		-- We need these tests only at events that can occure during it
-		(IsFlying() or UnitOnTaxi 'player') then
+
+	-- Impossible to summon in flight, but this prevents wrong 'restored' messages
+	if is_flying() then
 		throttle = 20
-		ns.debugprint 'Summoning stopped becaue of flying/taxi.'
+		ns.debugprint 'In the air!'
 	elseif InCombatLockdown()
 		or not ns.db.drSummoning and is_skyride_mounted()
 		or IsStealthed() -- Includes Hunter Camouflage
@@ -202,12 +210,13 @@ local function stop_auto_summon()
 		ns.debugprint('`stop_auto_summon`: new throttle:', throttle)
 		return true
 	end
+
 end
 
 -- For a manual action, we don't want all the checks from `stop_auto_summon` or a throttle.
 -- Combat check is needed though to not generate errors.
 local function stop_manual_summon()
-	if InCombatLockdown() or check_against_flying and (IsFlying() or UnitOnTaxi 'player') then
+	if InCombatLockdown() or is_flying() then
 		ns.msg_manual_summon_stopped()
 		return true
 	end
@@ -339,7 +348,6 @@ ns.events:RegisterEvent 'ADDON_LOADED'
 -- Used events that are not in any group:
 -- ADDON_LOADED
 -- PET_BATTLE_OVER (registered after PET_BATTLE_OPENING_START)
--- COMPANION_UPDATE (registered with the `SummonPetByGUID` hook)
 
 function ns.events:register_summon_events()
 	ns.debugprint 'Registering summon events.'
@@ -351,9 +359,6 @@ function ns.events:register_summon_events()
 		self:RegisterEvent 'ZONE_CHANGED_INDOORS'
 		--[[ Good event ]]
 		self:RegisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED'
-		--[[ Fires pretty frequently, sometimes in quick succession. Chain-firing when posting auctions.
-		Redundancy: Seems to get triggered by plEntWorld and/or zoneChNewA and/or plLogin ]]
-		-- self:RegisterEvent 'BAG_UPDATE_DELAYED'
 	else -- Traditional (default) event(s)
 		self:RegisterEvent 'PLAYER_STARTED_MOVING'
 	end
@@ -672,20 +677,20 @@ function ns.autoaction()
 	if ns.db.newPetTimer ~= 0 then
 		local now = time()
 		if ns.remaining_timer(now) == 0 then
-			ns.debugprint_pet '`autoaction` decided for new_pet'
+			ns.debugprint_pet '`autoaction` --> `new_pet`'
 			ns:new_pet(now, false)
 			return
 		end
 	end
 	-- TODO: Could we not simply check against the saved db pet, and restore if it isn't correct or missing?
 	if not ns.pet_verified then
-		ns.debugprint_pet '`autoaction` decided for `transitioncheck`, bc not `pet_verified`'
+		ns.debugprint_pet '`autoaction` --> `transitioncheck` (pet not verified)'
 		ns.transitioncheck()
 		return
 	end
 	local actpet = C_PetJournalGetSummonedPetGUID()
 	if not actpet then
-		ns.debugprint_pet '`autoaction` decided for `restore_pet`'
+		ns.debugprint_pet '`autoaction` --> `restore_pet`'
 		ns:restore_pet()
 	end
 end
@@ -842,7 +847,7 @@ function ns.transitioncheck()
 	if stop_auto_summon() then
 		if ns.db.debugMode then
 			ns.debugprint(format(
-				'`transitioncheck` returned early (`pet_verified`: %s; other conditions: combat, flying, taxi)', tostring(ns.pet_verified)))
+				'`transitioncheck` (`pet_verified`: %s) stopped by `stop_auto_summon`', tostring(ns.pet_verified)))
 		end
 		return
 	end
