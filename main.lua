@@ -74,6 +74,7 @@ local msg_onlyfavisactive_alreadydisplayed = false
 local time_responded_to_summoning_event = 0
 local throttle_min = 3
 local throttle = 0 --  throttle_min * 2
+local throttle_reason
 local bypass_throttle = false
 local savedpet_is_summonable = true
 local eventthrottle_companionupdate, pet_restored, ignoreevent_listupdate
@@ -98,6 +99,19 @@ local excluded_species = {
 -- Dummy ID for debugging. Keep this commented out!
 -- 	2403, -- Abyssal Eel
 }
+
+-- BEGIN Experimental (usable as temporary user settings):
+-- This is for the experimental usage of PLAYER_MOUNT_DISPLAY_CHANGED as second summoning event;
+-- see v2.5.0 change notes.
+-- Disable/enable usage of the event
+local use_PMDC = true -- true/false
+-- Delay after dismounting (applies also to mounting, but this is irrelevant)
+-- The shorter the better, but the risk of colliding with a summoning attempt by the game will probably be higher.
+local delay_PMDC = 0.3 -- reasonable range: 0 to 1; 0 means 'next frame'
+-- Disable/enable the above delay
+-- If false, no delay will be used, not even a single frame (risk of colliding will be high).
+local use_delay_PMDC = true -- true/false
+-- END Experimental
 
 -- Debug
 ns.time_summonspell = 0
@@ -170,9 +184,10 @@ local function stop_auto_summon(t)
 
 	-- Prevent summoning and add extra throttle
 
+	throttle_reason = nil
 	-- Impossible to summon in flight, but this prevents wrong 'restored' messages
 	if is_flying() then
-		throttle = 20
+		throttle, throttle_reason = 20, 'flying' -- increased timer for testing!
 		ns.debugprint 'In the air!'
 	elseif InCombatLockdown()
 		or not ns.db.drSummoning and is_skyride_mounted()
@@ -359,8 +374,12 @@ function ns.events:register_summon_events()
 		self:RegisterEvent 'ZONE_CHANGED_INDOORS'
 		--[[ Good event ]]
 		self:RegisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED'
-	else -- Traditional (default) event(s)
+	else -- Default event(s)
 		self:RegisterEvent 'PLAYER_STARTED_MOVING'
+		-- Added this because:
+			-- To cancel flight throttle instantly
+			-- Possibly smoother summoning at dismounting
+		if use_PMDC then self:RegisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED' end
 	end
 end
 
@@ -515,8 +534,15 @@ function ns:ADDON_LOADED(addon)
 			ns.autoaction()
 		end
 		function ns:PLAYER_MOUNT_DISPLAY_CHANGED()
-			ns.debugprint 'Event: PLAYER_MOUNT_DISPLAY_CHANGED --> `autoaction`'
-			ns.autoaction()
+			ns.debugprint 'Event: PLAYER_MOUNT_DISPLAY_CHANGED --> `autoaction`, flight throttle canceled'
+			if throttle_reason == 'flying' then throttle = 0 end
+			-- This can lead to a summoning conflict *if* the game itself re-summons the pet after dismounting
+			-- Let's try it with a little delay
+			if use_delay_PMDC then
+				C_TimerAfter(delay_PMDC, ns.autoaction)
+			else
+				ns.autoaction()
+			end
 		end
 
 --[[---------------------------------------------------------------------------
