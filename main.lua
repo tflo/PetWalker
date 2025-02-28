@@ -685,7 +685,7 @@ function ns.autoaction()
 	-- TODO: Could we not simply check against the saved db pet, and restore if it isn't correct or missing?
 	if not ns.pet_verified then
 		ns.debugprint_pet '`autoaction` --> `transitioncheck` (pet not verified)'
-		ns.transitioncheck()
+		ns.transitioncheck(true)
 		return
 	end
 	local actpet = C_PetJournalGetSummonedPetGUID()
@@ -840,11 +840,12 @@ end
 	in restore_pet, bc restore_pet is "prefiltered" by autoaction, and here we are not.
 --------------------------------------------------------------------------------------------------------------------]]--
 
-function ns.transitioncheck()
+function ns.transitioncheck(checks_done)
 -- 	Can be called via the entering-world events, or via `autoaction`, so we
 -- 	if ns.pet_verified or InCombatLockdown() or IsFlying() or UnitOnTaxi 'player' then
 	-- TODO: Observe if stop_auto_summon works as expected here!
-	if stop_auto_summon() then
+	-- Never run the stop_auto_summon check twice, as the 2nd one will always find a throttle then!
+	if not checks_done and stop_auto_summon() then
 		if ns.db.debugMode then
 			ns.debugprint(format(
 				'`transitioncheck` (`pet_verified`: %s) stopped by `stop_auto_summon`', tostring(ns.pet_verified)))
