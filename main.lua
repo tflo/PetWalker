@@ -154,13 +154,13 @@ local function saved_pet_is_shoulderpet()
 end
 
 -- To be called from autoaction (and - testwise- from transitioncheck)
-local function stop_auto_summon()
+local function stop_auto_summon(t)
 
 	-- Base/existing throttle
 
 	if not bypass_throttle then
 		throttle = max(throttle, throttle_min)
-		local now = now or time()
+		local now = t or time()
 		if now - time_responded_to_summoning_event < throttle then
 			ns.debugprint('`stop_auto_summon`: existing throttle found:', throttle)
 			return true
@@ -673,9 +673,9 @@ end
 ---------------------------------------------------------------------------]]--
 
 function ns.autoaction()
-	if stop_auto_summon() then return end
+	local now = time()
+	if stop_auto_summon(now) then return end
 	if ns.db.newPetTimer ~= 0 then
-		local now = time()
 		if ns.remaining_timer(now) == 0 then
 			ns.debugprint_pet '`autoaction` --> `new_pet`'
 			ns:new_pet(now, false)
