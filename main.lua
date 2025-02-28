@@ -62,9 +62,9 @@ local time_save_pet = 0
 local time_pool_msg = 0
 local time_transitioncheck = 0
 -- C_Timers launched at PLAYER_ENTERING_WORLD
-local delay_after_login = 16
-local delay_after_reload = 10
-local delay_after_instance = 8
+local delay_after_login = 14
+local delay_after_reload = 8
+local delay_after_instance = 6
 -- C_Timer launched at ADDON_LOADED
 local delay_login_msg = 22
 -- TODO: Should we delay also after we change or select pet teams in Rematch / PJ
