@@ -187,7 +187,7 @@ local function stop_auto_summon(t)
 	throttle_reason = nil
 	-- Impossible to summon in flight, but this prevents wrong 'restored' messages
 	if is_flying() then
-		throttle, throttle_reason = 20, 'flying' -- increased timer for testing!
+		throttle, throttle_reason = 5, 'flying'
 		ns.debugprint 'In the air!'
 	elseif InCombatLockdown()
 		or not ns.db.drSummoning and is_skyride_mounted()
@@ -198,7 +198,7 @@ local function stop_auto_summon(t)
 -- 		or C_UnitAurasGetPlayerAuraBySpellID(5384) -- Hunter: Feign Death (only useful if we use a different event than PLAYER_STARTED_MOVING)
 		or (UnitIsControlling 'player' and UnitChannelInfo 'player')
 	then
-		throttle = 8
+		throttle = 10
 	elseif UnitIsGhost 'player'
 		or UnitHasVehicleUI 'player' -- Alternative(?): `HasOverrideActionBar()`
 		-- Potentially useful: 	`HasExtraActionBar()`
