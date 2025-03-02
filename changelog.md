@@ -4,6 +4,21 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.5.0 (2025-03-02)
+
+- **Some improvements** (probably):
+    - We now run the summoning prevention checks with *every* type of summoning function (unless throttled). This should make checks like the ones against auras even more reliable.
+    - Being in a taboo instance (e.g. M+) will now cause PW to unregister all summoning events, instead of applying a long throttle time. The events will be re-registered after the next load screen.
+    - Slightly reduced the delays after load screens (login, reload, instance change). I have a fast computer now 😁, but it should still work fine on slower setups.
+    - Cleanup and misc optimizations.
+- **Experimental:** 
+    - We now use PLAYER_MOUNT_DISPLAY_CHANGED as additional event to trigger summoning. This event notably fires when you mount/dismount.
+    - The idea is to smooth out the behavior when you land with your mount and dismount, i.e. to summon a missing pet as soon as possible after dismounting, to minimize the risk of GCD conflicts. This change is somewhat important, since flying is one of the most common reasons for losing a pet.
+    - The difference should be noticeable especially if you land and dismount immediately (without having started moving on the ground while still mounted), or if you have deactivated the “summoning while mounted for Skyriding” option (the `/pw sr` toggle). 
+    - This is *experimental* because the catch is that sometimes the game itself will correctly re-summon your pet when you dismount (yes, it does, but not reliably). When this happens, PW’s summoning attempt may collide with the game’s summoning, causing the pet to be unsummoned in the worst case. This is not catastrophic, since PW will re-summon the pet 3s later when you start moving, but it defeats the purpose of this change.
+    - We are trying to avoid this with the help of a timer (currently trying values between 0 and 0.6s), but only play and observation can tell if it is an improvement or what the best delay is.
+    - *If you want to, you can experiment on your own:* you find a couple of related variables in *main.lua*, around line 105 (search for “BEGIN Experimental”). There are some explicative comments there too. You can toggle debug mode with `/pw dm` to see what is exactly going on.
+
 #### 2.4.2 (2025-02-27)
 
 - Added protection against event spam caused by the BattlePetBreedID addon.

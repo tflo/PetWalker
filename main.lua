@@ -102,12 +102,12 @@ local excluded_species = {
 
 -- BEGIN Experimental (usable as temporary user settings):
 -- This is for the experimental usage of PLAYER_MOUNT_DISPLAY_CHANGED as second summoning event;
--- see v2.5.0 change notes.
+-- see v2.5.0 change notes for more info.
 -- Disable/enable usage of the event
 local use_PMDC = true -- true/false
 -- Delay after dismounting (applies also to mounting, but this is irrelevant)
 -- The shorter the better, but the risk of colliding with a summoning attempt by the game will probably be higher.
-local delay_PMDC = 0.3 -- reasonable range: 0 to 1; 0 means 'next frame'
+local delay_PMDC = 0.4 -- [seconds] reasonable range: 0 to 1; 0 means 'next frame'
 -- Disable/enable the above delay
 -- If false, no delay will be used, not even a single frame (risk of colliding will be high).
 local use_delay_PMDC = true -- true/false
@@ -205,12 +205,13 @@ local function stop_auto_summon(t)
 		or IsPossessBarVisible() -- Seems to often coincide with `HasVehicleActionBar()` (not in case of aura 212754!)
 
 		 -- Daisy pet as backpack (/beckon). Disappears when Daisy is summoned.
-		or C_UnitAurasGetPlayerAuraBySpellID(311796) and saved_pet_is_backpet()
+		or C_UnitAurasGetPlayerAuraBySpellID(311796) and saved_pet_is_backpet() -- Daisy
 		 -- Pets on shoulder (/whistle). Disappears when any of the "shoulder pets" is summoned.
 		or C_UnitAurasGetPlayerAuraBySpellID(302954) and saved_pet_is_shoulderpet() -- Feathers
 		or C_UnitAurasGetPlayerAuraBySpellID(232871) and saved_pet_is_shoulderpet() -- Crackers
 		or C_UnitAurasGetPlayerAuraBySpellID(286268) and saved_pet_is_shoulderpet() -- Cap'n Crackers
 
+		-- Game events
 		or C_UnitAurasGetPlayerAuraBySpellID(312993) -- Carrying Forbidden Tomes (Scrivener Lenua event, Revendreth)
 		or C_UnitAurasGetPlayerAuraBySpellID(43880) -- Ramstein's Swift Work Ram (Brewfest daily; important bc the quest cannot be restarted if messed up)
 		or C_UnitAurasGetPlayerAuraBySpellID(43883) -- Rental Racing Ram (Brewfest daily)
@@ -219,7 +220,7 @@ local function stop_auto_summon(t)
 	elseif forbidden_instance() then
 		-- These will be re-enabled at the next PLAYER_ENTERING_WORLD
 		ns.events:unregister_summon_events()
-		throttle = 1 -- Must be > 0 to stop the autoaction in process
+		throttle = 1 -- Must be > 0 to stop the autoaction in progress
 	end
 	if throttle > 0 then
 		ns.debugprint('`stop_auto_summon`: new throttle:', throttle)
