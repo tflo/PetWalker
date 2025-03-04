@@ -201,9 +201,11 @@ local function stop_auto_summon(t)
 		throttle = 10
 	elseif UnitIsGhost 'player'
 		or UnitHasVehicleUI 'player' -- Alternative(?): `HasOverrideActionBar()`
-		-- Potentially useful: 	`HasExtraActionBar()`
-		or IsPossessBarVisible() -- Seems to often coincide with `HasVehicleActionBar()` (not in case of aura 212754!)
-
+		-- Potentially useful: `HasExtraActionBar()`
+		-- Controller toys etc. and some quests; coincides sometimes with `HasVehicleActionBar()` (not in case of aura 212754!)
+		or IsPossessBarVisible()
+		 -- Quest 'The Hole Deal' (84142) and 'Boomball' (85263) in TWW Undermine zone; possibly more, who knows.
+		or HasVehicleActionBar()
 		 -- Daisy pet as backpack (/beckon). Disappears when Daisy is summoned.
 		or C_UnitAurasGetPlayerAuraBySpellID(311796) and saved_pet_is_backpet() -- Daisy
 		 -- Pets on shoulder (/whistle). Disappears when any of the "shoulder pets" is summoned.

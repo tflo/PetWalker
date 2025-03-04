@@ -4,6 +4,13 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.5.1 (2025-03-04)
+
+- Added `HasVehicleActionBar()` to the *do-not-autosummon* conditions.
+    - This allows to do the quests “The Hole Deal” (84142) and “Boomball” (85263) in the TWW Undermine zone without interference by PetWalker. Might be useful for some other quests as well.
+    - Similar conditions that were already implemented are `UnitHasVehicleUI('player')` and `IsPossessBarVisible()`; these cover most of the controller-style toys and some sensible vehicle quests (see change notes of version 2.2.1 (2024-09-11)).
+    - But remember, if you encounter a quest (or toy) where PetWalker’s autosummoning interferes and it is not covered by the built-in *do-not-autosummon* conditions, you can always toggle PW’s autosummoning with `/pw a`.
+
 #### 2.5.0 (2025-03-02)
 
 - **Some improvements** (probably):
