@@ -99,7 +99,7 @@ end
 
 -- TODO: Do we need a warning at 1 selectable pet? Or should this be considered a valid use-case? (User manually summons a pet from Journal, but wants to get back his (only) fav pet when the timer is due.)
 -- function ns.msg_low_petpool(nPool)
--- 	chat_user_notification(CO.bw .. ": " .. (nPool < 1 and "0 (zero) pets" or "Only 1 pet") .. " eligible as random summon! You should either " .. (ns.db.favsOnly and "flag more pets as favorite, or set the ramdom pool to 'All Pets'" or "collect more pets") .. ", or set the random-summon timer to '0'. Please note that certain pets are excluded from random summoning, to not break their usability (for example Guild Herald)." .. ((ns.dbc.charFavsEnabled and ns.db.favsOnly) and "\nNote that you have set this char to use char-specific favorite pets. Maybe switching to global favorites ('/pw c') will help." or ""))
+-- 	chat_user_notification(CO.bw .. ": " .. (nPool < 1 and "0 (zero) pets" or "Only 1 pet") .. " eligible as random summon! You should either " .. (ns.db.favsOnly and "flag more pets as favorite, or set the random pool to 'All Pets'" or "collect more pets") .. ", or set the random-summon timer to '0'. Please note that certain pets are excluded from random summoning, to not break their usability (for example Guild Herald)." .. ((ns.dbc.charFavsEnabled and ns.db.favsOnly) and "\nNote that you have set this char to use char-specific favorite pets. Maybe switching to global favorites ('/pw c') will help." or ""))
 -- end
 
 function ns.msg_no_saved_pet()
@@ -286,7 +286,7 @@ function ns.msg_low_petpool(nPool)
 	local content = {
 		(nPool < 1 and CO.k .. '0 (zero) ' ..R.. 'pets ' or R.. 'Only ' ..CO.k .. '1 ' ..R.. 'pet '),
 		'eligible as random summon!',
-		'\nYou should either ' .. (ns.db.favsOnly and 'flag more pets as favorite, or set the ramdom pool to ' .. CO.s ..'All Pets' or 'collect more pets'), ', or set the random-summon timer to ', CO.s .. '0', '.',
+		'\nYou should either ' .. (ns.db.favsOnly and 'flag more pets as favorite, or set the random pool to ' .. CO.s ..'All Pets' or 'collect more pets'), ', or set the random-summon timer to ', CO.s .. '0', '.',
 		'\nAlso check your ', CO.k .. 'Filter ', 'settings in the ', CO.k .. 'Blizz Pet Journal ', '(not in Rematch!), as they are affecting the pool of available pets!',
 		'\nSome pets are ', CO.k .. 'faction-restricted ', 'and cannot be summoned on the other faction, so they may not be eligible on your current toon.',
 		'\nPlease note that certain pets are intentionally ', CO.k .. 'excluded ', 'from random summoning, to not break their usability (for example ',
