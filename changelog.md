@@ -4,6 +4,12 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.5.2 (2025-03-16)
+
+- Small change that may improve the resummoning of the correct pet after a pet battle.
+    - The changes to the save pet logic in v2.3.0 (to ensure that pets summoned in unusual ways are saved) had a negative impact on the reliability of resummoning the correct pet after a pet battle under certain circumstances. This change may help (experimental).
+- Merged pull request from @milotic (typo in console message).
+
 #### 2.5.1 (2025-03-04)
 
 - Added `HasVehicleActionBar()` to the *do-not-autosummon* conditions.

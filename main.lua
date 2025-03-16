@@ -592,6 +592,11 @@ function ns:ADDON_LOADED(addon)
 			ns.events:unregister_pw_events()
 			ns.events:RegisterEvent 'PET_BATTLE_OVER' -- Alternative: PET_BATTLE_CLOSE (fires twice)
 			ns.in_battlesleep = true
+			-- In theory, this is redundant here. However I noticed that since the change of the save-pet logic (2.3.0),
+			-- the correct pet isn't always restored after a battle (maybe 5–10%, possibly in conjunction with a second
+			-- battle or with entering combat while in battlesleep).
+			-- TODO: Observe if this improves the behavior.
+			ns.pet_verified = false
 		end
 
 		function ns:PET_BATTLE_OVER()
