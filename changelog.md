@@ -4,6 +4,11 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.5.3 (2025-03-22)
+
+- Modified a *do-not-autosummon* conditional so that it now covers *any* channeling done by the player.
+    - In particular, this should prevent PW from interrupting a Fishing channeling started while still mounted. This interference became possible with the “PLAYER_MOUNT_DISPLAY_CHANGED as additional event to trigger summoning”, recently introduced with v2.5.0.
+
 #### 2.5.2 (2025-03-16)
 
 - Small change that may improve the resummoning of the correct pet after a pet battle.

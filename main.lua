@@ -196,7 +196,8 @@ local function stop_auto_summon(t)
 		or C_UnitAurasGetPlayerAuraBySpellID(110960) -- Mage: Greater Invisibility
 		or C_UnitAurasGetPlayerAuraBySpellID(131347) -- DH: Gliding -- Prolly not needed, should be caught by IsFlying() (?)
 -- 		or C_UnitAurasGetPlayerAuraBySpellID(5384) -- Hunter: Feign Death (only useful if we use a different event than PLAYER_STARTED_MOVING)
-		or (UnitIsControlling 'player' and UnitChannelInfo 'player')
+		-- *Any* channeling. Also prevents interrupting a Fishing channel that was started while still mounted.
+		or UnitChannelInfo 'player' -- Cata/Classic: `ChannelInfo()`
 	then
 		throttle = 10
 	elseif UnitIsGhost 'player'
