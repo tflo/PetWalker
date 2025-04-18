@@ -4,6 +4,16 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.5.4 (2025-04-18)
+
+- toc: Flagged upcoming client version 110105 as compatible.
+- Added 9 tests to the debug display:
+    - This includes things like `HasOverrideActionBar()` and similar GUI/UI states.
+    - Conditions that are currently considered by PW are marked with “(used)”, i.e. PW does not summon a pet when the condition is met.
+    - This is mainly for my debugging QoL.
+    - You can make use of it when you are going to report an issue about PW summoning a pet when it shouldn’t. The command for the debug display is `/pw dd` (unchanged).
+    - If you’re a curious person, these tests might give you insight. AFAIK, there is no other addon that reports all these UI/GUI states with one single command ;) (Might be useful when writing macros, since many of the tested conditions are usable in macros.)
+
 #### 2.5.3 (2025-03-22)
 
 - Modified a *do-not-autosummon* conditional so that it now covers *any* channeling done by the player.
