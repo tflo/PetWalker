@@ -201,15 +201,33 @@ local function stop_auto_summon(t)
 	then
 		throttle = 10
 	elseif UnitIsGhost 'player'
-		or UnitHasVehicleUI 'player' -- Alternative(?): `HasOverrideActionBar()`
-		-- Potentially useful: `HasExtraActionBar()`
+		-- Still needed? Why did we add this? Maybe covered by the newly added `HasVehicleActionBar()`?
+		or UnitHasVehicleUI 'player'
 		-- Controller toys etc. and some quests; coincides sometimes with `HasVehicleActionBar()` (not in case of aura 212754!)
 		or IsPossessBarVisible()
 		 -- Quest 'The Hole Deal' (84142) and 'Boomball' (85263) in TWW Undermine zone; possibly more, who knows.
+		 -- Also Mr. Delver in the Sidestreet delve.
 		or HasVehicleActionBar()
-		 -- Daisy pet as backpack (/beckon). Disappears when Daisy is summoned.
+		-- This is the only one that is true when we have the D.R.I.V.E. UI.
+		-- But so far there aren't any conflicts. Let's see if users report some.
+		-- or HasOverrideActionBar()
+
+		-- Potentially useful (1): `CanExitVehicle()`, `UnitInVehicle 'player'`
+
+		-- Potentially useful (2); this is the 1-button bar with the ExtraActionButton.
+		-- This would cover things like the aura 467865 (Sunrise Sudser), used in WQ 85390 in Undermine. (This particular aura
+		-- gives the player a sort of channeling, but not really, though it does get interrupted by pet summoning.) However,
+		-- this is not critical because – unlike the above vehicle-like stuff – the ExtraActionBar usually does not force-dismiss
+		-- the pet, so it is unlikely that it triggers a pet summoning by PW. And if it really does, the user can simply click
+		-- the ExtraActionButton again.
+		-- If we use this, we would also disable PW in many situations where it is absolutely not necessary (and not desirable).
+		-- HasExtraActionBar()
+
+		-- Note: The action bar modification by Skyriding is a so called Bonus Bar.
+
+		-- Daisy pet as backpack (/beckon). Disappears when Daisy is summoned.
 		or C_UnitAurasGetPlayerAuraBySpellID(311796) and saved_pet_is_backpet() -- Daisy
-		 -- Pets on shoulder (/whistle). Disappears when any of the "shoulder pets" is summoned.
+		-- Pets on shoulder (/whistle). Disappears when any of the "shoulder pets" is summoned.
 		or C_UnitAurasGetPlayerAuraBySpellID(302954) and saved_pet_is_shoulderpet() -- Feathers
 		or C_UnitAurasGetPlayerAuraBySpellID(232871) and saved_pet_is_shoulderpet() -- Crackers
 		or C_UnitAurasGetPlayerAuraBySpellID(286268) and saved_pet_is_shoulderpet() -- Cap'n Crackers
@@ -221,7 +239,7 @@ local function stop_auto_summon(t)
 	then
 		throttle = 40
 	elseif forbidden_instance() then
-		-- These will be re-enabled at the next PLAYER_ENTERING_WORLD
+		-- Our events will be re-enabled at the next PLAYER_ENTERING_WORLD
 		ns.events:unregister_summon_events()
 		throttle = 1 -- Must be > 0 to stop the autoaction in progress
 	end
