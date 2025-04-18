@@ -34,6 +34,16 @@ function ns.debug_display()
 		format('%sChar DB current pet|r: %s', COLOR_DEBUG, ns.id_to_name(ns.dbc.currentPet)),
 		format('%sChar DB previous pet|r: %s', COLOR_DEBUG, ns.id_to_name(ns.dbc.previousPet)),
 		format('%spet_verified|r: %s', COLOR_DEBUG, tostring(ns.pet_verified)),
+		'---',
+		format("%s`UnitHasVehicleUI 'player'` (used): %s", COLOR_DEBUG, tostring(UnitHasVehicleUI 'player')),
+		format('%s`IsPossessBarVisible()` (used): %s', COLOR_DEBUG, tostring(IsPossessBarVisible())),
+		format('%s`HasVehicleActionBar()` (used): %s', COLOR_DEBUG, tostring(HasVehicleActionBar())),
+		format('%s`HasOverrideActionBar()`: %s', COLOR_DEBUG, tostring(HasOverrideActionBar())),
+		format('%s`CanExitVehicle()`: %s', COLOR_DEBUG, tostring(CanExitVehicle())),
+		format("%s`UnitInVehicle 'player'`: %s", COLOR_DEBUG, tostring(UnitInVehicle 'player')),
+		format('%s`HasExtraActionBar()`: %s', COLOR_DEBUG, tostring(HasExtraActionBar())),
+		format('%s`HasBonusActionBar()`: %s', COLOR_DEBUG, tostring(HasBonusActionBar())),
+		format('%s`HasTempShapeshiftActionBar()`: %s', COLOR_DEBUG, tostring(HasTempShapeshiftActionBar())),
 	}
 	for _, l in ipairs(lines) do print(l) end
 end
