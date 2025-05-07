@@ -104,7 +104,7 @@ end
 
 function ns.msg_no_saved_pet()
 	if ns.db.verbosityLevel < 0 then return end
-	chat_user_notification(CO.bw .. 'No Current Pet has been saved yet' .. (ns.dbc.charFavsEnabled and ' for ' .. CO.e .. this_char or '') .. CO.bw .. ' --> Summoning a new pet.')
+	chat_user_notification(CO.bw .. 'Cannot restore pet because no Current Pet has been saved yet' .. (ns.dbc.charFavsEnabled and ' for ' .. CO.e .. this_char or '') .. CO.bw .. '. This can happen when switching to char-specific favorites for the first time on a toon. - Summoned a random pet instead.')
 end
 
 function ns.msg_no_previous_pet()

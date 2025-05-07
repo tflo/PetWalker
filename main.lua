@@ -771,9 +771,12 @@ function ns:restore_pet()
 		pet_restored = true
 		ns:summon_pet(savedpet, false)
 	else
-		ns.debugprint '`restore_pet` could not find saved pet --> summoning new pet'
+		ns.debugprint '`restore_pet` could not find saved pet --> summoning new pet via Blizz SummonRandomPet'
 		ns.msg_no_saved_pet()
-		ns:new_pet(now, false)
+		-- Do not use `new_pet()` as fallback, since it isn't guaranteed that the user has a valid pool.
+		-- (e.g. set to char favs and no char favs defined)
+		-- `false` to summon any, `true` for favorites.
+		C_PetJournal.SummonRandomPet(false)
 	end
 end
 
@@ -806,7 +809,11 @@ function ns:new_pet(the_time, manually_called)
 			ns.msg_low_petpool(npool)
 			time_pool_msg = now
 		end
-		if not actpet then ns:restore_pet() end
+		-- We are intentionally no longer summoning a fallback pet here.
+		-- See the loop issue https://github.com/tflo/PetWalker/issues/20.
+		-- Also, it may just confuse the user if we show the "low pet pool" warning and in the same moment
+		-- summon a new (and unrelated) pet. The next auto-summon trigger will restore the saved pet anyway.
+		ns.debugprint '`new_pet`: zero pet pool, warning msg on cooldown'
 	else
 		if npool == 1 then
 			newpet = ns.pet_pool[1]
