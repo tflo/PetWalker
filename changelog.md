@@ -4,12 +4,16 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
-#### 2.5.5-dev (2025-05-07)
+#### 2.5.5 (2025-05-09)
 
 - Fixes an infinite loop (“script ran too long”) in situations where the pet pool is zero and no Current Pet has been saved yet (issue #20).
     - We now fall back to `C_PetJournal.SummonRandomPet` if there isn’t a saved pet. This force-populates the missing DB entry.
     - We no longer immediately restore the saved pet when a new-pet summoning fails due to a zero pet pool. You’ll just get the “low pet pool” warning as usual. (If your pet is missing, it will be restored at the next trigger anyway.)
     - Updated related user and debug messages.
+- Removed some unused code.
+- Added a few checks to the debug display.
+- Added pet GUIDs to the debug display.
+- Added currently summoned pet to the debug display.
 
 #### 2.5.4 (2025-04-18)
 
