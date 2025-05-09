@@ -27,23 +27,29 @@ end
 
 function ns.debug_display()
 	ns.status_display()
+	local actpet = C_PetJournal.GetSummonedPetGUID()
 	local lines = {
 		format('%sPW Debug:', COLOR_DEBUG),
-		format('%sDB current pet|r: %s', COLOR_DEBUG, ns.id_to_name(ns.db.currentPet)),
-		format('%sDB previous pet|r: %s', COLOR_DEBUG, ns.id_to_name(ns.db.previousPet)),
-		format('%sChar DB current pet|r: %s', COLOR_DEBUG, ns.id_to_name(ns.dbc.currentPet)),
-		format('%sChar DB previous pet|r: %s', COLOR_DEBUG, ns.id_to_name(ns.dbc.previousPet)),
-		format('%spet_verified|r: %s', COLOR_DEBUG, tostring(ns.pet_verified)),
+		format('%sDB current pet|r: %s [%s]', COLOR_DEBUG, ns.id_to_name(ns.db.currentPet), tostring(ns.db.currentPet)),
+		format('%sDB previous pet|r: %s [%s]', COLOR_DEBUG, ns.id_to_name(ns.db.previousPet), tostring(ns.db.previousPet)),
+		format('%sChar DB current pet|r: %s [%s]', COLOR_DEBUG, ns.id_to_name(ns.dbc.currentPet), tostring(ns.dbc.currentPet)),
+		format('%sChar DB previous pet|r: %s [%s]', COLOR_DEBUG, ns.id_to_name(ns.dbc.previousPet), tostring(ns.dbc.previousPet)),
+		format('%s`pet_verified`|r: %s', COLOR_DEBUG, tostring(ns.pet_verified)),
+		format('%sCurrently summoned pet|r: %s [%s]', COLOR_DEBUG, ns.id_to_name(actpet), tostring(actpet)),
 		'---',
-		format("%s`UnitHasVehicleUI 'player'` (used): %s", COLOR_DEBUG, tostring(UnitHasVehicleUI 'player')),
-		format('%s`IsPossessBarVisible()` (used): %s', COLOR_DEBUG, tostring(IsPossessBarVisible())),
-		format('%s`HasVehicleActionBar()` (used): %s', COLOR_DEBUG, tostring(HasVehicleActionBar())),
+		format('%s`IsPossessBarVisible()` [in use]: %s', COLOR_DEBUG, tostring(IsPossessBarVisible())),
+		format("%s`UnitIsControlling 'player'`: %s", COLOR_DEBUG, tostring(UnitIsControlling 'player')),
+		format("%s`UnitHasVehicleUI 'player'` [in use]: %s", COLOR_DEBUG, tostring(UnitHasVehicleUI 'player')),
+		format('%s`HasVehicleActionBar()` [in use]: %s', COLOR_DEBUG, tostring(HasVehicleActionBar())),
 		format('%s`HasOverrideActionBar()`: %s', COLOR_DEBUG, tostring(HasOverrideActionBar())),
-		format('%s`CanExitVehicle()`: %s', COLOR_DEBUG, tostring(CanExitVehicle())),
-		format("%s`UnitInVehicle 'player'`: %s", COLOR_DEBUG, tostring(UnitInVehicle 'player')),
 		format('%s`HasExtraActionBar()`: %s', COLOR_DEBUG, tostring(HasExtraActionBar())),
 		format('%s`HasBonusActionBar()`: %s', COLOR_DEBUG, tostring(HasBonusActionBar())),
-		format('%s`HasTempShapeshiftActionBar()`: %s', COLOR_DEBUG, tostring(HasTempShapeshiftActionBar())),
+-- 		format('%s`HasTempShapeshiftActionBar()`: %s', COLOR_DEBUG, tostring(HasTempShapeshiftActionBar())),
+		format("%s`UnitInVehicle 'player'`: %s", COLOR_DEBUG, tostring(UnitInVehicle 'player')),
+		format('%s`CanExitVehicle()`: %s', COLOR_DEBUG, tostring(CanExitVehicle())),
+		format('%s`IsMounted()`: %s', COLOR_DEBUG, tostring(IsMounted())),
+		format('%s`IsFlying()` [in use]: %s', COLOR_DEBUG, tostring(IsFlying())),
+		format('%s`IsStealthed()` [in use]: %s', COLOR_DEBUG, tostring(IsStealthed())),
 	}
 	for _, l in ipairs(lines) do print(l) end
 end
