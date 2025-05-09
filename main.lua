@@ -25,7 +25,7 @@ local C_MapGetBestMapForUnit = _G.C_Map.GetBestMapForUnit
 local C_UnitAurasGetPlayerAuraBySpellID = _G.C_UnitAuras.GetPlayerAuraBySpellID
 local InCombatLockdown = _G.InCombatLockdown
 local IsFlying = _G.IsFlying
-local IsMounted = _G.IsMounted
+-- local IsMounted = _G.IsMounted
 local UnitOnTaxi = _G.UnitOnTaxi
 local UnitHasVehicleUI = _G.UnitHasVehicleUI
 local IsPossessBarVisible = _G.IsPossessBarVisible
@@ -34,7 +34,7 @@ local UnitIsBattlePet = _G.UnitIsBattlePet
 local GetInstanceInfo = _G.GetInstanceInfo
 local IsInInstance = _G.IsInInstance
 local IsStealthed = _G.IsStealthed
-local UnitIsControlling = _G.UnitIsControlling
+-- local UnitIsControlling = _G.UnitIsControlling
 local UnitChannelInfo = _G.UnitChannelInfo
 local time = _G.time
 local C_PlayerInfoGetGlidingInfo = C_PlayerInfo.GetGlidingInfo
@@ -58,9 +58,9 @@ ns.pet_verified = false
 ns.in_battlesleep = false
 --[[ Last time AutoRestore() was called. ]]
 local time_restore_pet = 0
-local time_save_pet = 0
+-- local time_save_pet = 0 -- What did we use this for? Debugging?
 local time_pool_msg = 0
-local time_transitioncheck = 0
+-- local time_transitioncheck = 0 -- What did we use this for? Debugging?
 -- C_Timers launched at PLAYER_ENTERING_WORLD
 local delay_after_login = 14
 local delay_after_reload = 8
@@ -829,7 +829,7 @@ function ns:new_pet(the_time, manually_called)
 				newpet = ns.pet_pool[math.random(npool)]
 			until actpet ~= newpet
 		end
-		ns.set_sum_msg_to_newpet(actpet, newpet, npool)
+		ns.set_sum_msg_to_newpet(newpet, npool)
 		ns:summon_pet(newpet, true)
 	end
 end
@@ -1040,7 +1040,7 @@ local function clean_charfavs()
 	if count > 0 then ns.msg_removed_invalid_id(count) end
 end
 
-function ns.initialize_pool(self)
+function ns.initialize_pool()
 	ns.debugprint 'Running `initialize_pool`'
 	table.wipe(ns.pet_pool)
 	clean_charfavs()

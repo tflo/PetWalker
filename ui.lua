@@ -71,9 +71,9 @@ local function chat_user_notification(msg)
 	print(CO.an .. addon_name .. ":", msg)
 end
 
-local function chat_user_notification_block(msg)
-	print('\n' .. CO.an .. sep .. '\n' .. addon_name .. ':', msg, '\n' .. CO.an .. sep , '\n ')
-end
+-- local function chat_user_notification_block(msg)
+-- 	print('\n' .. CO.an .. sep .. '\n' .. addon_name .. ':', msg, '\n' .. CO.an .. sep , '\n ')
+-- end
 
 local function chat_user_notification_large(first, second, third, last)
 	print('\n' .. CO.an .. sep .. '\n' .. addon_name .. ':', first)
@@ -177,7 +177,7 @@ new_pet, or previous_pet or the transitioncheck.
 ---------------------------------------------------------------------------]]--
 
 -- Called by the new_pet func
-function ns.set_sum_msg_to_newpet(ap, np, n)
+function ns.set_sum_msg_to_newpet(np, n)
 	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned %s pet %s.', CO.bn, n > 1 and 'a new random' or 'your only eligible random', ns.id_to_link(np)) or nil
 end
 
