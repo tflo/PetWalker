@@ -25,6 +25,7 @@ local C_MapGetBestMapForUnit = _G.C_Map.GetBestMapForUnit
 local C_UnitAurasGetPlayerAuraBySpellID = _G.C_UnitAuras.GetPlayerAuraBySpellID
 local InCombatLockdown = _G.InCombatLockdown
 local IsFlying = _G.IsFlying
+local IsFalling = _G.IsFalling
 -- local IsMounted = _G.IsMounted
 local UnitOnTaxi = _G.UnitOnTaxi
 local UnitHasVehicleUI = _G.UnitHasVehicleUI
@@ -121,10 +122,10 @@ ns.time_summonspell = 0
 	Summoning prevention
 ---------------------------------------------------------------------------]]--
 
-local function is_flying()
+local function is_not_onground()
 	-- The taxi condition should only ever trigger if we use zone events, since we cannot "move" while on taxi,
 	-- or when manually calling `new_pet`
-	return IsFlying() or UnitOnTaxi 'player'
+	return IsFlying() or IsFalling() or UnitOnTaxi 'player'
 end
 
 -- Other possibility: UnitPowerBarID('player') == 631
@@ -186,7 +187,7 @@ local function stop_auto_summon(t)
 
 	throttle_reason = nil
 	-- Impossible to summon in flight, but this prevents wrong 'restored' messages
-	if is_flying() then
+	if is_not_onground() then
 		throttle, throttle_reason = 5, 'flying'
 		ns.debugprint 'In the air!'
 	elseif InCombatLockdown()
@@ -253,7 +254,7 @@ end
 -- For a manual action, we don't want all the checks from `stop_auto_summon` or a throttle.
 -- Combat check is needed though to not generate errors.
 local function stop_manual_summon()
-	if InCombatLockdown() or is_flying() then
+	if InCombatLockdown() or is_not_onground() then
 		ns.msg_manual_summon_stopped()
 		return true
 	end
