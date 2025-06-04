@@ -122,9 +122,8 @@ ns.time_summonspell = 0
 	Summoning prevention
 ---------------------------------------------------------------------------]]--
 
-local function is_not_onground()
-	-- The taxi condition should only ever trigger if we use zone events, since we cannot "move" while on taxi,
-	-- or when manually calling `new_pet`
+-- Besides combat lockdown, this is the only test we use with manual summoning
+local function is_inair()
 	return IsFlying() or IsFalling() or UnitOnTaxi 'player'
 end
 
@@ -187,8 +186,8 @@ local function stop_auto_summon(t)
 
 	throttle_reason = nil
 	-- Impossible to summon in flight, but this prevents wrong 'restored' messages
-	if is_not_onground() then
-		throttle, throttle_reason = 5, 'flying'
+	if is_inair() then
+		throttle, throttle_reason = 5, 'inair'
 		ns.debugprint 'In the air!'
 	elseif InCombatLockdown()
 		or not ns.db.drSummoning and is_skyride_mounted()
@@ -254,7 +253,7 @@ end
 -- For a manual action, we don't want all the checks from `stop_auto_summon` or a throttle.
 -- Combat check is needed though to not generate errors.
 local function stop_manual_summon()
-	if InCombatLockdown() or is_not_onground() then
+	if InCombatLockdown() or is_inair() then
 		ns.msg_manual_summon_stopped()
 		return true
 	end
@@ -558,7 +557,7 @@ function ns:ADDON_LOADED(addon)
 		end
 		function ns:PLAYER_MOUNT_DISPLAY_CHANGED()
 			ns.debugprint 'Event: PLAYER_MOUNT_DISPLAY_CHANGED --> `autoaction`, flight throttle canceled'
-			if throttle_reason == 'flying' then throttle = 0 end
+			if throttle_reason == 'inair' then throttle = 0 end
 			-- This can lead to a summoning conflict *if* the game itself re-summons the pet after dismounting
 			-- Let's try it with a little delay
 			if use_delay_PMDC then
