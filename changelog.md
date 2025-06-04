@@ -4,6 +4,16 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.5.7 (2025-06-04)
+
+- Added missing changelog for 2.5.6.
+- Minor formal internal changes.
+
+#### 2.5.6 (2025-06-01)
+
+- Added `IsFalling` exclusion to the is_flying bunch. Should fix https://legacy.curseforge.com/wow/addons/petwalker?comment=32.
+- Restructured/renamed the “not on ground” conditions.
+
 #### 2.5.5 (2025-05-09)
 
 - Fixes an infinite loop (“script ran too long”) in situations where the pet pool is zero and no Current Pet has been saved yet (issue #20).
