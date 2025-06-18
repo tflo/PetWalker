@@ -4,6 +4,11 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.5.8 (2025-06-18)
+
+- toc: Added `AllowAddOnTableAccess: 1`
+- toc: Removed Interface `110105`
+
 #### 2.5.7 (2025-06-04)
 
 - Added missing changelog for 2.5.6.
