@@ -1,6 +1,6 @@
-## Interface: 110107
+## Interface: 110107, 110200
 ## Title: PetWalker
-## Version: 2.5.8
+## Version: 2.5.9
 ## IconTexture: Interface/AddOns/PetWalker/icon.png
 ## Notes: Automatically re-summons your lost companion pet, or auto-summons a random or favorite one.
 ## Category: Collections
