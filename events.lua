@@ -42,7 +42,7 @@ local monitored_addons = {
 }
 -- dtd(monitored_addons)
 
-function ns:ADDON_LOADED(addon)
+local function ADDON_LOADED(addon)
 	if not monitored_addons[addon] then return end
 	if addon == addon_name then
 		PetWalkerDB = PetWalkerDB or {}
@@ -122,7 +122,7 @@ or 3s timer is OK.
 In any case, we should make sure to be completely out of the loading process,
 otherwise we might unsummon our - not yet spawned - pet.
 ]]
-function ns:PLAYER_ENTERING_WORLD(is_login, is_reload)
+local function PLAYER_ENTERING_WORLD(is_login, is_reload)
 	local delay
 	-- We do not want summon events before transitioncheck has finished
 	ns.events:unregister_summon_events()
@@ -160,21 +160,21 @@ function ns:PLAYER_ENTERING_WORLD(is_login, is_reload)
 end
 
 -- Regular main event
-function ns:PLAYER_STARTED_MOVING()
+local function PLAYER_STARTED_MOVING()
 	ns.debugprint 'Event: PLAYER_STARTED_MOVING --> `autoaction`'
 	ns.autoaction()
 end
 
 -- Experimental alternative events
-function ns:ZONE_CHANGED()
+local function ZONE_CHANGED()
 	ns.debugprint 'Event: ZONE_CHANGED --> `autoaction`'
 	ns.autoaction()
 end
-function ns:ZONE_CHANGED_INDOORS()
+local function ZONE_CHANGED_INDOORS()
 	ns.debugprint 'Event: ZONE_CHANGED_INDOORS --> `autoaction`'
 	ns.autoaction()
 end
-function ns:PLAYER_MOUNT_DISPLAY_CHANGED()
+local function PLAYER_MOUNT_DISPLAY_CHANGED()
 	ns.debugprint 'Event: PLAYER_MOUNT_DISPLAY_CHANGED --> `autoaction`, flight throttle canceled'
 -- 			if throttle_reason == 'inair' then throttle = 0 end  -- WTF?!
 	-- This can lead to a summoning conflict *if* the game itself re-summons the pet after dismounting
@@ -186,7 +186,7 @@ function ns:PLAYER_MOUNT_DISPLAY_CHANGED()
 	end
 end
 
-function ns:COMPANION_UPDATE(what)
+local function COMPANION_UPDATE(what)
 	-- This event fires always 2 times, so let's just listen to the first one
 	if what ~= 'CRITTER' or eventthrottle_companionupdate then return end
 	eventthrottle_companionupdate = true
@@ -215,7 +215,7 @@ function ns:COMPANION_UPDATE(what)
 	end)
 end
 
-function ns:PET_BATTLE_OPENING_START()
+local function PET_BATTLE_OPENING_START()
 	ns.debugprint 'Event: PET_BATTLE_OPENING_START'
 	ns.events:unregister_pw_events()
 	ns.events:RegisterEvent 'PET_BATTLE_OVER' -- Alternative: PET_BATTLE_CLOSE (fires twice)
@@ -227,7 +227,7 @@ function ns:PET_BATTLE_OPENING_START()
 	ns.pet_verified = false
 end
 
-function ns:PET_BATTLE_OVER()
+local function PET_BATTLE_OVER()
 	ns.debugprint(
 		format(
 			'Event: PET_BATTLE_OVER --> Re-register events in %ss, unless we are in the next battle',
@@ -251,7 +251,7 @@ needed, that is before selecting a random pet.
 --> This seems to work, so far!
 TODO: Just noticed that this fires each time I hover over a pet in the AH listing(!). Find out if this is triggered by an addon, or if it is Blizz crap. If needed, unregister PW events when the AH is opened.
 ]]
-function ns:PET_JOURNAL_LIST_UPDATE()
+local function PET_JOURNAL_LIST_UPDATE()
 	-- Hovering over any pet in the bags or the AH triggers the event.
 	-- This is caused by the BattlePetBreedID addon: if the 'collected pets' option is active,
 	-- it calls `C_PetJournal.ClearSearchFilter()`, in order to make the collected pets info fetchable.
@@ -266,8 +266,9 @@ function ns:PET_JOURNAL_LIST_UPDATE()
 		ns.pool_initialized = false
 	end
 end
+ns.PET_JOURNAL_LIST_UPDATE = PET_JOURNAL_LIST_UPDATE -- Used in main
 
-function ns:PLAYER_LOGOUT()
+local function PLAYER_LOGOUT()
 	ns.db.remainingTimer = ns.remaining_timer(time())
 end
 
@@ -276,11 +277,30 @@ end
 	Event frame
 ===========================================================================]]--
 
+local event_handlers = {
+	['ADDON_LOADED'] = ADDON_LOADED,
+	['PLAYER_ENTERING_WORLD'] = PLAYER_ENTERING_WORLD,
+	['PLAYER_LOGOUT'] = PLAYER_LOGOUT,
+	['PLAYER_STARTED_MOVING'] = PLAYER_STARTED_MOVING,
+	['ZONE_CHANGED'] = ZONE_CHANGED,
+	['ZONE_CHANGED_INDOORS'] = ZONE_CHANGED_INDOORS,
+	['PLAYER_MOUNT_DISPLAY_CHANGED'] = PLAYER_MOUNT_DISPLAY_CHANGED,
+	['COMPANION_UPDATE'] = COMPANION_UPDATE,
+	['PET_BATTLE_OPENING_START'] = PET_BATTLE_OPENING_START,
+	['PET_BATTLE_OVER'] = PET_BATTLE_OVER,
+	['PET_JOURNAL_LIST_UPDATE'] = PET_JOURNAL_LIST_UPDATE,
+}
+
 ns.events = CreateFrame 'Frame'
 
-ns.events:SetScript('OnEvent', function(self, event, ...)
-	if ns[event] then ns[event](self, ...) end
+ns.events:SetScript('OnEvent', function(_, event, ...)
+	local handler = event_handlers[event] -- or ns[event]
+	if handler then handler(...) end
 end)
+
+-- ns.events:SetScript('OnEvent', function(self, event, ...)
+-- 	if ns[event] then ns[event](self, ...) end
+-- end)
 
 ns.events:RegisterEvent 'ADDON_LOADED'
 
