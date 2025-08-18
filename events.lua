@@ -33,79 +33,8 @@ local use_delay_PMDC = true -- true/false
 
 
 --[[===========================================================================
-	Event frame
+	Events
 ===========================================================================]]--
-
-ns.events = CreateFrame 'Frame'
-
-ns.events:SetScript('OnEvent', function(self, event, ...)
-	if ns[event] then ns[event](self, ...) end
-end)
-
-ns.events:RegisterEvent 'ADDON_LOADED'
-
--- Groups
-
--- Used events that are not in any group:
--- ADDON_LOADED
--- PET_BATTLE_OVER (registered after PET_BATTLE_OPENING_START)
-
-function ns.events:register_summon_events()
-	ns.debugprint 'Registering summon events.'
-	if ns.db.eventAlt then -- Alt events, experimental
-		--[[ Pointless if it fires while flying, which is quite often. But this doesn't harm either. ]]
-		self:RegisterEvent 'ZONE_CHANGED'
-		--[[ Probably good, still testing.
-		Fires often together with zoneCh, but not always. ]]
-		self:RegisterEvent 'ZONE_CHANGED_INDOORS'
-		--[[ Good event ]]
-		self:RegisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED'
-	else -- Default event(s)
-		self:RegisterEvent 'PLAYER_STARTED_MOVING'
-		-- Added this because:
-			-- To cancel flight throttle instantly
-			-- Possibly smoother summoning at dismounting
-		if use_PMDC then self:RegisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED' end
-	end
-end
-
-function ns.events:unregister_summon_events()
-	ns.debugprint 'Unregistering summon events.'
-	self:UnregisterEvent 'ZONE_CHANGED'
-	self:UnregisterEvent 'ZONE_CHANGED_INDOORS'
-	self:UnregisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED'
-	self:UnregisterEvent 'PLAYER_STARTED_MOVING'
-end
-
-function ns.events:register_meta_events()
-	ns.debugprint 'Registering meta events.'
-	self:RegisterEvent 'PLAYER_ENTERING_WORLD'
-	self:RegisterEvent 'PET_JOURNAL_LIST_UPDATE'
-	self:RegisterEvent 'COMPANION_UPDATE'
-	self:RegisterEvent 'PET_BATTLE_OPENING_START'
-	self:RegisterEvent 'PLAYER_LOGOUT'
-end
-
-function ns.events:unregister_meta_events()
-	ns.debugprint 'Unregistering meta events.'
-	self:UnregisterEvent 'PLAYER_ENTERING_WORLD'
-	self:UnregisterEvent 'PET_JOURNAL_LIST_UPDATE'
-	self:UnregisterEvent 'COMPANION_UPDATE'
-	self:UnregisterEvent 'PET_BATTLE_OPENING_START'
-	self:UnregisterEvent 'PLAYER_LOGOUT'
-end
-
-function ns.events:register_pw_events()
-	ns.debugprint 'Registering PW events.'
-	self:register_meta_events()
-	self:register_summon_events()
-end
-
-function ns.events:unregister_pw_events()
-	ns.debugprint 'Unregistering PW events (`UnregisterAllEvents`).'
-	self:UnregisterAllEvents()
-end
-
 
 local monitored_addons = {
 	[addon_name] = true,
@@ -340,4 +269,79 @@ end
 
 function ns:PLAYER_LOGOUT()
 	ns.db.remainingTimer = ns.remaining_timer(time())
+end
+
+
+--[[===========================================================================
+	Event frame
+===========================================================================]]--
+
+ns.events = CreateFrame 'Frame'
+
+ns.events:SetScript('OnEvent', function(self, event, ...)
+	if ns[event] then ns[event](self, ...) end
+end)
+
+ns.events:RegisterEvent 'ADDON_LOADED'
+
+-- Groups
+
+-- Used events that are not in any group:
+-- ADDON_LOADED
+-- PET_BATTLE_OVER (registered after PET_BATTLE_OPENING_START)
+
+function ns.events:register_summon_events()
+	ns.debugprint 'Registering summon events.'
+	if ns.db.eventAlt then -- Alt events, experimental
+		--[[ Pointless if it fires while flying, which is quite often. But this doesn't harm either. ]]
+		self:RegisterEvent 'ZONE_CHANGED'
+		--[[ Probably good, still testing.
+		Fires often together with zoneCh, but not always. ]]
+		self:RegisterEvent 'ZONE_CHANGED_INDOORS'
+		--[[ Good event ]]
+		self:RegisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED'
+	else -- Default event(s)
+		self:RegisterEvent 'PLAYER_STARTED_MOVING'
+		-- Added this because:
+			-- To cancel flight throttle instantly
+			-- Possibly smoother summoning at dismounting
+		if use_PMDC then self:RegisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED' end
+	end
+end
+
+function ns.events:unregister_summon_events()
+	ns.debugprint 'Unregistering summon events.'
+	self:UnregisterEvent 'ZONE_CHANGED'
+	self:UnregisterEvent 'ZONE_CHANGED_INDOORS'
+	self:UnregisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED'
+	self:UnregisterEvent 'PLAYER_STARTED_MOVING'
+end
+
+function ns.events:register_meta_events()
+	ns.debugprint 'Registering meta events.'
+	self:RegisterEvent 'PLAYER_ENTERING_WORLD'
+	self:RegisterEvent 'PET_JOURNAL_LIST_UPDATE'
+	self:RegisterEvent 'COMPANION_UPDATE'
+	self:RegisterEvent 'PET_BATTLE_OPENING_START'
+	self:RegisterEvent 'PLAYER_LOGOUT'
+end
+
+function ns.events:unregister_meta_events()
+	ns.debugprint 'Unregistering meta events.'
+	self:UnregisterEvent 'PLAYER_ENTERING_WORLD'
+	self:UnregisterEvent 'PET_JOURNAL_LIST_UPDATE'
+	self:UnregisterEvent 'COMPANION_UPDATE'
+	self:UnregisterEvent 'PET_BATTLE_OPENING_START'
+	self:UnregisterEvent 'PLAYER_LOGOUT'
+end
+
+function ns.events:register_pw_events()
+	ns.debugprint 'Registering PW events.'
+	self:register_meta_events()
+	self:register_summon_events()
+end
+
+function ns.events:unregister_pw_events()
+	ns.debugprint 'Unregistering PW events (`UnregisterAllEvents`).'
+	self:UnregisterAllEvents()
 end
