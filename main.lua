@@ -762,7 +762,11 @@ function ns:create_cfavs_checkbox()
 	end)
 	btn:SetScript('OnClick', function()
 		ns.dbc.charFavsEnabled = not ns.dbc.charFavsEnabled
-		ns:cfavs_update()
+		if ns.db.autoEnabled then
+			ns.transitioncheck()
+		else
+			ns:cfavs_update()
+		end
 	end)
 	btn:SetScript('OnLeave', function() GameTooltip:Hide() end)
 	local label = btn:CreateFontString(nil, 'OVERLAY')
