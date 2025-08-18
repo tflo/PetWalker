@@ -462,6 +462,24 @@ function ns:list_charfavs()
 end
 
 
+--[[---------------------------------------------------------------------------
+	For the bindings.xml
+---------------------------------------------------------------------------]]--
+
+-- BINDING_HEADER_PETWALKER = "PetWalker  "
+BINDING_NAME_PETWALKER_TOGGLE_AUTO = 'Toggle Auto-Summoning'
+BINDING_NAME_PETWALKER_NEW_PET = 'Summon New Pet'
+BINDING_NAME_PETWALKER_PREVIOUS_PET = 'Summon Previous Pet'
+BINDING_NAME_PETWALKER_TARGET_PET = 'Summon Same Pet as Target'
+BINDING_NAME_PETWALKER_DISMISS_PET = 'Dismiss Pet & Disable Auto-Summoning'
+
+function PetWalker_binding_toggle_autosummon() ns:auto_toggle() end
+function PetWalker_binding_new_pet() ns:new_pet(nil, true) end
+function PetWalker_binding_previous_pet() ns.previous_pet() end
+function PetWalker_binding_target_pet() ns:summon_targetpet() end
+function PetWalker_binding_dismiss_and_disable() ns:dismiss_and_disable() end
+
+
 --[[ License ===================================================================
 
 	Copyright © 2022-2025 Thomas Floeren

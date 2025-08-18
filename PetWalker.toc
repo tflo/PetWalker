@@ -22,12 +22,14 @@
 ## X-Flavor: Mainline
 ## X-License: GPLv3
 ## X-Localizations: enUS
+## LoadSavedVariablesFirst: 1
 ## SavedVariables: PetWalkerDB
 ## SavedVariablesPerCharacter: PetWalkerPerCharDB
 
 main.lua
 ui.lua
 utilities.lua
+events.lua
 
 
 
