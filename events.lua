@@ -18,7 +18,8 @@ local instasummon_after_battlesleep = true -- Summon without waiting for trigger
 
 local eventthrottle_companionupdate, pet_restored, ignoreevent_listupdate
 
--- BEGIN Experimental (usable as temporary user settings):
+-- BEGIN PMDC finetuning (usable as temporary user settings):
+-- Once experimental, this is now standard.
 -- This is for the experimental usage of PLAYER_MOUNT_DISPLAY_CHANGED as second summoning event;
 -- see v2.5.0 change notes for more info.
 -- Disable/enable usage of the event
@@ -29,7 +30,7 @@ local delay_PMDC = 0.4 -- [seconds] reasonable range: 0 to 1; 0 means 'next fram
 -- Disable/enable the above delay
 -- If false, no delay will be used, not even a single frame (risk of colliding will be high).
 local use_delay_PMDC = true -- true/false
--- END Experimental
+-- END PMDC finetuning
 
 
 --[[===========================================================================
@@ -75,6 +76,7 @@ local function ADDON_LOADED(addon)
 		-- The summon events are now registered with transitioncheck or delayed after PLAYER_ENTERING_WORLD
 		if ns.db.autoEnabled then ns.events:register_meta_events() end
 
+		-- This would raise an error if not loaded yet, so OK here.
 		hooksecurefunc(C_PetJournal, 'SetPetLoadOutInfo', function()
 			-- Note that SetPetLoadOutInfo summons the slot #1 pet, but it does so _not_ via SummonPetByGUID
 			ns.debugprint 'Hook: `SetPetLoadOutInfo` --> Setting `pet_verified` to false'
@@ -82,6 +84,7 @@ local function ADDON_LOADED(addon)
 		end)
 
 	elseif addon == 'Blizzard_Collections' then
+		-- By all measures, this should come after all 3rd-party addons, so safe to stop here.
 		ns.events:UnregisterEvent 'ADDON_LOADED'
 		ns.debugprint 'Addon "Blizzard_Collections" loaded.'
 		--[[ -- Currently disabled due to DF changes
@@ -129,6 +132,12 @@ local function PLAYER_ENTERING_WORLD(is_login, is_reload)
 	-- Prevent event spam caused by BattlePetBreedID
 	if is_login or is_reload then
 		if C_AddOnsIsAddOnLoaded('BattlePetBreedID') then
+			-- Hovering over any pet in the bags or the AH triggers the PET_JOURNAL_LIST_UPDATE event.
+			-- This is caused by the BattlePetBreedID addon: if the 'collected pets' option is active,
+			-- it calls `C_PetJournal.ClearSearchFilter()`, in order to make the collected pets info fetchable.
+			-- BreedTooltips.lua, line 116
+			-- We set the `ignoreevent_listupdate` flag via a hook to BPBID's `BPBID_SetBreedTooltip` at login/reload.
+			-- Works fine w/o timer (and with timer it gets out of sync if the spam rate is high).
 			hooksecurefunc('BPBID_SetBreedTooltip', function(parent)
 				-- Same conditions as used by the func to trigger `ClearSearchFilter`
 				if BPBID_Options.Breedtip.Collected and (not PetJournalPetCardPetInfo or not PetJournalPetCardPetInfo:IsVisible() or parent == FloatingBattlePetTooltip) then
@@ -249,15 +258,9 @@ Let's do a test:
 Unset the 'pool_initialized' var with that event, and initialize only when
 needed, that is before selecting a random pet.
 --> This seems to work, so far!
-TODO: Just noticed that this fires each time I hover over a pet in the AH listing(!). Find out if this is triggered by an addon, or if it is Blizz crap. If needed, unregister PW events when the AH is opened.
 ]]
 local function PET_JOURNAL_LIST_UPDATE()
-	-- Hovering over any pet in the bags or the AH triggers the event.
-	-- This is caused by the BattlePetBreedID addon: if the 'collected pets' option is active,
-	-- it calls `C_PetJournal.ClearSearchFilter()`, in order to make the collected pets info fetchable.
-	-- BreedTooltips.lua, line 116
-	-- We set the `ignoreevent_listupdate` flag via a hook to BPBID's `BPBID_SetBreedTooltip` at login/reload.
-	-- Works fine w/o timer (and with timer it gets out of sync if the spam rate is high).
+	-- For the redundant triggering of this event see the hook for the BattlePetBreedID addon.
 	if ignoreevent_listupdate then
 		ns.debugprint 'Event: PET_JOURNAL_LIST_UPDATE --> Ignored'
 		ignoreevent_listupdate = nil
