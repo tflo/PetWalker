@@ -4,6 +4,13 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.5.10 (2025-08-19)
+
+- Major code refactoring and cleanup, part 1/WiP.
+    - There’s a chance that this introduces a bug or two, e.g. no longer accessible local functions. My testing was fine, but please report to the [issues tracker](https://github.com/tflo/PetWalker/issues) if you notice something weird or get an error in BugSack.
+- When switching between char favs and global favs via the Pet Journal checkbox, immediately summon a pet from the respective list (it’s the same behavior now as when switching via `/pw c` console command).
+- Finetuning for the PLAYER_MOUNT_DISPLAY_CHANGED event has now moved to _events.lua._ If you want to experiment with it (see 2.5.0 change notes), search for the string `BEGIN PMDC finetuning`. Experimenting is optional, ofc; the default settings seem fine to me. (Accordingly removed the “experimental” words from the respective comments.)
+
 #### 2.5.9 (2025-08-05)
 
 - toc: Added interface `110200`
