@@ -4,6 +4,12 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.5.11 (2025-08-25)
+
+- Removed the hook to a BattlePetBreedID (BPBID) addon function:
+    - See change notes 2.4.2 (2025-02-27), where it was introduced.
+    - No longer needed, since the author fixed the event spam: See [issue 32, BPBID](https://github.com/MMOSimca/BattlePetBreedID/issues/32) and this [commit](https://github.com/MMOSimca/BattlePetBreedID/commit/ed640ed0b34696902ed7a5fe026bd842df276046).
+
 #### 2.5.10 (2025-08-19)
 
 - Major code refactoring and cleanup, part 1/WiP.

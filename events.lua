@@ -16,7 +16,7 @@ local delay_login_msg = 22
 local delay_after_battle = 15 -- Post-petbattle sleep
 local instasummon_after_battlesleep = true -- Summon without waiting for trigger event
 
-local eventthrottle_companionupdate, pet_restored, ignoreevent_listupdate
+local eventthrottle_companionupdate, pet_restored
 
 -- BEGIN PMDC finetuning (usable as temporary user settings):
 -- Once experimental, this is now standard.
@@ -129,24 +129,6 @@ local function PLAYER_ENTERING_WORLD(is_login, is_reload)
 	local delay
 	-- We do not want summon events before transitioncheck has finished
 	ns.events:unregister_summon_events()
-	-- Prevent event spam caused by BattlePetBreedID
-	if is_login or is_reload then
-		if C_AddOnsIsAddOnLoaded('BattlePetBreedID') then
-			-- Hovering over any pet in the bags or the AH triggers the PET_JOURNAL_LIST_UPDATE event.
-			-- This is caused by the BattlePetBreedID addon: if the 'collected pets' option is active,
-			-- it calls `C_PetJournal.ClearSearchFilter()`, in order to make the collected pets info fetchable.
-			-- BreedTooltips.lua, line 116
-			-- We set the `ignoreevent_listupdate` flag via a hook to BPBID's `BPBID_SetBreedTooltip` at login/reload.
-			-- Works fine w/o timer (and with timer it gets out of sync if the spam rate is high).
-			hooksecurefunc('BPBID_SetBreedTooltip', function(parent)
-				-- Same conditions as used by the func to trigger `ClearSearchFilter`
-				if BPBID_Options.Breedtip.Collected and (not PetJournalPetCardPetInfo or not PetJournalPetCardPetInfo:IsVisible() or parent == FloatingBattlePetTooltip) then
-					ignoreevent_listupdate = true
-					ns.debugprint 'Hook: BPBID_SetBreedTooltip --> ignoreevent_listupdate'
-				end
-			end)
-		end
-	end
 	if is_login then
 		ns.debugprint 'Event: PLAYER_ENTERING_WORLD: Login'
 		delay = delay_after_login
@@ -260,14 +242,8 @@ needed, that is before selecting a random pet.
 --> This seems to work, so far!
 ]]
 local function PET_JOURNAL_LIST_UPDATE()
-	-- For the redundant triggering of this event see the hook for the BattlePetBreedID addon.
-	if ignoreevent_listupdate then
-		ns.debugprint 'Event: PET_JOURNAL_LIST_UPDATE --> Ignored'
-		ignoreevent_listupdate = nil
-	else
-		ns.debugprint 'Event: PET_JOURNAL_LIST_UPDATE --> Setting `pool_initialized` to false'
-		ns.pool_initialized = false
-	end
+	ns.debugprint 'Event: PET_JOURNAL_LIST_UPDATE --> Setting `pool_initialized` to false'
+	ns.pool_initialized = false
 end
 ns.PET_JOURNAL_LIST_UPDATE = PET_JOURNAL_LIST_UPDATE -- Used in main
 
