@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-or-later
+-- Copyright (c) 2022-2025 Thomas Floeren
+
 local addon_name, ns = ...
 local _
 
@@ -478,25 +481,3 @@ function PetWalker_binding_new_pet() ns:new_pet(nil, true) end
 function PetWalker_binding_previous_pet() ns.previous_pet() end
 function PetWalker_binding_target_pet() ns:summon_targetpet() end
 function PetWalker_binding_dismiss_and_disable() ns:dismiss_and_disable() end
-
-
---[[ License ===================================================================
-
-	Copyright © 2022-2025 Thomas Floeren
-
-	This file is part of PetWalker.
-
-	PetWalker is free software: you can redistribute it and/or modify it under
-	the terms of the GNU General Public License as published by the Free
-	Software Foundation, either version 3 of the License, or (at your option)
-	any later version.
-
-	PetWalker is distributed in the hope that it will be useful, but WITHOUT ANY
-	WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-	FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-	details.
-
-	You should have received a copy of the GNU General Public License along with
-	PetWalker. If not, see <https://www.gnu.org/licenses/>.
-
-============================================================================]]--

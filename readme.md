@@ -9,14 +9,14 @@ The addon helps you to always have a companion pet out (summoned). You can choos
 - __Auto Restore only:__ Whenever your pet is lost – for whatever reason –, it will be restored. This works across logouts and characters.
 - __Random Summon:__ Automatically summons a random pet (from a configurable pool) every n minutes, or via keybind or slash command. This pet will be auto-restored whenever it is lost, until a new one is summoned.
 
+___If you’re having trouble reading this description on CurseForge, you might want to try switching to the [REPO PAGE](https://github.com/tflo/PetWalker?tab=readme-ov-file#petwalker). You’ll find the exact same text there, but it’s much easier to read and free from CurseForge’s rendering errors.___
+
 ## Notes
 
 In early 2022 this project started out as an improved version of [NugMiniPet](https://www.curseforge.com/wow/addons/nugminipet), but in the meantime not much of the original code is left.
 Credits for the concept, the inspiration and for the initial code base though to the [author](https://www.curseforge.com/members/d87_/projects) of NugMiniPet.
 
 PetWalker was first published on [GitHub](https://github.com/tflo/PetWalker) and [Wago](https://addons.wago.io/addons/petwalker) in April 2022; starting with version 1.1.4 (Dec 2022) now also available on [CurseForge](https://www.curseforge.com/wow/addons/petwalker).
-
-___If you are reading this description on CurseForge, be aware that CF’s Markdown parser is quite broken. For a correctly rendered and more readable description, please go [here](https://github.com/tflo/PetWalker?tab=readme-ov-file#petwalker).___
 
 ## Features
 
@@ -171,16 +171,16 @@ If you want to have another pet out while Crackers sits on your shoulder, just s
 
 ---
 
-Feel free to post suggestions or issues in the [GitHub Issues](https://github.com/tflo/PetWalker/issues) of the repo!
-__Please do not post issues or suggestions in the comments on Curseforge.__
+Feel free to share your suggestions or report issues on the [GitHub Issues](https://github.com/tflo/PetWalker/issues) page of the repository.  
+__Please avoid posting suggestions or issues in the comments on Curseforge.__
 
 ---
 
 __Other addons by me:__
 
-- [___Auto Quest Tracker Mk III___](https://www.curseforge.com/wow/addons/auto-quest-tracker-mk-iii): Continuation of
-  the one and only original. Up to date and new features.
-- [___Move 'em All___](https://www.curseforge.com/wow/addons/move-em-all): Mass move items/stacks from your bags to wherever. Works also with bag addons.
+- [___Auto Quest Tracker Mk III___](https://www.curseforge.com/wow/addons/auto-quest-tracker-mk-iii): Continuation of the one and only original. Up to date and tons of new features.
+- [___Move 'em All___](https://www.curseforge.com/wow/addons/move-em-all): Mass move items/stacks from your bags to wherever. Works also fine with most bag addons.
+- [___Auto Discount Repair___](https://github.com/tflo/AutoDiscountRepair): Automatically repair your gear – where it’s cheap.
 - [___Auto-Confirm Equip___](https://www.curseforge.com/wow/addons/auto-confirm-equip): Less (or no) confirmation prompts for BoE gear.
 - [___Action Bar Button Growth Direction___](https://www.curseforge.com/wow/addons/action-bar-button-growth-direction): Fix the button growth direction of multi-row action bars to what is was before Dragonflight (top --> bottom).
 - [___EditBox Font Improver___](https://www.curseforge.com/wow/addons/editbox-font-improver): Better fonts for your macro/script edit boxes.

@@ -1,3 +1,8 @@
+<!--
+SPDX-License-Identifier: GPL-3.0-or-later
+Copyright (c) 2022-2025 Thomas Floeren
+ -->
+
 <Bindings>
 	<Binding name="PETWALKER_TOGGLE_AUTO" category="PetWalker ">
         PetWalker_binding_toggle_autosummon()

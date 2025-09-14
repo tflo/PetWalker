@@ -4,6 +4,11 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.5.12 (2025-09-14)
+
+- Standardized licensing information in the files.
+- ReadMe/description: minor changes; added my new addon [Auto Discount Repair](https://github.com/tflo/AutoDiscountRepair) to the “Other addons” list.
+
 #### 2.5.11 (2025-08-25)
 
 - Removed the hook to a BattlePetBreedID (BPBID) addon function:
