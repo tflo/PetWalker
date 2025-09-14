@@ -4,6 +4,10 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.5.13 (2025-09-14)
+
+- ReadMe/description: fixed wrong URL; added my new addon [Auto Discount Repair](https://www.curseforge.com/wow/addons/auto-discount-repair) to the “Other addons” list.
+
 #### 2.5.12 (2025-09-14)
 
 - Standardized licensing information in the files.
