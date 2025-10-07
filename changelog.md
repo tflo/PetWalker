@@ -4,6 +4,10 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.5.14 (2025-10-07)
+
+- toc bumped to 110205, no changes.
+
 #### 2.5.13 (2025-09-14)
 
 - ReadMe/description: fixed wrong URL; added my new addon [Auto Discount Repair](https://www.curseforge.com/wow/addons/auto-discount-repair) to the “Other addons” list.
