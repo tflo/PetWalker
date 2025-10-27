@@ -9,14 +9,16 @@ The addon helps you to always have a companion pet out (summoned). You can choos
 - __Auto Restore only:__ Whenever your pet is lost – for whatever reason –, it will be restored. This works across logouts and characters.
 - __Random Summon:__ Automatically summons a random pet (from a configurable pool) every n minutes, or via keybind or slash command. This pet will be auto-restored whenever it is lost, until a new one is summoned.
 
-___If you’re having trouble reading this description on CurseForge, you might want to try switching to the [REPO PAGE](https://github.com/tflo/PetWalker?tab=readme-ov-file#petwalker). You’ll find the exact same text there, but it’s much easier to read and free from CurseForge’s rendering errors.___
-
 ## Notes
 
 In early 2022 this project started out as an improved version of [NugMiniPet](https://www.curseforge.com/wow/addons/nugminipet), but in the meantime not much of the original code is left.
 Credits for the concept, the inspiration and for the initial code base though to the [author](https://www.curseforge.com/members/d87_/projects) of NugMiniPet.
 
-PetWalker was first published on [GitHub](https://github.com/tflo/PetWalker) and [Wago](https://addons.wago.io/addons/petwalker) in April 2022; starting with version 1.1.4 (Dec 2022) now also available on [CurseForge](https://www.curseforge.com/wow/addons/petwalker).
+---
+
+*If you’re having trouble reading this description on CurseForge, you might want to try switching to the [Repo Page](https://github.com/tflo/PetWalker?tab=readme-ov-file#petwalker). You’ll find the exact same text there, but it’s much easier to read and free from CurseForge’s rendering errors.*
+
+---
 
 ## Features
 
