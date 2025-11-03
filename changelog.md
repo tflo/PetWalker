@@ -4,6 +4,11 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.5.15 (2025-11-04)
+
+- Seems we messed up the scope of `pet_restored` in ba20a32.
+- toc: add 110207.
+
 #### 2.5.14 (2025-10-07)
 
 - toc bumped to 110205, no changes.

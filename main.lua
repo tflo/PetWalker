@@ -400,7 +400,7 @@ function ns:restore_pet()
 	if savedpet then
 		ns.debugprint '`restore_pet` is restoring saved pet'
 		ns.set_sum_msg_to_restore_pet(savedpet)
-		pet_restored = true
+		ns.pet_restored = true
 		ns:summon_pet(savedpet, false)
 	else
 		ns.debugprint '`restore_pet` could not find saved pet --> summoning new pet via Blizz SummonRandomPet'

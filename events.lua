@@ -19,7 +19,7 @@ local delay_login_msg = 22
 local delay_after_battle = 15 -- Post-petbattle sleep
 local instasummon_after_battlesleep = true -- Summon without waiting for trigger event
 
-local eventthrottle_companionupdate, pet_restored
+local eventthrottle_companionupdate
 
 -- BEGIN PMDC finetuning (usable as temporary user settings):
 -- Once experimental, this is now standard.
@@ -184,7 +184,7 @@ local function COMPANION_UPDATE(what)
 	-- This event fires always 2 times, so let's just listen to the first one
 	if what ~= 'CRITTER' or eventthrottle_companionupdate then return end
 	eventthrottle_companionupdate = true
-	if not pet_restored then
+	if not ns.pet_restored then
 		ns.save_pet()
 		if ns.db.debugMode then
 			ns.debugprint(
@@ -194,7 +194,7 @@ local function COMPANION_UPDATE(what)
 			)
 		end
 	else
-		pet_restored = nil
+		ns.pet_restored = nil
 		if ns.db.debugMode then
 			ns.debugprint(
 				'Event: COMPANION_UPDATE (`actpet`: '
