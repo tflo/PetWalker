@@ -41,7 +41,6 @@ local IsStealthed = _G.IsStealthed
 local UnitChannelInfo = _G.UnitChannelInfo
 local time = _G.time
 local C_PlayerInfoGetGlidingInfo = C_PlayerInfo.GetGlidingInfo
-local MAX_RECENTS = 4 -- includes current pet
 
 --[[===========================================================================
 	Some Variables/Constants
@@ -600,7 +599,7 @@ function ns.save_pet()
 		if db.recentPets[i] == actpet then table.remove(db.recentPets, i) end
 	end
 	table.insert(db.recentPets, 1, actpet)
-	while #db.recentPets > MAX_RECENTS do
+	while #db.recentPets > ns.db.numRecents do
 		table.remove(db.recentPets)
 	end
 	ns.debugprint_pet '`save_pet` completed'

@@ -9,8 +9,8 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 - New: Multiple “previous pets” instead of just one. See it as history of your recently summoned pets.
     - Default: 3
     - The existing “previous pet” command (`/pw p` or your keybind) now cycles through the recent pets (and the “current” one), instead of just swapping previous/current back and forth. 
-    - TODO: You can change the number of recorded recent pets with `/pw p <number>` between 1 and 10.
-    - TODO: To replicate the old behavior, just set it to 1.
+    - You can change the number of recorded recent pets with `/pw p <number>` between 1 and 20.
+    - To replicate the old behavior, just set it to 1.
 - TODO: Modernized database handling.
     - You might loose some data from your existing SV file. I hope not, but it might happen.
 

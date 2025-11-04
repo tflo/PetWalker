@@ -14,7 +14,7 @@ local GetAddOnMetadata = _G.C_AddOns.GetAddOnMetadata
 
 
 local this_char = UnitName 'player'
-
+local MAX_NUM_RECENTS = 20
 
 local function get_link_actpet()
 	local p = C_PetJournalGetSummonedPetGUID()
@@ -237,7 +237,8 @@ function ns.help_display()
 		CO.c .. '\nf', ': ', 'Toggle ', CO.k .. 'pet pool: ', CO.s .. 'Favorites Only', ', or ', CO.s .. 'All Pets', '.',
 		CO.c .. '\nc', ': ', 'Toggle ', CO.k .. 'favorites: ', CO.s .. 'Per-character', ', or ', CO.s .. 'Global Favorites', '.',
 		CO.c .. '\n<number>', ': ', 'Set ', CO.k .. 'Summon Timer ', 'in minutes (', CO.c .. '1 ', 'to ', CO.c .. '1440', '; ', CO.c .. '0 ', 'to ', CO.k .. 'disable', ').',
-		CO.c .. '\np', ': ', 'Summon ', CO.k .. 'previous pet ', '.',
+		CO.c .. '\np', ': ', 'Cycle through ', CO.k .. 'Previous (recently summoned) Pets', '.',
+		CO.c .. '\np <number>', ': ', 'Set ', CO.k .. 'number of recorded Previous Pets ', '(', CO.c .. '1 ', 'to ', CO.c .. MAX_NUM_RECENTS, ').',
 		CO.c .. '\nv', ': ', CO.k .. 'Verbosity: ', CO.s .. 'silent ', '(only failures and warnings are printed to chat); ', CO.c .. 'vv ', 'for ', CO.s .. 'medium ', CO.k .. 'verbosity ', '(new summons); ', CO.c .. 'vvv ', 'for ', CO.s .. 'full ', CO.k .. 'verbosity ', '(also restored pets).',
 		CO.c .. '\ns', ': ', 'Display current ', CO.k .. 'status/settings.',
 		CO.c .. '\nh', ': ', 'This help text.',
@@ -265,6 +266,7 @@ function ns.status_display()
 		CO.k ..'\nAutomatic Random-summoning / Restore ', 'is ', CO.s .. (ns.db.autoEnabled and 'enabled' or CO.bw .. 'disabled'), '.',
 		CO.k .. '\nSummon Timer ', 'is ', CO.s .. (ns.db.newPetTimer > 0 and (ns.db.newPetTimer/60) .. CO.bn .. ' minutes' or 'disabled'), '. Next random pet in ', CO.e .. ns.remaining_timer_for_display(), '.',
 		CO.k ..'\nAutomatic summoning while mounted for Skyriding ', 'is ', CO.s .. (ns.db.drSummoning and 'allowed' or 'not allowed'), '.',
+		CO.k .. '\nHistory ', 'of Previous Pets: ', CO.s .. ns.db.numRecents - 1, ' (1 to ' .. MAX_NUM_RECENTS .. ').',
 		CO.k .. '\nVerbosity ', 'level of messages: ', CO.s .. ns.db.verbosityLevel, ' (of 3).',
 		CO.k .. '\nPet Pool ', 'is set to ', CO.s .. (ns.db.favsOnly and 'Favorites Only' or 'All Pets'), '. Eligible pets: ', CO.e .. #ns.pet_pool, '.',
 		CO.k .. '\nPer-character Favorites ', 'are ', CO.s .. (ns.dbc.charFavsEnabled and 'enabled' or 'disabled'), ' for ', CO.e .. this_char, '.',
@@ -306,44 +308,50 @@ end
 ===========================================================================]]--
 
 SLASH_PetWalker1, SLASH_PetWalker2 = '/pw', '/petwalker'
-function SlashCmdList.PetWalker(cmd)
-	if cmd == 'd' or cmd == 'dis' then
+function SlashCmdList.PetWalker(msg)
+	local args = {}
+	for arg in msg:gmatch('[^ ]+') do
+		tinsert(args, arg)
+	end
+	if args[1] == 'd' or args[1] == 'dis' then
 		ns:dismiss_and_disable()
-	elseif cmd == 'dd' or cmd == 'debd' then
+	elseif args[1] == 'dd' or args[1] == 'debd' then
 		ns:debug_display()
-	elseif cmd == 'dm' or cmd == 'debug' then
+	elseif args[1] == 'dm' or args[1] == 'debug' then
 		ns.debugmode_toggle()
-	elseif cmd == 'vvv' then
+	elseif args[1] == 'vvv' then
 		ns.verbosity_full()
-	elseif cmd == 'vv' then
+	elseif args[1] == 'vv' then
 		ns.verbosity_medium()
-	elseif cmd == 'v' then
+	elseif args[1] == 'v' then
 		ns.verbosity_silent()
-	elseif cmd == 'v0' then
+	elseif args[1] == 'v0' then
 		ns.verbosity_mute()
-	elseif cmd == 'a' or cmd == 'auto' then
+	elseif args[1] == 'a' or args[1] == 'auto' then
 		ns:auto_toggle()
-	elseif cmd == 'n' or cmd == 'new' then
+	elseif args[1] == 'n' or args[1] == 'new' then
 		ns:new_pet(nil, true)
-	elseif cmd == 'f' or cmd == 'fav' then
+	elseif args[1] == 'f' or args[1] == 'fav' then
 		ns:favs_toggle()
-	elseif cmd == 'aev' or cmd == 'altevents' then -- Probably better to leave this undocumented
+	elseif args[1] == 'aev' or args[1] == 'altevents' then -- Probably better to leave this undocumented
 		ns:event_toggle()
-	elseif cmd == 'c' or cmd == 'char' then
+	elseif args[1] == 'c' or args[1] == 'char' then
 		ns.charfavs_slash_toggle()
-	elseif cmd == 'p' or cmd == 'prev' then
+	elseif (args[1] == 'p' or args[1] == 'prev') and tonumber(args[2]) then
+		ns.set_num_recents(args[2])
+	elseif args[1] == 'p' or args[1] == 'prev' then
 		ns.previous_pet()
-	elseif cmd == 's' or cmd == 'status' then
+	elseif args[1] == 's' or args[1] == 'status' then
 		ns.status_display()
-	elseif tonumber(cmd) then
-		ns:timer_slash_cmd(cmd)
-	elseif cmd == 'sr' then
+	elseif tonumber(args[1]) then
+		ns:timer_slash_cmd(args[1])
+	elseif args[1] == 'sr' then
 		ns.dr_summoning_toggle()
-	elseif cmd == 't' or cmd == 'target' then
+	elseif args[1] == 't' or args[1] == 'target' then
 		ns.summon_targetpet()
-	elseif cmd == 'h' or cmd == 'help' then
+	elseif args[1] == 'h' or args[1] == 'help' then
 		ns.help_display()
-	elseif cmd == '' then
+	elseif args[1] == '' then
 		ns.help_display()
 		ns.status_display()
 	else
@@ -449,6 +457,19 @@ function ns:timer_slash_cmd(value)
 	else
 		chat_user_notification(format('%sNot a valid timer value. Enter a number from %s1%1$s to %2$s1440%1$s for a timer in minutes, or %2$s0%1$s (zero) to %3$sdisable%1$s the timer. \nExamples: %2$s/pw 20%1$s will summon a new pet every 20 minutes, %2$s/pw 0%1$s disables the timer. Note that there is a space between "/pw" and the number.', CO.bw, CO.c, CO.k))
 	end
+end
+
+function ns.set_num_recents(num)
+	num = max(min(floor(num), MAX_NUM_RECENTS), 1)
+	ns.db.numRecents = num + 1 -- "current" is idx 1
+	for _, v in ipairs({ ns.db.recentPets, ns.dbc.recentPets }) do
+		while #v > ns.db.numRecents do
+			table.remove(v)
+		end
+	end
+	chat_user_notification(
+		format('%sPrevious Pets history set to %s.', CO.bn, ns.db.numRecents - 1)
+	)
 end
 
 -- Used for info print

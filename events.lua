@@ -76,7 +76,7 @@ local function ADDON_LOADED(addon)
 		end
 		ns.db.currentPet, ns.db.previousPet, ns.dbc.currentPet, ns.dbc.previousPet = nil, nil, nil, nil
 		-- END Transition to recents
-
+		ns.db.numRecents = ns.db.numRecents or 4
 		--[[
 		if not ns.db.dbVersion or ns.db.dbVersion ~= db_version then table.wipe(ns.db) end
 		if not ns.dbc.dbVersion or ns.dbc.dbVersion ~= db_version then
