@@ -63,6 +63,20 @@ local function ADDON_LOADED(addon)
 		ns.db.debugMode = ns.db.debugMode or false
 		ns.db.verbosityLevel = ns.db.verbosityLevel or 3
 		ns.db.drSummoning = ns.db.drSummoning == nil and true or ns.db.drSummoning
+		-- Transition to recents
+		ns.db.recentPets = ns.db.recentPets or {}
+		if ns.table_is_empty(ns.db.recentPets) then
+			table.insert(ns.db.recentPets, ns.db.currentPet)
+			table.insert(ns.db.recentPets, ns.db.previousPet)
+		end
+		ns.dbc.recentPets = ns.dbc.recentPets or {}
+		if ns.table_is_empty(ns.dbc.recentPets) then
+			table.insert(ns.dbc.recentPets, ns.dbc.currentPet)
+			table.insert(ns.dbc.recentPets, ns.dbc.previousPet)
+		end
+		ns.db.currentPet, ns.db.previousPet, ns.dbc.currentPet, ns.dbc.previousPet = nil, nil, nil, nil
+		-- END Transition to recents
+
 		--[[
 		if not ns.db.dbVersion or ns.db.dbVersion ~= db_version then table.wipe(ns.db) end
 		if not ns.dbc.dbVersion or ns.dbc.dbVersion ~= db_version then
