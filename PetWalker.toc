@@ -25,6 +25,7 @@
 ## SavedVariables: PetWalkerDB
 ## SavedVariablesPerCharacter: PetWalkerPerCharDB
 
+init.lua
 utilities.lua
 main.lua
 ui.lua

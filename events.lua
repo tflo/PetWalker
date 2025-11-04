@@ -49,45 +49,10 @@ local monitored_addons = {
 local function ADDON_LOADED(addon)
 	if not monitored_addons[addon] then return end
 	if addon == addon_name then
-		PetWalkerDB = PetWalkerDB or {}
-		PetWalkerPerCharDB = PetWalkerPerCharDB or {}
-		ns.db, ns.dbc = PetWalkerDB, PetWalkerPerCharDB
-		ns.db.dbVersion, ns.dbc.dbVersion = db_version, db_version
-		ns.db.autoEnabled = ns.db.autoEnabled == nil and true or ns.db.autoEnabled
-		ns.db.newPetTimer = ns.db.newPetTimer or 720
-		ns.db.remainingTimer = ns.db.remainingTimer or 360
-		ns.db.favsOnly = ns.db.favsOnly == nil and true or ns.db.favsOnly
-		ns.dbc.charFavsEnabled = ns.dbc.charFavsEnabled or false
-		ns.dbc.charFavs = ns.dbc.charFavs or {}
-		ns.db.eventAlt = ns.db.eventAlt or false
-		ns.db.debugMode = ns.db.debugMode or false
-		ns.db.verbosityLevel = ns.db.verbosityLevel or 3
-		ns.db.drSummoning = ns.db.drSummoning == nil and true or ns.db.drSummoning
-		-- Transition to recents
-		ns.db.recentPets = ns.db.recentPets or {}
-		if ns.table_is_empty(ns.db.recentPets) then
-			table.insert(ns.db.recentPets, ns.db.currentPet)
-			table.insert(ns.db.recentPets, ns.db.previousPet)
-		end
-		ns.dbc.recentPets = ns.dbc.recentPets or {}
-		if ns.table_is_empty(ns.dbc.recentPets) then
-			table.insert(ns.dbc.recentPets, ns.dbc.currentPet)
-			table.insert(ns.dbc.recentPets, ns.dbc.previousPet)
-		end
-		ns.db.currentPet, ns.db.previousPet, ns.dbc.currentPet, ns.dbc.previousPet = nil, nil, nil, nil
-		-- END Transition to recents
-		ns.db.numRecents = ns.db.numRecents or 4
-		--[[
-		if not ns.db.dbVersion or ns.db.dbVersion ~= db_version then table.wipe(ns.db) end
-		if not ns.dbc.dbVersion or ns.dbc.dbVersion ~= db_version then
-			local tmpCharFavs = ns.dbc.charFavs -- charFavs
-			table.wipe(ns.dbc)
-			ns.dbc.charFavs = tmpCharFavs
-		end
-		]]
 		ns.debugprint 'Addon "PetWalker" loaded.'
 		ns.time_newpet_success = time() - (ns.db.newPetTimer - ns.db.remainingTimer)
-		-- *Not* with PLAYER_ENTERING_WORLD so that it is not affected when all events get unregistered via /pw a
+		-- *Not* with PLAYER_ENTERING_WORLD so that it is not affected
+		-- when all events get unregistered via /pw a
 		C_TimerAfter(delay_login_msg, ns.msg_login)
 
 		-- The summon events are now registered with transitioncheck or delayed after PLAYER_ENTERING_WORLD

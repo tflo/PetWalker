@@ -2,8 +2,6 @@
 -- Copyright (c) 2022-2025 Thomas Floeren
 
 local addon_name, ns = ...
--- _G[addon_name] = ns -- Debug
-local db_version = 1
 
 --[[===========================================================================
 	API references
@@ -58,7 +56,7 @@ from being saved.
 ns.pet_verified = false
 -- ns.skipNextSave = false
 ns.in_battlesleep = false
---[[ Last time AutoRestore() was called. ]]
+-- Last time AutoRestore() was called.
 local time_restore_pet = 0
 -- local time_save_pet = 0 -- What did we use this for? Debugging?
 local time_pool_msg = 0
@@ -512,13 +510,13 @@ function ns.summon_targetpet()
 end
 
 
---[[--------------------------------------------------------------------------------------------------------------------
+--[[----------------------------------------------------------------------------
 	Transition check
 	One time action, after big transitions, like login, portals, entering instance, etc. Basically a standalone
 	restore_pet func; in addition, it not only checks for presence of a pet, but also against the saved pet. This makes
 	sure that a newly logged toon gets the same pet as the previous toon had at logout. We need more checks here than
 	in restore_pet, bc restore_pet is "prefiltered" by autoaction, and here we are not.
---------------------------------------------------------------------------------------------------------------------]]--
+----------------------------------------------------------------------------]]--
 
 function ns.transitioncheck(checks_done)
 -- 	Can be called via the entering-world events, or via `autoaction`, so we
