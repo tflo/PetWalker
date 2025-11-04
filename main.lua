@@ -41,6 +41,7 @@ local IsStealthed = _G.IsStealthed
 local UnitChannelInfo = _G.UnitChannelInfo
 local time = _G.time
 local C_PlayerInfoGetGlidingInfo = C_PlayerInfo.GetGlidingInfo
+local MAX_RECENTS = 4 -- includes current pet
 
 --[[===========================================================================
 	Some Variables/Constants
@@ -125,24 +126,16 @@ end
 -- To test against if pet-on-back aura is found (AFAIK, only Daisy)
 local function saved_pet_is_backpet()
 	local backpet = 2780 -- Daisy
-	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
-		return ns.id_to_species(ns.dbc.currentPet) == backpet
-	else
-		return ns.id_to_species(ns.db.currentPet) == backpet
-	end
+	local db = ns.dbc.charFavsEnabled and ns.db.favsOnly and ns.dbc or ns.db
+	return ns.id_to_species(db.recentPets[1]) == backpet
 end
 
 -- To test against if pet-on-shoulder aura is found
 local function saved_pet_is_shoulderpet()
 	local shoulderpets = { 2526, 1997, 2185 } -- Feathers, Crackers, Cap'n Crackers
-	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
-		for _, species in ipairs(shoulderpets) do
-			if ns.id_to_species(ns.dbc.currentPet) == species then return true end
-		end
-	else
-		for _, species in ipairs(shoulderpets) do
-			if ns.id_to_species(ns.db.currentPet) == species then return true end
-		end
+	local db = ns.dbc.charFavsEnabled and ns.db.favsOnly and ns.dbc or ns.db
+	for _, species in ipairs(shoulderpets) do
+		if ns.id_to_species(db.recentPets[1]) == species then return true end
 	end
 end
 
@@ -290,17 +283,17 @@ function ns.saved_pet_summonability_check() --- After login
 	if ns.dbc.charFavsEnabled then
 		perchar = true
 		priorities = {
-			ns.dbc.currentPet,
-			ns.dbc.previousPet,
-			ns.db.currentPet,
-			ns.db.previousPet
+			ns.dbc.recentPets[1],
+			ns.dbc.recentPets[2],
+			ns.db.recentPets[1],
+			ns.db.recentPets[2]
 		}
 	else
 		priorities = {
-			ns.db.currentPet,
-			ns.db.previousPet,
-			ns.dbc.currentPet,
-			ns.dbc.previousPet
+			ns.db.recentPets[1],
+			ns.db.recentPets[2],
+			ns.dbc.recentPets[1],
+			ns.dbc.recentPets[2],
 		}
 	end
 
@@ -313,9 +306,9 @@ function ns.saved_pet_summonability_check() --- After login
 			else
 				if is_summonable then
 					if perchar then
-						ns.dbc.currentPet = guid
+						ns.dbc.recentPets[1] = guid
 					else
-						ns.db.currentPet = guid
+						ns.db.recentPets[1] = guid
 					end
 					return
 				end
@@ -391,11 +384,8 @@ end
 function ns:restore_pet()
 	local now = time()
 	local savedpet
-	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
-		savedpet = ns.dbc.currentPet
-	else
-		savedpet = ns.db.currentPet
-	end
+	local db = ns.dbc.charFavsEnabled and ns.db.favsOnly and ns.dbc or ns.db
+	savedpet = db.recentPets[1]
 	time_restore_pet = now
 	if savedpet then
 		ns.debugprint '`restore_pet` is restoring saved pet'
@@ -471,17 +461,16 @@ end
 	Summon previous
 ---------------------------------------------------------------------------]]--
 
+-- NewRecents
 function ns.previous_pet()
 	if stop_manual_summon() then return end
-	local prevpet
-	if ns.dbc.charFavsEnabled then
-		prevpet = ns.dbc.previousPet
-	else
-		prevpet = ns.db.previousPet
-	end
-	if prevpet then
-		ns.set_sum_msg_to_previouspet(prevpet)
-		ns:summon_pet(prevpet, true)
+	local db = ns.dbc.charFavsEnabled and ns.db.favsOnly and ns.dbc or ns.db
+	if #db.recentPets > 1 then
+		-- Rotate: move current (1) to end
+		local current = table.remove(db.recentPets, 1)
+		table.insert(db.recentPets, current)
+		ns.set_sum_msg_to_previouspet(db.recentPets[1])
+		ns:summon_pet(db.recentPets[1], true)
 	else
 		ns.msg_no_previous_pet()
 	end
@@ -556,14 +545,11 @@ function ns.transitioncheck(checks_done)
 	local savedpet
 	ns:cfavs_update()
 	local actpet = C_PetJournalGetSummonedPetGUID()
-	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
-		if not actpet or actpet ~= ns.dbc.currentPet then savedpet = ns.dbc.currentPet end
-	elseif not actpet or actpet ~= ns.db.currentPet then
-		savedpet = ns.db.currentPet
-	end
+	local db = ns.dbc.charFavsEnabled and ns.db.favsOnly and ns.dbc or ns.db
+	if not actpet or actpet ~= db.recentPets[1] then savedpet = db.recentPets[1] end
 	if ns.current_zone == 1970 then -- Pocopoc issue
 		if ns.id_to_species(savedpet) == 3247 or ns.id_to_species(actpet) == 3247 then
-			savedpet = ns.db.previousPet
+			savedpet = db.recentPets[2]
 		end
 	end
 	if savedpet and savedpet_is_summonable then
@@ -603,21 +589,19 @@ function ns.save_pet()
 		return
 	end
 	local actpet = C_PetJournalGetSummonedPetGUID()
-	if
-		not actpet
-		or is_excluded_by_id(actpet)
-	then
+	if not actpet or is_excluded_by_id(actpet) then
 		ns.debugprint '`save_pet` FAILURE: No `actpet` or `actpet` is excluded'
 		return
 	end
-	if ns.dbc.charFavsEnabled and ns.db.favsOnly then
-		if ns.dbc.currentPet == actpet then return end
-		ns.dbc.previousPet = ns.dbc.currentPet
-		ns.dbc.currentPet = actpet
-	else
-		if ns.db.currentPet == actpet then return end
-		ns.db.previousPet = ns.db.currentPet
-		ns.db.currentPet = actpet
+	-- NewRecents
+	local db = ns.dbc.charFavsEnabled and ns.db.favsOnly and ns.dbc or ns.db
+	if db.recentPets[1] == actpet then return end
+	for i = #db.recentPets, 1, -1 do
+		if db.recentPets[i] == actpet then table.remove(db.recentPets, i) end
+	end
+	table.insert(db.recentPets, 1, actpet)
+	while #db.recentPets > MAX_RECENTS do
+		table.remove(db.recentPets)
 	end
 	ns.debugprint_pet '`save_pet` completed'
 end

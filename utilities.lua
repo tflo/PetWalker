@@ -93,3 +93,7 @@ function ns.remaining_timer_for_display()
 	rem = rem > 0 and rem or 0
 	return sec_to_min(rem)
 end
+
+function ns.table_is_empty(t)
+	return next(t) == nil
+end

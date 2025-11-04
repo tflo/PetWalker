@@ -23,7 +23,7 @@ local function get_link_actpet()
 end
 
 local function get_link_savedpet()
-	local p = ns.dbc.charFavsEnabled and ns.dbc.currentPet or ns.db.currentPet
+	local p = ns.dbc.charFavsEnabled and ns.dbc.recentPets[1] or ns.db.recentPets[1]
 	p = p and C_PetJournalGetBattlePetLink(p)
 	return p
 end
