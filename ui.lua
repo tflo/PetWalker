@@ -230,18 +230,29 @@ function ns.help_display()
 	}
 
 	local body = {
-		CO.c .. '\nd', ': ', CO.k .. 'Dismiss ', 'current pet and ', CO.k .. 'disable auto-summoning ', '(new pet / restore).',
-		CO.c .. '\na', ': ', 'Toggle ', CO.k .. 'auto-summoning ', '(new pet / restore).',
-		CO.c .. '\nsr', ': ', 'Toggle ', CO.k .. 'auto-summoning ', 'also ', CO.k .. 'while mounted for Skyriding: ', CO.s .. 'allowed / not allowed', '.',
-		CO.c .. '\nn', ': ', 'Summon ', CO.k .. 'new pet ', 'from pool.',
-		CO.c .. '\nf', ': ', 'Toggle ', CO.k .. 'pet pool: ', CO.s .. 'Favorites Only', ', or ', CO.s .. 'All Pets', '.',
-		CO.c .. '\nc', ': ', 'Toggle ', CO.k .. 'favorites: ', CO.s .. 'Per-character', ', or ', CO.s .. 'Global Favorites', '.',
-		CO.c .. '\n<number>', ': ', 'Set ', CO.k .. 'Summon Timer ', 'in minutes (', CO.c .. '1 ', 'to ', CO.c .. '1440', '; ', CO.c .. '0 ', 'to ', CO.k .. 'disable', ').',
-		CO.c .. '\np', ': ', 'Cycle through ', CO.k .. 'Previous (recently summoned) Pets', '.',
-		CO.c .. '\np <number>', ': ', 'Set ', CO.k .. 'number of recorded Previous Pets ', '(', CO.c .. '1 ', 'to ', CO.c .. MAX_NUM_RECENTS, ').',
-		CO.c .. '\nv', ': ', CO.k .. 'Verbosity: ', CO.s .. 'silent ', '(only failures and warnings are printed to chat); ', CO.c .. 'vv ', 'for ', CO.s .. 'medium ', CO.k .. 'verbosity ', '(new summons); ', CO.c .. 'vvv ', 'for ', CO.s .. 'full ', CO.k .. 'verbosity ', '(also restored pets).',
-		CO.c .. '\ns', ': ', 'Display current ', CO.k .. 'status/settings.',
-		CO.c .. '\nh', ': ', 'This help text.',
+		{CO.c .. 'd', ' : ', CO.k .. 'Dismiss ', 'current pet and ', CO.k .. 'disable auto-summoning ', '(new pet / restore).'},
+
+		{CO.c .. 'a', ' : ', 'Toggle ', CO.k .. 'auto-summoning ', '(new pet / restore).'},
+
+		{CO.c .. 'sr', ' : ', 'Toggle ', CO.k .. 'auto-summoning ', 'also ', CO.k .. 'while mounted for Skyriding: ', CO.s .. 'allowed / not allowed', '.'},
+
+		{CO.c .. 'n', ' : ', 'Summon ', CO.k .. 'new pet ', 'from pool.'},
+
+		{CO.c .. 'f', ' : ', 'Toggle ', CO.k .. 'pet pool: ', CO.s .. 'Favorites Only', ', or ', CO.s .. 'All Pets', '.'},
+
+		{CO.c .. 'c', ' : ', 'Toggle ', CO.k .. 'favorites: ', CO.s .. 'Per-character', ', or ', CO.s .. 'Global Favorites', '.'},
+
+		{CO.c .. '<number>', ' : ', 'Set ', CO.k .. 'Summon Timer ', 'in minutes (', CO.c .. '1 ', 'to ', CO.c .. '1440', '; ', CO.c .. '0 ', 'to ', CO.k .. 'disable', ').'},
+
+		{CO.c .. 'p', ' : ', 'Cycle through ', CO.k .. 'Previous (recently summoned) Pets', '.'},
+
+		{CO.c .. 'p <number>', ' : ', 'Set ', CO.k .. 'number of recorded Previous Pets ', '(', CO.c .. '1 ', 'to ', CO.c .. MAX_NUM_RECENTS, ').'},
+
+		{CO.c .. 'v', ' : ', CO.k .. 'Verbosity: ', CO.s .. 'silent ', '(only failures and warnings are printed to chat); ', CO.c .. 'vv ', 'for ', CO.s .. 'medium ', CO.k .. 'verbosity ', '(new summons); ', CO.c .. 'vvv ', 'for ', CO.s .. 'full ', CO.k .. 'verbosity ', '(also restored pets).'},
+
+		{CO.c .. 's', ' : ', 'Display current ', CO.k .. 'status/settings.'},
+
+		{CO.c .. 'h', ' : ', 'This help text.'},
 	}
 
 	local footer = {
@@ -250,10 +261,13 @@ function ns.help_display()
 	}
 
 	local header_text = table.concat(header, CO.bn)
-	local body_text = table.concat(body, CO.bn)
 	local footer_text = table.concat(footer, CO.bn)
 
-	chat_user_notification_large(header_text, body_text, nil, footer_text)
+	print('\n' .. CO.an .. sep .. '\n' .. addon_name .. ':' .. header_text .. '\n')
+	for _, v in ipairs(body) do
+		print(table.concat(v, CO.bn))
+	end
+	print(footer_text .. '\n' .. CO.an .. sep)
 end
 
 
