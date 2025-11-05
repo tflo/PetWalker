@@ -57,8 +57,9 @@ if not _G.PetWalkerDB.dbVersion or _G.PetWalkerDB.dbVersion ~= DB_VERSION_CURREN
 	table.insert(_G.PetWalkerDB.recentPets, _G.PetWalkerDB.previousPet)
 	table.insert(_G.PetWalkerPerCharDB.recentPets, _G.PetWalkerPerCharDB.currentPet)
 	table.insert(_G.PetWalkerPerCharDB.recentPets, _G.PetWalkerPerCharDB.previousPet)
-	_G.PetWalkerDB.currentPet, _G.PetWalkerDB.previousPet, _G.PetWalkerPerCharDB.currentPet, _G.PetWalkerPerCharDB.previousPet =
-		nil, nil, nil, nil
+	-- Cleanup old stuff
+	_G.PetWalkerDB.currentPet, _G.PetWalkerDB.previousPet, _G.PetWalkerPerCharDB.currentPet, _G.PetWalkerPerCharDB.previousPet, _G.PetWalkerPerCharDB.eventAlt =
+		nil, nil, nil, nil, nil
 end
 
 merge_defaults(defaults_global, _G.PetWalkerDB)
