@@ -211,10 +211,9 @@ end
 Three big messages: Status, Low Pet Pool, and Help
 ---------------------------------------------------------------------------]]--
 
-function ns.help_display()
-
+function ns.help_display(print_bottomspace)
 	local header = {
-		CO.bn .. 'Help: ',
+		CO.bn .. ' Help: ',
 		CO.c .. '\n/pw ', 'or ', CO.c .. '/petwalker ', 'supports these commands: ',
 	}
 
@@ -252,18 +251,18 @@ function ns.help_display()
 	local header_text = table.concat(header, CO.bn)
 	local footer_text = table.concat(footer, CO.bn)
 
-	print('\n' .. CO.an .. BLOCK_SEP .. '\n' .. ADDON_NAME .. ':' .. header_text .. '\n')
+	print('\n' .. CO.an .. BLOCK_SEP .. '\n' .. ADDON_NAME .. header_text .. '\n')
 	for _, v in ipairs(body) do
 		print(table.concat(v, CO.bn))
 	end
-	print(footer_text .. '\n' .. CO.an .. BLOCK_SEP)
+	print(footer_text .. '\n' .. CO.an .. BLOCK_SEP .. (print_bottomspace and '\n ' or ''))
 end
 
 
-function ns.status_display()
+function ns.status_display(print_topsep, print_bottomsep)
 	if not ns.pool_initialized then ns.initialize_pool() end
 	local header = {
-		CO.bn .. '[v', C_AddOns.GetAddOnMetadata(ADDON_NAME, 'Version'), '] Status & Settings:',
+		CO.bn .. ' [v', C_AddOns.GetAddOnMetadata(ADDON_NAME, 'Version'), '] Status & Settings:',
 	}
 	local body = {
 		{CO.k ..'Automatic Random-summoning / Restore ', 'is ', CO.s .. (ns.db.autoEnabled and 'enabled' or CO.bw .. 'disabled'), '.'},
@@ -289,13 +288,13 @@ function ns.status_display()
 	local charfavlist_text = table.concat(charfavlist, CO.bn)
 	local extra_settings = (ns.db.eventAlt and table.concat({CO.k ..'\nAlternative Events ', 'are ', CO.s .. 'enabled ', 'for all chars.'}, CO.bn) or nil)
 
-	print('\n' .. CO.an .. BLOCK_SEP .. '\n' .. ADDON_NAME .. ':' .. header_text .. '\n')
+	print((print_topsep and '\n' .. CO.an .. BLOCK_SEP .. '\n' or CO.an) .. ADDON_NAME .. header_text .. '\n')
 	for _, v in ipairs(body) do
 		print(table.concat(v, CO.bn))
 	end
 	if extra_settings then print(extra_settings) end
 	print(charfavlist_text)
--- 	print(footer_text .. '\n' .. CO.an .. BLOCK_SEP)
+	if print_bottomsep then print(CO.an .. BLOCK_SEP .. '\n ') end
 end
 
 
@@ -356,7 +355,7 @@ function SlashCmdList.PetWalker(msg)
 	elseif args[1] == 'p' or args[1] == 'prev' then
 		ns.previous_pet()
 	elseif args[1] == 's' or args[1] == 'status' then
-		ns.status_display()
+		ns.status_display(true, true)
 	elseif tonumber(args[1]) then
 		ns:timer_slash_cmd(args[1])
 	elseif args[1] == 'sr' then
@@ -364,10 +363,10 @@ function SlashCmdList.PetWalker(msg)
 	elseif args[1] == 't' or args[1] == 'target' then
 		ns.summon_targetpet()
 	elseif args[1] == 'h' or args[1] == 'help' then
-		ns.help_display()
+		ns.help_display(true)
 	elseif args[1] == nil then
-		ns.help_display()
-		ns.status_display()
+		ns.help_display(false)
+		ns.status_display(false, true)
 	else
 		chat_user_notification(format('%sInvalid command or arguments. Enter %s/pw help %sfor a list of commands.', CO.bw, CO.c, CO.bw))
 	end
