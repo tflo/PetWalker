@@ -64,7 +64,7 @@ local CO = set_colors(colscheme_green)
 Messages
 ===========================================================================]]--
 
-local BLOCK_SEP = '-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --'
+local BLOCK_SEP = strrep('+', 42)
 
 local function chat_user_notification(msg)
 	print(CO.an .. ADDON_NAME .. ":", msg)
