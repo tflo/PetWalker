@@ -6,13 +6,15 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 #### 2.6.0 (2025-11-05)
 
-- New: Multiple “previous pets” instead of just one. See it as history of your recently summoned pets.
-    - Default: 3
+- **New: Multiple “previous pets” instead of just one.** See it as history of your recently summoned pets:
     - The existing “previous pet” command (`/pw p` or your keybind) now cycles through the recent pets (and the “current” one), instead of just swapping previous/current back and forth. 
-    - You can change the number of recorded recent pets with `/pw p <number>` between 1 and 20.
-    - To replicate the old behavior, just set it to 1.
-- TODO: Modernized database handling.
+    - Default is 3. But you can change the number of recorded recent pets with `/pw p <number>` between 1 and 20 (global setting).
+        - To replicate the old behavior, just set it to 1.
+    - The history is independent of any favorites or auto-summoning, i.e., it remembers also your manually summoned pets.
+    - This involves a significant change to the save-pet mechanics. Bugs might still be alive; please report them to the [GitHub Issues](https://github.com/tflo/PetWalker/issues) page of the addon.
+- Better database handling, cleanup; migrate obsolete entries.
     - You might loose some data from your existing SV file. I hope not, but it might happen.
+- Updated ReadMe/description.
 
 #### 2.5.16 (2025-11-04)
 

@@ -61,7 +61,8 @@ PetWalker has a rich chat console interface:
     - If you set the pool to Favorites, make sure that your favorites are not excluded by the Pet Journal filters or search string.
 - __`/pw c`:__ Toggle char-specific favorites list. (Applies if Favorites are enabled via `/pw f`.)
 - __`/pw n`:__ Summon new pet (from the active pet pool: Favs or All, see commands explained above). Summoning a pet with `/pw n` (or the keybind) resets your current auto-summon timer.
-- __`/pw p`:__ Summon previous pet. By ‘previous’ we don‘t mean a pet you just lost (this is covered by the core functionality of the addon), but the one before that. For example, if your auto-summon timer gives you a new pet, but you actually liked the last one, you can quickly get it back with this command.
+- __`/pw p`:__ Cycle through your recent (previously summoned) pets. For example, if your auto-summon timer gives you a new pet, but you actually liked one of the last ones better, you can quickly get it back with this command. By default, the last 3 pets before the current one are recorded. You can also set a keybind for this command.
+- __`/pw p <number>`: New in v2.6, Nov 2025!__ Set how many of your previous pets should be recorded (1 to 20; default: 3).
 - __`/pw v[vv]`:__ Verbosity level for messages:
     - `/pw v`: _silent:_ only important messages (missing favorites, failed summons, etc.) are printed to the chat.
     - `/pw vv`: _medium:_ you get a message when a _new_ pet is summoned (either via auto-timer or manually via `/pw n` or keybind).
@@ -79,21 +80,25 @@ PetWalker has a rich chat console interface:
   - A list of character-specific favorite pets (if you have set any).
         - A list of global favorites is not displayed because you can easily get that list by sorting the Pet Journal or Rematch by favorites.
 
+### New feature since version 1.1.5: Summon same pet as targeted pet
+
+1. Target a summoned pet of another player.
+2. Enter `/pw t` or `/pw target` or set and use the keybind in the Keybinding section of the client.
+3. If the targeted pet is in your collection, it should be summoned.
+
+If the target pet is not in your collection, you get a weblink to the pet’s page on warcraftpets.com, or on wowhead.com if it’s not collectible.
+
 If `/pw` is conflicting with another addon’s command, then use the long form `/petwalker` instead.
 
-Also check the Key Bindings section of your client. You’ll find three bindable commands for PetWalker there:
+### Keybinds
+
+You’ll find five bindable commands for PetWalker in the Keybindings settings of the client:
 
 - Toggle automatic summoning of pets (same as `/pw a`)
 - Dismiss current pet and disable auto-summoning (same as `/pw d`)
 - Summon new pet (same as `/pw n`)
-
-### New feature since version 1.1.5: Summon same pet as targeted pet
-
-1. Target a summoned pet of another player.
-2. Enter `/pw t` or `/pw target` or set and use the new keybind in the Keybinding section.
-3. If the targeted pet is in your collection, it should be summoned.
-
-If the target pet is not in your collection, you get a weblink to the pet’s page on warcraftpets.com, or on wowhead.com if it’s not collectible.
+- Cycle through previous pets (same as `/pw p`)
+- Summon same pet as target (same as `/pw t`)
 
 ---
 
@@ -165,14 +170,6 @@ If you want to have another pet out while Crackers sits on your shoulder, just s
 
 ---
 
-## Known Issues / To Do
-
-- ~~Remove erroneous “summoned” messages in a few situations where actually no pet was summoned.~~
-- ~~As mentioned in the FAQ, there is a chance that after a pet battle your previous companion is not re-summoned. This needs to be improved.~~
-- ~~Add an optional login message.~~
-
----
-
 Feel free to share your suggestions or report issues on the [GitHub Issues](https://github.com/tflo/PetWalker/issues) page of the repository.  
 __Please avoid posting suggestions or issues in the comments on Curseforge.__
 
@@ -185,7 +182,7 @@ __Other addons by me:__
 - [___Auto Discount Repair___](https://www.curseforge.com/wow/addons/auto-discount-repair): Automatically repair your gear – where it’s cheap.
 - [___Auto-Confirm Equip___](https://www.curseforge.com/wow/addons/auto-confirm-equip): Less (or no) confirmation prompts for BoE gear.
 - [___Action Bar Button Growth Direction___](https://www.curseforge.com/wow/addons/action-bar-button-growth-direction): Fix the button growth direction of multi-row action bars to what is was before Dragonflight (top --> bottom).
-- [___EditBox Font Improver___](https://www.curseforge.com/wow/addons/editbox-font-improver): Better fonts for your macro/script edit boxes.
+- [___EditBox Font Improver___](https://www.curseforge.com/wow/addons/editbox-font-improver): Better fonts and font size for the macro/script edit boxes of many addons, incl. Blizz's. Comes with 70+ preinstalled monospaced fonts.
 
 __WeakAuras:__
 
