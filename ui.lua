@@ -8,6 +8,7 @@ local C_PetJournal_GetSummonedPetGUID = _G.C_PetJournal.GetSummonedPetGUID
 local C_PetJournal_GetBattlePetLink = _G.C_PetJournal.GetBattlePetLink
 local tostring = _G.tostring
 local format = _G.format
+local print = _G.print
 
 local CHAR_NAME = UnitName 'player'
 local MAX_NUM_RECENTS = 20
