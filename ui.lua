@@ -74,13 +74,6 @@ end
 -- 	print('\n' .. CO.an .. BLOCK_SEP .. '\n' .. ADDON_NAME .. ':', msg, '\n' .. CO.an .. BLOCK_SEP , '\n ')
 -- end
 
-local function chat_user_notification_large(first, second, third, last)
-	print('\n' .. CO.an .. BLOCK_SEP .. '\n' .. ADDON_NAME .. ':', first)
-	if second then print(second) end
-	if third then print(third) end
-	print(last, '\n' .. CO.an .. BLOCK_SEP)
-end
-
 -- Login msg
 function ns.msg_login()
 	if ns.db.verbosityLevel < 2 then return end
@@ -273,13 +266,19 @@ function ns.status_display()
 		CO.bn .. '[v', C_AddOns.GetAddOnMetadata(ADDON_NAME, 'Version'), '] Status & Settings:',
 	}
 	local body = {
-		CO.k ..'\nAutomatic Random-summoning / Restore ', 'is ', CO.s .. (ns.db.autoEnabled and 'enabled' or CO.bw .. 'disabled'), '.',
-		CO.k .. '\nSummon Timer ', 'is ', CO.s .. (ns.db.newPetTimer > 0 and (ns.db.newPetTimer/60) .. CO.bn .. ' minutes' or 'disabled'), '. Next random pet in ', CO.e .. ns.remaining_timer_for_display(), '.',
-		CO.k ..'\nAutomatic summoning while mounted for Skyriding ', 'is ', CO.s .. (ns.db.drSummoning and 'allowed' or 'not allowed'), '.',
-		CO.k .. '\nHistory ', 'of Previous Pets: ', CO.s .. ns.db.numRecents - 1, ' (1 to ' .. MAX_NUM_RECENTS .. ').',
-		CO.k .. '\nVerbosity ', 'level of messages: ', CO.s .. ns.db.verbosityLevel, ' (of 3).',
-		CO.k .. '\nPet Pool ', 'is set to ', CO.s .. (ns.db.favsOnly and 'Favorites Only' or 'All Pets'), '. Eligible pets: ', CO.e .. #ns.pet_pool, '.',
-		CO.k .. '\nPer-character Favorites ', 'are ', CO.s .. (ns.dbc.charFavsEnabled and 'enabled' or 'disabled'), ' for ', CO.e .. CHAR_NAME, '.',
+		{CO.k ..'Automatic Random-summoning / Restore ', 'is ', CO.s .. (ns.db.autoEnabled and 'enabled' or CO.bw .. 'disabled'), '.'},
+
+		{CO.k .. 'Summon Timer ', 'is ', CO.s .. (ns.db.newPetTimer > 0 and (ns.db.newPetTimer/60) .. CO.bn .. ' minutes' or 'disabled'), '. Next random pet in ', CO.e .. ns.remaining_timer_for_display(), '.'},
+
+		{CO.k ..'Automatic summoning while mounted for Skyriding ', 'is ', CO.s .. (ns.db.drSummoning and 'allowed' or 'not allowed'), '.'},
+
+		{CO.k .. 'History ', 'of Previous Pets: ', CO.s .. ns.db.numRecents - 1, ' (1 to ' .. MAX_NUM_RECENTS .. ').'},
+
+		{CO.k .. 'Verbosity ', 'level of messages: ', CO.s .. ns.db.verbosityLevel, ' (of 3).'},
+
+		{CO.k .. 'Pet Pool ', 'is set to ', CO.s .. (ns.db.favsOnly and 'Favorites Only' or 'All Pets'), '. Eligible pets: ', CO.e .. #ns.pet_pool, '.'},
+
+		{CO.k .. 'Per-character Favorites ', 'are ', CO.s .. (ns.dbc.charFavsEnabled and 'enabled' or 'disabled'), ' for ', CO.e .. CHAR_NAME, '.'},
 	}
 	-- Separating this bc it might be a longish list
 	local charfavlist = {
@@ -287,11 +286,16 @@ function ns.status_display()
 	}
 
 	local header_text = table.concat(header, CO.bn)
-	local body_text = table.concat(body, CO.bn)
 	local charfavlist_text = table.concat(charfavlist, CO.bn)
 	local extra_settings = (ns.db.eventAlt and table.concat({CO.k ..'\nAlternative Events ', 'are ', CO.s .. 'enabled ', 'for all chars.'}, CO.bn) or nil)
 
-	chat_user_notification_large(header_text, body_text, extra_settings, charfavlist_text)
+	print('\n' .. CO.an .. BLOCK_SEP .. '\n' .. ADDON_NAME .. ':' .. header_text .. '\n')
+	for _, v in ipairs(body) do
+		print(table.concat(v, CO.bn))
+	end
+	if extra_settings then print(extra_settings) end
+	print(charfavlist_text)
+-- 	print(footer_text .. '\n' .. CO.an .. BLOCK_SEP)
 end
 
 
