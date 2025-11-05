@@ -365,7 +365,7 @@ function SlashCmdList.PetWalker(msg)
 		ns.summon_targetpet()
 	elseif args[1] == 'h' or args[1] == 'help' then
 		ns.help_display()
-	elseif args[1] == '' then
+	elseif args[1] == nil then
 		ns.help_display()
 		ns.status_display()
 	else
