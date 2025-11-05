@@ -1,36 +1,39 @@
 -- SPDX-License-Identifier: GPL-3.0-or-later
 -- Copyright (c) 2022-2025 Thomas Floeren
 
-local addon_name, ns = ...
+local _, ns = ...
 
-local C_PetJournalGetPetInfoByPetID = C_PetJournal.GetPetInfoByPetID
-local C_PetJournalGetBattlePetLink = C_PetJournal.GetBattlePetLink
+local C_PetJournal_GetPetInfoByPetID = C_PetJournal.GetPetInfoByPetID
+local C_PetJournal_GetBattlePetLink = C_PetJournal.GetBattlePetLink
+local C_PetJournal_GetSummonedPetGUID = C_PetJournal.GetSummonedPetGUID
 local GetTimePreciseSec = _G.GetTimePreciseSec
+local tostring = _G.tostring
+local format = _G.format
 
 local COLOR_DEBUG = '|cffEE82EE'
 
 function ns.id_to_name(id)
 	if not id then return '"no ID!" from `id_to_name`' end
-	local name = select(8, C_PetJournalGetPetInfoByPetID(id))
+	local name = select(8, C_PetJournal_GetPetInfoByPetID(id))
 	return name or '?petname?'
 end
 
 function ns.id_to_species(id)
 	if not id then return '"no ID!" from `id_to_species`' end
-	local spec = C_PetJournalGetPetInfoByPetID(id)
+	local spec = C_PetJournal_GetPetInfoByPetID(id)
 	return spec or '?petspecies?'
 end
 
 function ns.id_to_link(id)
 	if not id then return '"no ID!" from `id_to_link`' end
-	local link = C_PetJournalGetBattlePetLink(id)
+	local link = C_PetJournal_GetBattlePetLink(id)
 	return link or '?petlink?'
 end
 
 
 function ns.debug_display()
 	ns.status_display()
-	local actpet = C_PetJournal.GetSummonedPetGUID()
+	local actpet = C_PetJournal_GetSummonedPetGUID()
 	local lines = {
 		format('%sPW Debug:', COLOR_DEBUG),
 		format('%sDB current pet|r: %s [%s]', COLOR_DEBUG, ns.id_to_name(ns.db.currentPet), tostring(ns.db.currentPet)),
@@ -84,7 +87,7 @@ end
 
 -- Seconds to minutes
 local function sec_to_min(seconds)
-	local min, sec = tostring(math.floor(seconds / 60)), tostring(seconds % 60)
+	local min, sec = tostring(floor(seconds / 60)), tostring(seconds % 60)
 	return format('%.0f:%02.0f', min, sec)
 end
 

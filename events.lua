@@ -1,7 +1,7 @@
 -- SPDX-License-Identifier: GPL-3.0-or-later
 -- Copyright (c) 2022-2025 Thomas Floeren
 
-local addon_name, ns = ...
+local ADDON_NAME, ns = ...
 
 
 local C_AddOnsIsAddOnLoaded = _G.C_AddOns.IsAddOnLoaded
@@ -41,14 +41,14 @@ local use_delay_PMDC = true -- true/false
 ===========================================================================]]--
 
 local monitored_addons = {
-	[addon_name] = true,
+	[ADDON_NAME] = true,
 	['Blizzard_Collections'] = true,
 }
 -- dtd(monitored_addons)
 
 local function ADDON_LOADED(addon)
 	if not monitored_addons[addon] then return end
-	if addon == addon_name then
+	if addon == ADDON_NAME then
 		ns.debugprint 'Addon "PetWalker" loaded.'
 		ns.time_newpet_success = time() - (ns.db.newPetTimer - ns.db.remainingTimer)
 		-- *Not* with PLAYER_ENTERING_WORLD so that it is not affected

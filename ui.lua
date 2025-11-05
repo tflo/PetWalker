@@ -1,30 +1,26 @@
 -- SPDX-License-Identifier: GPL-3.0-or-later
 -- Copyright (c) 2022-2025 Thomas Floeren
 
-local addon_name, ns = ...
-local _
+local ADDON_NAME, ns = ...
 
--- API references
-local C_PetJournalGetSummonedPetGUID = _G.C_PetJournal.GetSummonedPetGUID
-local C_PetJournalGetBattlePetLink = _G.C_PetJournal.GetBattlePetLink
-local UnitName = _G.UnitName
-local GetAddOnMetadata = _G.C_AddOns.GetAddOnMetadata
+-- API
+local C_PetJournal_GetSummonedPetGUID = _G.C_PetJournal.GetSummonedPetGUID
+local C_PetJournal_GetBattlePetLink = _G.C_PetJournal.GetBattlePetLink
+local tostring = _G.tostring
+local format = _G.format
 
-
-
-
-local this_char = UnitName 'player'
+local CHAR_NAME = UnitName 'player'
 local MAX_NUM_RECENTS = 20
 
 local function get_link_actpet()
-	local p = C_PetJournalGetSummonedPetGUID()
-	p = p and C_PetJournalGetBattlePetLink(p)
+	local p = C_PetJournal_GetSummonedPetGUID()
+	p = p and C_PetJournal_GetBattlePetLink(p)
 	return p
 end
 
 local function get_link_savedpet()
 	local p = ns.dbc.charFavsEnabled and ns.dbc.recentPets[1] or ns.db.recentPets[1]
-	p = p and C_PetJournalGetBattlePetLink(p)
+	p = p and C_PetJournal_GetBattlePetLink(p)
 	return p
 end
 
@@ -68,21 +64,21 @@ local CO = set_colors(colscheme_green)
 Messages
 ===========================================================================]]--
 
-local sep = '-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --'
+local BLOCK_SEP = '-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --'
 
 local function chat_user_notification(msg)
-	print(CO.an .. addon_name .. ":", msg)
+	print(CO.an .. ADDON_NAME .. ":", msg)
 end
 
 -- local function chat_user_notification_block(msg)
--- 	print('\n' .. CO.an .. sep .. '\n' .. addon_name .. ':', msg, '\n' .. CO.an .. sep , '\n ')
+-- 	print('\n' .. CO.an .. BLOCK_SEP .. '\n' .. ADDON_NAME .. ':', msg, '\n' .. CO.an .. BLOCK_SEP , '\n ')
 -- end
 
 local function chat_user_notification_large(first, second, third, last)
-	print('\n' .. CO.an .. sep .. '\n' .. addon_name .. ':', first)
+	print('\n' .. CO.an .. BLOCK_SEP .. '\n' .. ADDON_NAME .. ':', first)
 	if second then print(second) end
 	if third then print(third) end
-	print(last, '\n' .. CO.an .. sep)
+	print(last, '\n' .. CO.an .. BLOCK_SEP)
 end
 
 -- Login msg
@@ -107,12 +103,12 @@ end
 
 function ns.msg_no_saved_pet()
 	if ns.db.verbosityLevel < 0 then return end
-	chat_user_notification(CO.bw .. 'Cannot restore pet because no Current Pet has been saved yet' .. (ns.dbc.charFavsEnabled and ' for ' .. CO.e .. this_char or '') .. CO.bw .. '. This can happen when switching to char-specific favorites for the first time on a toon. - Summoned a random pet instead.')
+	chat_user_notification(CO.bw .. 'Cannot restore pet because no Current Pet has been saved yet' .. (ns.dbc.charFavsEnabled and ' for ' .. CO.e .. CHAR_NAME or '') .. CO.bw .. '. This can happen when switching to char-specific favorites for the first time on a toon. - Summoned a random pet instead.')
 end
 
 function ns.msg_no_previous_pet()
 	if ns.db.verbosityLevel < 0 then return end
-	chat_user_notification(CO.bw .. 'No Previous Pet has been saved yet' .. (ns.dbc.charFavsEnabled and ' for ' .. CO.e .. this_char or '') .. CO.bw .. '.')
+	chat_user_notification(CO.bw .. 'No Previous Pet has been saved yet' .. (ns.dbc.charFavsEnabled and ' for ' .. CO.e .. CHAR_NAME or '') .. CO.bw .. '.')
 end
 
 function ns.msg_onlyfavisactive(ap)
@@ -263,18 +259,18 @@ function ns.help_display()
 	local header_text = table.concat(header, CO.bn)
 	local footer_text = table.concat(footer, CO.bn)
 
-	print('\n' .. CO.an .. sep .. '\n' .. addon_name .. ':' .. header_text .. '\n')
+	print('\n' .. CO.an .. BLOCK_SEP .. '\n' .. ADDON_NAME .. ':' .. header_text .. '\n')
 	for _, v in ipairs(body) do
 		print(table.concat(v, CO.bn))
 	end
-	print(footer_text .. '\n' .. CO.an .. sep)
+	print(footer_text .. '\n' .. CO.an .. BLOCK_SEP)
 end
 
 
 function ns.status_display()
 	if not ns.pool_initialized then ns.initialize_pool() end
 	local header = {
-		CO.bn .. '[v', GetAddOnMetadata(addon_name, 'Version'), '] Status & Settings:',
+		CO.bn .. '[v', C_AddOns.GetAddOnMetadata(ADDON_NAME, 'Version'), '] Status & Settings:',
 	}
 	local body = {
 		CO.k ..'\nAutomatic Random-summoning / Restore ', 'is ', CO.s .. (ns.db.autoEnabled and 'enabled' or CO.bw .. 'disabled'), '.',
@@ -283,7 +279,7 @@ function ns.status_display()
 		CO.k .. '\nHistory ', 'of Previous Pets: ', CO.s .. ns.db.numRecents - 1, ' (1 to ' .. MAX_NUM_RECENTS .. ').',
 		CO.k .. '\nVerbosity ', 'level of messages: ', CO.s .. ns.db.verbosityLevel, ' (of 3).',
 		CO.k .. '\nPet Pool ', 'is set to ', CO.s .. (ns.db.favsOnly and 'Favorites Only' or 'All Pets'), '. Eligible pets: ', CO.e .. #ns.pet_pool, '.',
-		CO.k .. '\nPer-character Favorites ', 'are ', CO.s .. (ns.dbc.charFavsEnabled and 'enabled' or 'disabled'), ' for ', CO.e .. this_char, '.',
+		CO.k .. '\nPer-character Favorites ', 'are ', CO.s .. (ns.dbc.charFavsEnabled and 'enabled' or 'disabled'), ' for ', CO.e .. CHAR_NAME, '.',
 	}
 	-- Separating this bc it might be a longish list
 	local charfavlist = {
@@ -310,7 +306,7 @@ function ns.msg_low_petpool(nPool)
 		'\nSome pets are ', CO.k .. 'faction-restricted ', 'and cannot be summoned on the other faction, so they may not be eligible on your current toon.',
 		'\nPlease note that certain pets are intentionally ', CO.k .. 'excluded ', 'from random summoning, to not break their usability (for example ',
 		CO.q .. 'Guild Herald', '). ',
-		((ns.dbc.charFavsEnabled and ns.db.favsOnly) and '\nYou have set ' .. CO.e .. this_char ..R.. ' to use ' .. CO.s .. 'char-specific favorite ' ..R.. 'pets. Maybe switching to ' .. CO.s .. 'global favorites ' ..R.. '(' .. CO.c .. '/pw c' ..R.. ') will help.' or ''),
+		((ns.dbc.charFavsEnabled and ns.db.favsOnly) and '\nYou have set ' .. CO.e .. CHAR_NAME ..R.. ' to use ' .. CO.s .. 'char-specific favorite ' ..R.. 'pets. Maybe switching to ' .. CO.s .. 'global favorites ' ..R.. '(' .. CO.c .. '/pw c' ..R.. ') will help.' or ''),
 	}
 	local content = table.concat(content, R)
 	chat_user_notification(content)
@@ -378,7 +374,7 @@ Toggles, Commands
 ---------------------------------------------------------------------------]]--
 
 function ns:dismiss_and_disable()
-	local actpet = C_PetJournalGetSummonedPetGUID()
+	local actpet = C_PetJournal_GetSummonedPetGUID()
 	if actpet then
 		C_PetJournal.SummonPetByGUID(actpet)
 	end
@@ -446,7 +442,7 @@ function ns.charfavs_slash_toggle() -- for slash command only
 		ns:cfavs_update()
 	end
 	if PetWalkerCharFavsCheckbox then PetWalkerCharFavsCheckbox:SetChecked(ns.dbc.charFavsEnabled) end
-	chat_user_notification(format('%sCharacter-specific favorites %s for %s%s.', CO.bn, ns.dbc.charFavsEnabled and 'enabled' or 'disabled', CO.e, this_char))
+	chat_user_notification(format('%sCharacter-specific favorites %s for %s%s.', CO.bn, ns.dbc.charFavsEnabled and 'enabled' or 'disabled', CO.e, CHAR_NAME))
 end
 
 function ns.dr_summoning_toggle()
@@ -491,11 +487,11 @@ function ns:list_charfavs()
 	local favlinks, count, name = {}, 0, nil
 	for id, _ in pairs(ns.dbc.charFavs) do
 		count = count + 1
-		name = C_PetJournalGetBattlePetLink(id)
+		name = C_PetJournal_GetBattlePetLink(id)
 		table.insert(favlinks, name)
 	end
 	local favlinks_text = table.concat(favlinks, ' ')
-	return CO.e .. this_char .. CO.bn .. ' has ' .. CO.e .. count .. CO.bn ..
+	return CO.e .. CHAR_NAME .. CO.bn .. ' has ' .. CO.e .. count .. CO.bn ..
 	' character-specific favorite pet' .. (count > 1 and 's:\n' or count > 0 and ':\n' or 's.') .. favlinks_text
 end
 
