@@ -188,6 +188,8 @@ local function COMPANION_UPDATE(what)
 	end)
 end
 
+-- See bottom of file for complete pet battle event chain
+
 local function PET_BATTLE_OPENING_START()
 	ns.debugprint 'Event: PET_BATTLE_OPENING_START'
 	ns.events:unregister_pw_events()
@@ -326,3 +328,27 @@ function ns.events:unregister_pw_events()
 	ns.debugprint 'Unregistering PW events (`UnregisterAllEvents`).'
 	self:UnregisterAllEvents()
 end
+
+
+--[[ Typical pet battle event chain: ]]--[[
+
+[player interacts with tamer --> Rematch loads team]
+COMPANION_UPDATE "CRITTER"
+[0ms]
+COMPANION_UPDATE "CRITTER"
+[player initiates pet pattle]
+PET_BATTLE_OPENING_START
+[2000ms]
+PET_BATTLE_OPENING_DONE
+[pet battling now…]
+PET_BATTLE_OVER
+[200ms]
+PET_BATTLE_CLOSE
+[1200ms]
+PET_BATTLE_CLOSE
+[0ms]
+UPDATE_SUMMONPETS_ACTION
+[0ms]
+UPDATE_SUMMONPETS_ACTION
+
+]]
