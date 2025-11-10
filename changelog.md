@@ -4,6 +4,11 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.6.2 (2025-11-10)
+
+- Change timer logic of the COMPANION_UPDATE func (pick last) and add 0.2s
+    - Possibly this helps bulletproofing the correct pet restore after SetPetLoadOutInfo summonings by effectively creating more room between SetPetLoadOutInfo and save_pet.
+
 #### 2.6.1 (2025-11-05)
 
 - Mitigate the broken scroll behavior of Blizz’s chat addon by splitting also the body parts of status and help display into single-line prints.
