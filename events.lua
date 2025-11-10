@@ -160,31 +160,30 @@ local function PLAYER_MOUNT_DISPLAY_CHANGED()
 end
 
 local function COMPANION_UPDATE(what)
-	-- This event fires always 2 times, so let's just listen to the first one
+	-- This event fires always 2 times, so let's listen to the last one.
 	if what ~= 'CRITTER' or eventthrottle_companionupdate then return end
 	eventthrottle_companionupdate = true
-	if not ns.pet_restored then
-		ns.save_pet()
-		if ns.db.debugMode then
-			ns.debugprint(
-				'Event: COMPANION_UPDATE (`actpet`: '
-					.. ns.id_to_name(C_PetJournalGetSummonedPetGUID())
-					.. ') --> `save_pet`'
-			)
-		end
-	else
-		ns.pet_restored = nil
-		if ns.db.debugMode then
-			ns.debugprint(
-				'Event: COMPANION_UPDATE (`actpet`: '
-					.. ns.id_to_name(C_PetJournalGetSummonedPetGUID())
-					.. '): not saving bc `pet_restored`'
-			)
-		end
-	end
-	-- It *seems* the pet is already summoned when the event fires the 1st time, so no need to delay the saving itself
-	C_TimerAfter(0.5, function()
+	C_TimerAfter(0.7, function()
 		eventthrottle_companionupdate = nil
+		if not ns.pet_restored then
+			ns.save_pet()
+			if ns.db.debugMode then
+				ns.debugprint(
+					'Event: COMPANION_UPDATE (`actpet`: '
+						.. ns.id_to_name(C_PetJournalGetSummonedPetGUID())
+						.. ') --> `save_pet`'
+				)
+			end
+		else
+			ns.pet_restored = nil
+			if ns.db.debugMode then
+				ns.debugprint(
+					'Event: COMPANION_UPDATE (`actpet`: '
+						.. ns.id_to_name(C_PetJournalGetSummonedPetGUID())
+						.. '): not saving bc `pet_restored`'
+				)
+			end
+		end
 	end)
 end
 
