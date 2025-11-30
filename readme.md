@@ -9,17 +9,6 @@ The addon helps you to always have a companion pet out (summoned). You can choos
 - __Auto Restore only:__ Whenever your pet is lost – for whatever reason –, it will be restored. This works across logouts and characters.
 - __Random Summon:__ Automatically summons a random pet (from a configurable pool) every n minutes, or via keybind or slash command. This pet will be auto-restored whenever it is lost, until a new one is summoned.
 
-## Notes
-
-In early 2022 this project started out as an improved version of [NugMiniPet](https://www.curseforge.com/wow/addons/nugminipet), but in the meantime not much of the original code is left.
-Credits for the concept, the inspiration and for the initial code base though to the [author](https://www.curseforge.com/members/d87_/projects) of NugMiniPet.
-
----
-
-*If you’re having trouble reading this description on CurseForge, you might want to try switching to the [Repo Page](https://github.com/tflo/PetWalker?tab=readme-ov-file#petwalker). You’ll find the exact same text there, but it’s much easier to read and free from CurseForge’s rendering errors.*
-
----
-
 ## Features
 
 ### Main Features
@@ -44,6 +33,12 @@ Credits for the concept, the inspiration and for the initial code base though to
 - Alt friendly: All settings are account wide (except for char-specific favorite pets, ofc).
 - For obvious reasons conflicting with [NugMiniPet](https://www.curseforge.com/wow/addons/nugminipet), [Zone Pet](https://www.curseforge.com/wow/addons/zonepet), [Mount Mini-Me](https://www.curseforge.com/wow/addons/mount-mini-me) and probably any similar addon that auto-summons pets.
 - Fully compatible with [Rematch](https://www.curseforge.com/wow/addons/rematch).
+
+---
+
+*If you’re having trouble reading this description on CurseForge, you might want to try switching to the [Repo Page](https://github.com/tflo/PetWalker?tab=readme-ov-file#petwalker). You’ll find the exact same text there, but it’s much easier to read and free from CurseForge’s rendering errors.*
+
+---
 
 ## Usage
 
