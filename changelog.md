@@ -4,6 +4,12 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.6.3 (2025-11-30)
+
+- Update readme/description.
+- Change license.
+- Add CONTRIBUTING/CLA document.
+
 #### 2.6.2 (2025-11-10)
 
 - Change timer logic of the COMPANION_UPDATE func (pick last) and add 0.2s
