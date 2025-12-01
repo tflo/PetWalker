@@ -20,7 +20,7 @@
 ## X-Wago-ID: qv63aZGb
 ## X-Curse-Project-ID: 784734
 ## X-Flavor: Mainline
-## SPDX-License-Identifier: GPL-3.0-or-later
+## SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 ## LoadSavedVariablesFirst: 1
 ## SavedVariables: PetWalkerDB
 ## SavedVariablesPerCharacter: PetWalkerPerCharDB
