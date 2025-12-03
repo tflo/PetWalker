@@ -4,6 +4,10 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.6.5 (2025-12-03)
+
+- toc: remove 110205 flag.
+
 #### 2.6.4 (2025-12-01)
 
 - Forgot to update license info also in toc.
