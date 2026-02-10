@@ -301,7 +301,16 @@ function ns.status_display(print_topsep, print_bottomsep)
 	if print_bottomsep then print(CO.an .. BLOCK_SEP .. '\n ') end
 end
 
--- TODO: auto-switch to "All" if no Favs available
+-- TODO: different msgs for the situations:
+-- No favs
+-- No non-favs bc all pets are favorites
+-- One of the two pools is empty (not strictly a failure but favsProbability set to 1)
+-- TODO: add db.flags when favsProbability or favsOnly has been force-changed, so we
+-- can show this in the status text.
+function ns.msg_force_changed_pool()
+	chat_user_notification(format('%sYou don\'t have any summonable pets in your active pool, or in one of your active pools (Favorites/Non-favorites). I\'ve set your pet pool to %sAll Pets|r and will try to re-initialize the pool.', CO.bw, CO.k))
+end
+
 function ns.msg_low_petpool(nPool)
 	if ns.db.verbosityLevel < 0 then return end
 	local R = CO.bw
