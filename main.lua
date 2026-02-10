@@ -44,7 +44,7 @@ local format = _G.format
 	Some Variables/Constants
 ===========================================================================]]--
 
-ns.pet_pool = {}
+ns.pool, ns.pet_pool_favs, ns.pet_pool_other, ns.pet_pool_all = {}, {}, {}, {}
 ns.pool_initialized = false
 --[[ This prevents the "wrong" active pet from being saved. We get a "wrong" pet
 mainly after login, if the game summons the last active pet on this toon,
@@ -657,7 +657,7 @@ local function clean_charfavs()
 	if count > 0 then ns.msg_removed_invalid_id(count) end
 end
 
-function ns.initialize_pool()
+function ns.initialize_pool_OLD()
 	ns.debugprint 'Running `initialize_pool`'
 	table.wipe(ns.pet_pool)
 	clean_charfavs()
@@ -682,6 +682,85 @@ function ns.initialize_pool()
 	end
 end
 
+local function can_add_to_pool(species_id, pet_id)
+	return not is_excluded_by_species(species_id) and is_pet_summonable(pet_id)
+end
+
+-- TODO: auto-switch to "All" if no Favs available
+function ns.initialize_pool()
+	local pet_pool_favs, pet_pool_other, pet_pool_all = {}, {}, {}
+	ns.debugprint 'Running `initialize_pool`'
+	table.wipe(ns.pet_pool_favs)
+	table.wipe(ns.pet_pool_other)
+	table.wipe(ns.pet_pool_all)
+	clean_charfavs()
+	local can_send_warning = now - time_pool_msg > 60 and ns.db.newPetTimer ~= 0
+	local now = time()
+	local index = 1
+	if ns.db.favsProbability == 1 then
+		-- "Favs Only"
+		while true do
+			local pet_id, species_id, _, _, _, favorite = C_PetJournal_GetPetInfoByIndex(index)
+			if not pet_id then break end
+			if favorite and can_add_to_pool(species_id, pet_id) then
+				table.insert(pet_pool_favs, pet_id)
+			end
+			index = index + 1
+		end
+		if can_send_warning and #pet_pool_favs <= 0 then
+			ns.msg_low_petpool(#pet_pool_favs)
+			time_pool_msg = time()
+		end
+	elseif ns.db.favsProbability == -1 then
+		-- "All", treat favs as regulars
+		while true do
+			local pet_id, species_id = C_PetJournal_GetPetInfoByIndex(index)
+			if not pet_id then break end
+			if can_add_to_pool(species_id, pet_id) then table.insert(pet_pool_all, pet_id) end
+			index = index + 1
+		end
+		if can_send_warning and #pet_pool_all <= 0 then
+			ns.msg_low_petpool(#pet_pool_all)
+			time_pool_msg = time()
+		end
+	elseif ns.db.favsProbability == 0 then
+		-- "Regulars Only"
+		while true do
+			local pet_id, species_id, _, _, _, favorite = C_PetJournal_GetPetInfoByIndex(index)
+			if not pet_id then break end
+			if not favorite and can_add_to_pool(species_id, pet_id) then
+				table.insert(pet_pool_others, pet_id)
+			end
+			index = index + 1
+		end
+		if can_send_warning and #pet_pool_others <= 0 then
+			ns.msg_low_petpool(#pet_pool_others)
+			time_pool_msg = time()
+		end
+	else
+		-- "Mixed", two pools
+		while true do
+			local pet_id, species_id, _, _, _, favorite = C_PetJournal_GetPetInfoByIndex(index)
+			if not pet_id then break end
+			if can_add_to_pool(species_id, pet_id) then
+				if favorite then
+					table.insert(pet_pool_favs, pet_id)
+				else
+					table.insert(pet_pool_other, pet_id)
+				end
+			end
+			index = index + 1
+		end
+		-- Check sum of both pools
+		if can_send_warning and max(#pet_pool_favs, #pet_pool_favs) <= 0 then
+			ns.msg_low_petpool(max(#pet_pool_favs, #pet_pool_favs))
+			time_pool_msg = time()
+		end
+	end
+	ns.pool_initialized = true
+	ns.pet_pool_favs, ns.pet_pool_other, ns.pet_pool_all =
+		pet_pool_favs, pet_pool_other, pet_pool_all
+end
 
 --[[===========================================================================
 	Char Favs
