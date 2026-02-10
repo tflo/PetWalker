@@ -175,8 +175,11 @@ new_pet, or previous_pet or the transitioncheck.
 ---------------------------------------------------------------------------]]--
 
 -- Called by the new_pet func
-function ns.set_sum_msg_to_newpet(np, n)
-	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned %s pet %s.', CO.bn, n > 1 and 'a new random' or 'your only eligible random', ns.id_to_link(np)) or nil
+-- function ns.set_sum_msg_to_newpet(newpet, pool)
+-- 	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned %s pet %s.', CO.bn, #pool > 1 and 'a new random' or 'your only pool', ns.id_to_link(np)) or nil
+-- end
+function ns.set_sum_msg_to_newpet(newpet, pool)
+	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned %s pet from %s: %s.', CO.bn, #pool > 1 and 'a new' or 'your only', pool == ns.pet_pool_other and 'Non-favs' or pool == ns.pet_pool_favs and 'Favs' or 'All', ns.id_to_link(newpet)) or nil
 end
 
 -- Called by the restore_pet func
