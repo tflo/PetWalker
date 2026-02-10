@@ -20,7 +20,7 @@ local function merge_defaults(src, dst)
 end
 
 -- 1/2: v2.6, Nov 2025: currentPet/previousPet --> recentPets ==> reset specific
-local DB_VERSION_CURRENT = 2.0
+local DB_VERSION_CURRENT = 3
 
 local defaults_global = {
 	dbVersion = DB_VERSION_CURRENT,
@@ -28,6 +28,7 @@ local defaults_global = {
 	newPetTimer = 720,
 	remainingTimer = 360,
 	favsOnly = false,
+	favsProbability = 0.66,
 	verbosityLevel = 3,
 	drSummoning = true,
 	numRecents = 4,
