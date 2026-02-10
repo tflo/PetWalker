@@ -668,30 +668,30 @@ local function clean_charfavs()
 	if count > 0 then ns.msg_removed_invalid_id(count) end
 end
 
-function ns.initialize_pool_OLD()
-	ns.debugprint 'Running `initialize_pool`'
-	table.wipe(ns.pet_pool)
-	clean_charfavs()
-	local index = 1
-	while true do
-		local pet_id, species_id, _, _, _, favorite = C_PetJournal_GetPetInfoByIndex(index)
-		if not pet_id then break end
-		if not is_excluded_by_species(species_id) and is_pet_summonable(pet_id) then
-			if ns.db.favsOnly then
-				if favorite then table.insert(ns.pet_pool, pet_id) end
-			else
-				table.insert(ns.pet_pool, pet_id)
-			end
-		end
-		index = index + 1
-	end
-	ns.pool_initialized = true -- Condition in ns:new_pet and ns.ManualSummonNew
-	local now = time()
-	if #ns.pet_pool <= 0 and ns.db.newPetTimer ~= 0 and now - time_pool_msg > 90 then
-		ns.msg_low_petpool(#ns.pet_pool)
-		time_pool_msg = now
-	end
-end
+-- function ns.initialize_pool_OLD()
+-- 	ns.debugprint 'Running `initialize_pool`'
+-- 	table.wipe(ns.pet_pool)
+-- 	clean_charfavs()
+-- 	local index = 1
+-- 	while true do
+-- 		local pet_id, species_id, _, _, _, favorite = C_PetJournal_GetPetInfoByIndex(index)
+-- 		if not pet_id then break end
+-- 		if not is_excluded_by_species(species_id) and is_pet_summonable(pet_id) then
+-- 			if ns.db.favsOnly then
+-- 				if favorite then table.insert(ns.pet_pool, pet_id) end
+-- 			else
+-- 				table.insert(ns.pet_pool, pet_id)
+-- 			end
+-- 		end
+-- 		index = index + 1
+-- 	end
+-- 	ns.pool_initialized = true -- Condition in ns:new_pet and ns.ManualSummonNew
+-- 	local now = time()
+-- 	if #ns.pet_pool <= 0 and ns.db.newPetTimer ~= 0 and now - time_pool_msg > 30 then
+-- 		ns.msg_low_petpool(#ns.pet_pool)
+-- 		time_pool_msg = now
+-- 	end
+-- end
 
 local function can_add_to_pool(species_id, pet_id)
 	return not is_excluded_by_species(species_id) and is_pet_summonable(pet_id)

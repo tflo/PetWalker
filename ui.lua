@@ -90,11 +90,6 @@ function ns.msg_login()
 	chat_user_notification(table.concat({CO.k .. 'Auto: ' .. CO.s .. (ns.db.autoEnabled and 'On' or CO.bw .. 'Off'), CO.k .. 'Pet pool: ' .. CO.s .. (ns.db.favsOnly and ns.dbc.charFavsEnabled and 'Char favs' or ns.db.favsOnly and 'Global favs' or 'All pets'), CO.k .. 'Timer: ' .. CO.s .. (ns.db.newPetTimer > 0 and ns.db.newPetTimer/60 .. ' min' or 'Off'), petinfo}, sep))
 end
 
--- TODO: Do we need a warning at 1 selectable pet? Or should this be considered a valid use-case? (User manually summons a pet from Journal, but wants to get back his (only) fav pet when the timer is due.)
--- function ns.msg_low_petpool(nPool)
--- 	chat_user_notification(CO.bw .. ": " .. (nPool < 1 and "0 (zero) pets" or "Only 1 pet") .. " eligible as random summon! You should either " .. (ns.db.favsOnly and "flag more pets as favorite, or set the random pool to 'All Pets'" or "collect more pets") .. ", or set the random-summon timer to '0'. Please note that certain pets are excluded from random summoning, to not break their usability (for example Guild Herald)." .. ((ns.dbc.charFavsEnabled and ns.db.favsOnly) and "\nNote that you have set this char to use char-specific favorite pets. Maybe switching to global favorites ('/pw c') will help." or ""))
--- end
-
 function ns.msg_no_saved_pet()
 	if ns.db.verbosityLevel < 0 then return end
 	chat_user_notification(CO.bw .. 'Cannot restore pet because no Current Pet has been saved yet' .. (ns.dbc.charFavsEnabled and ' for ' .. CO.e .. CHAR_NAME or '') .. CO.bw .. '. This can happen when switching to char-specific favorites for the first time on a toon. - Summoned a random pet instead.')
@@ -315,7 +310,6 @@ function ns.msg_low_petpool(nPool)
 	if ns.db.verbosityLevel < 0 then return end
 	local R = CO.bw
 	local poolstr = db.favsProbability == -1 and 'All Pets' or db.favsProbability == 0 and 'Non-fav Pets' or db.favsProbability == 1 and 'Fav Pets' or 'Favs + Non-fav Pets'
-		line1 = '
 	local content = {
 		('Your current pool (' .. poolstr .. ') contains ' .. nPool < 1 and CO.k .. '0 (zero) ' ..R.. 'pets ' or R.. 'only ' ..CO.k .. '1 ' ..R.. 'pet '),
 		'eligible as random summon!',
