@@ -279,7 +279,7 @@ function ns.status_display(print_topsep, print_bottomsep)
 
 		{CO.k .. 'Verbosity ', 'level of messages: ', CO.s .. ns.db.verbosityLevel, ' (of 3).'},
 
-		{CO.k .. 'Pet Pool ', 'is set to ', CO.s .. (ns.db.favsOnly and 'Favorites Only' or 'All Pets'), '. Eligible pets: ', CO.e .. #ns.pet_pool, '.'},
+		{CO.k .. 'Pet Pool ', 'is set to ', CO.s .. (ns.db.favsOnly and 'Favorites Only' or 'All Pets'), '. Eligible pets: ', CO.e .. #ns.pool, '.'},
 
 		{CO.k .. 'Per-character Favorites ', 'are ', CO.s .. (ns.dbc.charFavsEnabled and 'enabled' or 'disabled'), ' for ', CO.e .. CHAR_NAME, '.'},
 	}
