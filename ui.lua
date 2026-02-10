@@ -301,12 +301,14 @@ function ns.status_display(print_topsep, print_bottomsep)
 	if print_bottomsep then print(CO.an .. BLOCK_SEP .. '\n ') end
 end
 
-
+-- TODO: auto-switch to "All" if no Favs available
 function ns.msg_low_petpool(nPool)
 	if ns.db.verbosityLevel < 0 then return end
 	local R = CO.bw
+	local poolstr = db.favsProbability == -1 and 'All Pets' or db.favsProbability == 0 and 'Non-fav Pets' or db.favsProbability == 1 and 'Fav Pets' or 'Favs + Non-fav Pets'
+		line1 = '
 	local content = {
-		(nPool < 1 and CO.k .. '0 (zero) ' ..R.. 'pets ' or R.. 'Only ' ..CO.k .. '1 ' ..R.. 'pet '),
+		('Your current pool (' .. poolstr .. ') contains ' .. nPool < 1 and CO.k .. '0 (zero) ' ..R.. 'pets ' or R.. 'only ' ..CO.k .. '1 ' ..R.. 'pet '),
 		'eligible as random summon!',
 		'\nYou should either ' .. (ns.db.favsOnly and 'flag more pets as favorite, or set the random pool to ' .. CO.s ..'All Pets' or 'collect more pets'), ', or set the random-summon timer to ', CO.s .. '0', '.',
 		'\nAlso check your ', CO.k .. 'Filter ', 'settings in the ', CO.k .. 'Blizz Pet Journal ', '(not in Rematch!), as they are affecting the pool of available pets!',
