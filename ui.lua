@@ -351,7 +351,7 @@ function SlashCmdList.PetWalker(msg)
 	elseif args[1] == 'n' or args[1] == 'new' then
 		ns:new_pet(nil, true)
 	elseif args[1] == 'f' or args[1] == 'fav' then
-		ns:favs_toggle()
+		ns:favs_toggle(args[2])
 	elseif args[1] == 'aev' or args[1] == 'altevents' then -- Probably better to leave this undocumented
 		ns:event_toggle()
 	elseif args[1] == 'c' or args[1] == 'char' then
@@ -433,11 +433,34 @@ function ns:event_toggle()
 	chat_user_notification(format('%s%s %s.', CO.bn, ns.db.eventAlt and 'Alternative event(s)' or 'Default event (PLAYER_STARTED_MOVING)', ns.db.autoEnabled and 'registered' or 'selected. Note that auto-summoning is currently disabled; event(s) will be registered when you enable auto-summoning (' .. CO.c .. '/pw a' .. CO.bn .. ')'))
 end
 
-function ns:favs_toggle()
-	ns.db.favsOnly = not ns.db.favsOnly
+-- function ns:favs_toggle_OLD()
+-- 	ns.db.favsOnly = not ns.db.favsOnly
+-- 	ns.pool_initialized, ns.pet_verified = false, false
+-- 	if ns.db.autoEnabled then ns:new_pet() end
+-- 	chat_user_notification(format('%sPet pool: %s%s.', CO.bn, ns.db.favsOnly and 'favorites' or 'all pets', ns.db.favsOnly and ns.dbc.charFavsEnabled and ' (char-specific)' or ns.db.favsOnly and ' (global)' or ''))
+-- end
+
+function ns:favs_toggle(arg2)
+	if arg2 then
+		arg2 = tonumber(arg2)
+		if not arg2 or arg2 < 0 or arg2 > 1 then
+			chat_user_notification(format('%sThe optional second argument must be a number from %s0|r to %s1|r. For example: %s0|r, %s0.2|r, %s0.45|r, %s0.618|r, %s1|r.', CO.bn, CO.c, CO.c, CO.c, CO.c, CO.c, CO.c, CO.c))
+			return
+		end
+		db.favsProbability = arg2
+		ns.db.favsProbability_reset_by_pw = false
+		if arg2 < 1 then
+			chat_user_notification(format('%sFavorites probability (in %sAll Pets|r mode) set to %s%s|r.', CO.bn, CO.e, CO.k))
+		else
+			chat_user_notification(format('%sFavorites probability (in %sAll Pets|r mode) set to %no special treatment|r.', CO.bn, CO.e, CO.k))
+		end
+	else
+		ns.db.favsOnly = not ns.db.favsOnly
+		ns.db.favsOnly_reset_by_pw = false
+		chat_user_notification(format('%sPet pool: %s%s.', CO.bn, ns.db.favsOnly and 'Favorites' or 'All Pets', ns.db.favsOnly and ns.dbc.charFavsEnabled and ' (char-specific)' or ns.db.favsOnly and ' (global)' or ''))
+	end
 	ns.pool_initialized, ns.pet_verified = false, false
 	if ns.db.autoEnabled then ns:new_pet() end
-	chat_user_notification(format('%sPet pool: %s%s.', CO.bn, ns.db.favsOnly and 'favorites' or 'all pets', ns.db.favsOnly and ns.dbc.charFavsEnabled and ' (char-specific)' or ns.db.favsOnly and ' (global)' or ''))
 end
 
 function ns.charfavs_slash_toggle() -- for slash command only
