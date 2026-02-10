@@ -568,7 +568,6 @@ end
 -- 	chat_user_notification(format('%sPet pool: %s%s.', CLR.TXT(), ns.db.favsOnly and 'favorites' or 'all pets', ns.db.favsOnly and ns.dbc.charFavsEnabled and ' (char-specific)' or ns.db.favsOnly and ' (global)' or ''))
 -- end
 
--- XXX here
 function ns:favs_toggle(arg2)
 	if arg2 then
 		arg2 = tonumber(arg2)
