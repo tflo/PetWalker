@@ -421,7 +421,19 @@ function ns:new_pet(the_time, manually_called)
 		ns.debugprint '`new_pet` --> `initialize_pool`'
 		ns.initialize_pool()
 	end
-	local npool = #ns.pet_pool
+
+	local pool
+	if ns.db.favsProbability == -1 then
+		pool = ns.pet_pool_all
+	elseif ns.db.favsProbability == 0 or #ns.pet_pool_favs == 0 then
+		pool = ns.pet_pool_other
+	elseif ns.db.favsProbability == 1 or #ns.pet_pool_other == 0 then
+		pool = ns.pet_pool_favs
+	else
+		pool = rand() <= ns.db.favsProbability and ns.pet_pool_favs or ns.pet_pool_other
+	end
+
+	local npool = #pool
 	local newpet
 	if npool == 0 then
 		if now - time_pool_msg > 90 then
@@ -435,7 +447,7 @@ function ns:new_pet(the_time, manually_called)
 		ns.debugprint '`new_pet`: zero pet pool, warning msg on cooldown'
 	else
 		if npool == 1 then
-			newpet = ns.pet_pool[1]
+			newpet = pool[1]
 			if actpet == newpet then
 				if not msg_onlyfavisactive_alreadydisplayed or manually_called then
 					ns.msg_onlyfavisactive(actpet)
@@ -445,11 +457,12 @@ function ns:new_pet(the_time, manually_called)
 			end
 		else
 			repeat
-				newpet = ns.pet_pool[math.random(npool)]
+				newpet = pool[rand(npool)]
 			until actpet ~= newpet
 		end
-		ns.set_sum_msg_to_newpet(newpet, npool)
+		ns.set_sum_msg_to_newpet(newpet, pool)
 		ns:summon_pet(newpet, true)
+		ns.pool = pool
 	end
 end
 
