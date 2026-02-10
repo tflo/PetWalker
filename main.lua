@@ -423,13 +423,11 @@ function ns:new_pet(the_time, manually_called)
 	end
 
 	local pool
-	if ns.db.favsProbability == -1 then
-		pool = ns.pet_pool_all
-	elseif ns.db.favsProbability == 0 or #ns.pet_pool_favs == 0 then
-		pool = ns.pet_pool_other
-	elseif ns.db.favsProbability == 1 or #ns.pet_pool_other == 0 then
-		pool = ns.pet_pool_favs
+	if ns.db.favsOnly or ns.db.favsProbability == 1 or ns.db.favsProbability == 0 then
+		-- Unified pool either by user setting or enforced in initialize_pool()
+		pool = ns.pet_pool
 	else
+		-- Two pools; shouldn't get here if one of the pools is empty
 		pool = rand() <= ns.db.favsProbability and ns.pet_pool_favs or ns.pet_pool_other
 	end
 
