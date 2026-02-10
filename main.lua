@@ -700,60 +700,47 @@ local function can_add_to_pool(species_id, pet_id)
 end
 
 -- TODO: auto-switch to "All" if no Favs available
-function ns.initialize_pool()
-	local pet_pool_favs, pet_pool_other, pet_pool_all = {}, {}, {}
+function ns.initialize_pool(rerun)
+	local pet_pool, pet_pool_favs, pet_pool_other = {}, {}, {}
 	ns.debugprint 'Running `initialize_pool`'
 	table.wipe(ns.pet_pool_favs)
 	table.wipe(ns.pet_pool_other)
-	table.wipe(ns.pet_pool_all)
+	table.wipe(ns.pet_pool)
 	clean_charfavs()
 	local can_send_warning = now - time_pool_msg > 60 and ns.db.newPetTimer ~= 0
-	local now = time()
-	local index = 1
-	if ns.db.favsProbability == 1 then
+	local idx = 1
+	if ns.db.favsOnly then
 		-- "Favs Only"
 		while true do
-			local pet_id, species_id, _, _, _, favorite = C_PetJournal_GetPetInfoByIndex(index)
+			local pet_id, species_id, _, _, _, favorite = C_PetJournal_GetPetInfoByIndex(idx)
 			if not pet_id then break end
 			if favorite and can_add_to_pool(species_id, pet_id) then
-				table.insert(pet_pool_favs, pet_id)
+				table.insert(pet_pool, pet_id)
 			end
-			index = index + 1
+			idx = idx + 1
 		end
-		if can_send_warning and #pet_pool_favs <= 0 then
-			ns.msg_low_petpool(#pet_pool_favs)
-			time_pool_msg = time()
-		end
-	elseif ns.db.favsProbability == -1 then
-		-- "All", treat favs as regulars
+	elseif ns.db.favsProbability == 1 then
+		-- "All equal", treat favs as regulars
 		while true do
-			local pet_id, species_id = C_PetJournal_GetPetInfoByIndex(index)
+			local pet_id, species_id = C_PetJournal_GetPetInfoByIndex(idx)
 			if not pet_id then break end
-			if can_add_to_pool(species_id, pet_id) then table.insert(pet_pool_all, pet_id) end
-			index = index + 1
-		end
-		if can_send_warning and #pet_pool_all <= 0 then
-			ns.msg_low_petpool(#pet_pool_all)
-			time_pool_msg = time()
+			if can_add_to_pool(species_id, pet_id) then table.insert(pet_pool, pet_id) end
+			idx = idx + 1
 		end
 	elseif ns.db.favsProbability == 0 then
 		-- "Regulars Only"
 		while true do
-			local pet_id, species_id, _, _, _, favorite = C_PetJournal_GetPetInfoByIndex(index)
+			local pet_id, species_id, _, _, _, favorite = C_PetJournal_GetPetInfoByIndex(idx)
 			if not pet_id then break end
 			if not favorite and can_add_to_pool(species_id, pet_id) then
-				table.insert(pet_pool_others, pet_id)
+				table.insert(pet_pool, pet_id)
 			end
-			index = index + 1
-		end
-		if can_send_warning and #pet_pool_others <= 0 then
-			ns.msg_low_petpool(#pet_pool_others)
-			time_pool_msg = time()
+			idx = idx + 1
 		end
 	else
 		-- "Mixed", two pools
 		while true do
-			local pet_id, species_id, _, _, _, favorite = C_PetJournal_GetPetInfoByIndex(index)
+			local pet_id, species_id, _, _, _, favorite = C_PetJournal_GetPetInfoByIndex(idx)
 			if not pet_id then break end
 			if can_add_to_pool(species_id, pet_id) then
 				if favorite then
@@ -762,16 +749,44 @@ function ns.initialize_pool()
 					table.insert(pet_pool_other, pet_id)
 				end
 			end
-			index = index + 1
+			idx = idx + 1
 		end
-		-- Check sum of both pools
-		if can_send_warning and max(#pet_pool_favs, #pet_pool_favs) <= 0 then
-			ns.msg_low_petpool(max(#pet_pool_favs, #pet_pool_favs))
-			time_pool_msg = time()
+		if #pet_pool_favs < 1 or #pet_pool_other < 1 then
+			db.favsProbability = 1
+			ns.msg_force_changed_pool()
+			pet_pool = #pet_pool_other > 0 and pet_pool_other or pet_pool_favs
+		else
+			pet_pool = nil
 		end
 	end
+
+	if pet_pool and #petpool < 1 then
+		if rerun then
+			if ns.db.newPetTimer ~= 0 then
+				ns.db.newPetTimer = 0
+				ns.db.newPetTimer_reset_by_pw = true
+			end
+			if can_send_warning then
+				ns.msg_low_petpool(#pet_pool)
+				time_pool_msg = time()
+			end
+		else
+			if ns.db.favsOnly ~= false then
+				ns.db.favsOnly = false
+				ns.db.favsOnly_reset_by_pw = true
+			end
+			if ns.db.favsProbability ~= 1 then
+				ns.db.favsProbability = 1
+				ns.db.favsProbability_reset_by_pw = true
+			end
+			ns.msg_force_changed_pool()
+			ns.initialize_pool(true)
+		end
+		return
+	end
+
 	ns.pool_initialized = true
-	ns.pet_pool_favs, ns.pet_pool_other, ns.pet_pool_all =
+	ns.pet_pool_favs, ns.pet_pool_other, ns.pet_pool =
 		pet_pool_favs, pet_pool_other, pet_pool_all
 end
 
