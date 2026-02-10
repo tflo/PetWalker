@@ -82,10 +82,9 @@ local function update_db()
 	if ver == DB_VERSION_CURRENT then return end
 
 	-- Do the migration in ascending order, in case we have historically overlapping changes!
-	-- if ver < 2 then
-	-- end
-	-- if ver < 3 then
-	-- end
+	if ver < 3 then
+		db.favsProbability = db.favsOnly and 1 or 0.2
+	end
 
 	clean_removed(db, defaults_global)
 	clean_removed(dbc, defaults_perchar)
