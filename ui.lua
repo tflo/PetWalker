@@ -314,7 +314,7 @@ function ns.status_display(print_topsep, print_bottomsep)
 
 		{CO.k .. 'Verbosity ', 'level of messages: ', CO.s .. ns.db.verbosityLevel, ' (of 3).'},
 
-		{CO.k .. 'Pet Pool ', 'is set to ', CO.s .. (ns.db.favsOnly and 'Favorites Only' or 'All Pets'), '. Eligible pets: ', CO.e .. (ns.pet_pool and #ns.pet_pool or ns.pet_pool_other and #ns.pet_pool_other .. '+' .. #ns.pet_pool_favs), '.'},
+		{CO.k .. 'Pet Pool ', 'is ', CO.s .. (curr_pool_str(true)), (not ns.db.favsOnly and ns.db.favsProbability < 1 and ' (favs prob: ' .. CO.s .. ns.db.favsProbability .. CO.bn .. ')' or ''), '. Eligible pets: ', CO.e .. (curr_num_pool_str()), '.'},
 
 		{CO.k .. 'Per-character Favorites ', 'are ', CO.s .. (ns.dbc.charFavsEnabled and 'enabled' or 'disabled'), ' for ', CO.e .. CHAR_NAME, '.'},
 	}
