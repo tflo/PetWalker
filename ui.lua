@@ -45,7 +45,7 @@ local colscheme_green = {
 }
 
 local function set_colors(scheme)
-	local prefix = '|r|cff'
+	local prefix = '|cff'
 	local colorstrings = {
 		bn = prefix .. scheme.basetext.notification,
 		bw = prefix .. scheme.basetext.warning,
@@ -289,12 +289,12 @@ function ns.help_display(print_bottomspace)
 	local footer_text = table.concat(footer, CO.bn)
 
 	print('\n' .. CO.an .. BLOCK_SEP .. '\n' .. ADDON_NAME .. header_text .. '\n')
+	local sep = '\124r' .. CO.bn
 	for _, v in ipairs(body) do
-		print(table.concat(v, CO.bn))
+		print(table.concat(v, sep))
 	end
 	print(footer_text .. '\n' .. CO.an .. BLOCK_SEP .. (print_bottomspace and '\n ' or ''))
 end
-
 
 function ns.status_display(print_topsep, print_bottomsep)
 	if not ns.pool_initialized then ns.initialize_pool() end
@@ -326,8 +326,9 @@ function ns.status_display(print_topsep, print_bottomsep)
 	local extra_settings = (ns.db.eventAlt and table.concat({CO.k ..'\nAlternative Events ', 'are ', CO.s .. 'enabled ', 'for all chars.'}, CO.bn) or nil)
 
 	print((print_topsep and '\n' .. CO.an .. BLOCK_SEP .. '\n' or CO.an) .. ADDON_NAME .. header_text .. '\n')
+	local sep = '\124r' .. CO.bn
 	for _, v in ipairs(body) do
-		print(table.concat(v, CO.bn))
+		print(table.concat(v, sep))
 	end
 	if extra_settings then print(extra_settings) end
 	print(charfavlist_text)
