@@ -44,7 +44,6 @@ local format = _G.format
 	Some Variables/Constants
 ===========================================================================]]--
 
-ns.pet_pool_favs, ns.pet_pool_other, ns.pet_pool = {}, {}, {}
 ns.pool_initialized = false
 --[[ This prevents the "wrong" active pet from being saved. We get a "wrong" pet
 mainly after login, if the game summons the last active pet on this toon,
@@ -422,14 +421,7 @@ function ns:new_pet(the_time, manually_called)
 		ns.initialize_pool()
 	end
 
-	local pool = {}
-	if ns.db.favsOnly or ns.db.favsProbability == 1 or ns.db.favsProbability == 0 then
-		-- Unified pool either by user setting or enforced in initialize_pool()
-		pool = ns.pet_pool
-	else
-		-- Two pools; shouldn't get here if one of the pools is empty
-		pool = random() <= ns.db.favsProbability and ns.pet_pool_favs or ns.pet_pool_other
-	end
+	local pool = ns.pet_pool or random() <= ns.db.favsProbability and ns.pet_pool_favs or ns.pet_pool_other or {}
 
 	local npool = #pool
 	local newpet
@@ -710,6 +702,7 @@ function ns.initialize_pool(rerun)
 	local idx = 1
 	if ns.db.favsOnly then
 		-- "Favs Only"
+		pet_pool_favs, pet_pool_other = nil, nil
 		while true do
 			local pet_id, species_id, _, _, _, favorite = C_PetJournal_GetPetInfoByIndex(idx)
 			if not pet_id then break end
@@ -720,6 +713,7 @@ function ns.initialize_pool(rerun)
 		end
 	elseif ns.db.favsProbability == 1 then
 		-- "All equal", treat favs as regulars
+		pet_pool_favs, pet_pool_other = nil, nil
 		while true do
 			local pet_id, species_id = C_PetJournal_GetPetInfoByIndex(idx)
 			if not pet_id then break end
@@ -728,6 +722,7 @@ function ns.initialize_pool(rerun)
 		end
 	elseif ns.db.favsProbability == 0 then
 		-- "Regulars Only"
+		pet_pool_favs, pet_pool_other = nil, nil
 		while true do
 			local pet_id, species_id, _, _, _, favorite = C_PetJournal_GetPetInfoByIndex(idx)
 			if not pet_id then break end
@@ -754,6 +749,7 @@ function ns.initialize_pool(rerun)
 			ns.db.favsProbability = 1
 			ns.msg_force_changed_pool()
 			pet_pool = #pet_pool_other > 0 and pet_pool_other or pet_pool_favs
+			pet_pool_favs, pet_pool_other = nil, nil
 		else
 			pet_pool = nil
 		end
