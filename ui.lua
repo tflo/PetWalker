@@ -102,7 +102,7 @@ end
 
 function ns.msg_onlyfavisactive(ap)
 	if ns.db.verbosityLevel < 1 then return end
-	chat_user_notification(CO.bn .. 'Your only eligible random pet ' .. (ns.id_to_link(ap) or '???') .. ' is already active.')
+	chat_user_notification(CO.bn .. 'Your only eligible random pet ' .. ns.id_to_link(ap) .. ' is already active.')
 end
 
 function ns.msg_removed_invalid_id(counter)
@@ -179,17 +179,17 @@ end
 
 -- Called by the restore_pet func
 function ns.set_sum_msg_to_restore_pet(pet)
-	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 3 and format('%sRestored your last pet %s.', CO.bn, ns.id_to_link(pet) or '???') or nil
+	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 3 and format('%sRestored your last pet %s.', CO.bn, ns.id_to_link(pet)) or nil
 end
 
 -- Called by the previous_pet func
 function ns.set_sum_msg_to_previouspet(pet)
-	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned your previous pet %s.', CO.bn, ns.id_to_link(pet) or '???') or nil
+	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned your previous pet %s.', CO.bn, ns.id_to_link(pet)) or nil
 end
 
 -- Called by the transitioncheck func
 function ns.set_sum_msg_to_transcheck(pet)
-	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 3 and format('%sSummoned your last saved pet %s.', CO.bn, ns.id_to_link(pet) or '???') or nil
+	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 3 and format('%sSummoned your last saved pet %s.', CO.bn, ns.id_to_link(pet)) or nil
 end
 
 -- Called by the summon func
