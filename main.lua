@@ -759,6 +759,7 @@ function ns.initialize_pool(rerun)
 		end
 	end
 
+	if pet_pool and #pet_pool < 1 then
 		if rerun then
 			if ns.db.newPetTimer ~= 0 then
 				ns.db.newPetTimer = 0
