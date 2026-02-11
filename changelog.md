@@ -4,19 +4,22 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
-#### 3.0.0-beta1 (2026-02-11)
+#### 3.0.0-dev3 (2026-02-11)
 
-- New feature: Set probability of favorite pets when using the *All Pets* pool. Idea by @tsemoana on GitHub.
+- New feature: **Configurable probability** of favorite pets in *All Pets* mode. Idea by @tsemoana on GitHub.
     - You set the probability with the usual favorites toggle `f` command, but followed by a number between `0` and `1`.
     - For example `/pw f 0.5` gives you an equal probability (50%) that a random pet is picked from your favorites or from your non-favorites pool. With `0.9`,  nine out of ten pets (on average) will be from your favorites, and so on.
+    - Hint: You don’t have to type the zero before the decimal point.
     - With `/pw f 0`, you’ll only ever get non-favorites.
-    - `/pw f 1` does not what you think, but will simply activate the old *All Pets* mode, that is, all pets, favs and non-favs in one pool.
+    - `/pw f 1` does not what you think, but will simply activate the old *All Pets* mode as you know it (all pets, favs and non-favs, in one single pool).
     - To summon only favorites, you just toggle from *All Pets* to *Favs Only* with `/pw f` (as it was before).
     - Your probability value is remembered, and used whenever you switch back to *All Pets* mode with `/pw f`.
     - When you set/change the probability value, PW will automatically go into *All Pets* mode, if you were in *Favs Only* mode.
-- When your active pool (e.g., *Favorites Only*) doesn’t contain any summonable pet, PW will now actively try to fix the user’s setting by deactivating *Favs Only* and putting all pets in the pool, as if you typed `/pw f 1`. 
-    - This should significantly reduce the “Low Pool” warnings, which some users apparently regarded as spam, instead of reading the hints.
+- **Fighting PEBKACs:** When your active pool (for example, *Favorites Only*) doesn’t contain any summonable pet, PW will now actively try to fix the user’s setting by deactivating *Favs Only* and putting all pets in the pool, as if you typed `/pw f 1`. 
+    - This should significantly reduce cases that trigger the “Low Pool” warning/hints, which some users apparently regarded as spam.
     - You should get the “Low Pool” warning only if after reinitializing the pool with the fixed settings, there are still no pets in the pool. In this case, PW will also deactivate the auto-summon timer, as with `/pw 0`.
+- Code cleanup (light).
+- Add messages, help, status for the new feature; slightly reworked other chat texts.
 
 #### 2.6.10 (2026-06-14)
 
