@@ -498,6 +498,7 @@ function ns:favs_toggle(arg2)
 		else
 			chat_user_notification(format('%sFavorites probability in All Pets mode set to %sNo Special Treatment|r. Switched to All Pets mode.', CO.bn, CO.k))
 		end
+		ns.db.favsOnly = false
 	else
 		ns.db.favsOnly = not ns.db.favsOnly
 		ns.db.favsOnly_reset_by_pw = false
