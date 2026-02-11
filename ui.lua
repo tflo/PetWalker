@@ -28,42 +28,6 @@ local function get_link_savedpet()
 end
 
 --[[===========================================================================
-	Colors - OLD - replace this crap!
-===========================================================================]]--
-
-local colscheme_green = {
-	basetext = {
-		notification = '8FBC8F',
-		warning = 'FA8072',
-	},
-	element = {
-		addonname = '7CFC00',
-		quote = '808000',
-		emphasis = 'ADFF2F',
-		keyword = '00FA9A',
-		state = '32CD32',
-		command = 'FF00FF',
-	}
-}
-
-local function set_colors(scheme)
-	local prefix = '|cff'
-	local colorstrings = {
-		bn = prefix .. scheme.basetext.notification,
-		bw = prefix .. scheme.basetext.warning,
-		an = prefix .. scheme.element.addonname,
-		q = prefix .. scheme.element.quote,
-		e = prefix .. scheme.element.emphasis,
-		k = prefix .. (scheme.element.keyword or scheme.element.emphasis),
-		s = prefix .. (scheme.element.state or scheme.element.emphasis),
-		c = prefix .. (scheme.element.command or scheme.element.emphasis),
-	}
-	return colorstrings
-end
-
-local CO = set_colors(colscheme_green)
-
---[[===========================================================================
 	Colors
 ===========================================================================]]--
 
@@ -103,7 +67,7 @@ ns.CLR = CLR
 local BLOCK_SEP = strrep('+', 42)
 
 local function chat_user_notification(msg) -- OLD
-	print(CO.an .. ADDON_NAME .. ":", msg)
+	print(CLR.ADDON() .. ADDON_NAME .. ":", msg)
 end
 
 local function addonprint(msg)
@@ -253,7 +217,7 @@ end
 
 -- function ns.msg_recents_dupe_removed(idx)
 -- 	if ns.db.verbosityLevel < 3 then return end
--- 	chat_user_notification(CO.bn .. 'Removed a duplicate from recent pets at idx ' .. idx .. '.')
+-- 	chat_user_notification(CLR.TXT() .. 'Removed a duplicate from recent pets at idx ' .. idx .. '.')
 -- end
 
 
@@ -272,22 +236,22 @@ end
 
 -- function ns.msg_target_is_same(link, name) -- With web link
 -- 	if ns.db.verbosityLevel < 1 then return end
--- 	chat_user_notification(format('%sTarget pet %s is the same pet as you currently have summened: \nhttps://www.warcraftpets.com/search?q=%s', CO.bn, link, name:gsub("[ ']", {[" "] = "%20", ["'"] = "%27"})))
+-- 	chat_user_notification(format('%sTarget pet %s is the same pet as you currently have summened: \nhttps://www.warcraftpets.com/search?q=%s', CLR.TXT(), link, name:gsub("[ ']", {[" "] = "%20", ["'"] = "%27"})))
 -- end
 
 function ns.msg_target_not_in_collection(link, name)
 	if ns.db.verbosityLevel < 1 then return end
-	chat_user_notification(format('%sUnfortunately, the target pet %s is not in your collection: \nhttps://www.warcraftpets.com/search?q=%s', CO.bn, link, name:gsub("[ ']", {[" "] = "%20", ["'"] = "%27"})))
+	chat_user_notification(format('%sUnfortunately, the target pet %s is not in your collection: \nhttps://www.warcraftpets.com/search?q=%s', CLR.TXT(), link, name:gsub("[ ']", {[" "] = "%20", ["'"] = "%27"})))
 end
 
 function ns.msg_target_is_not_battlepet()
 	if ns.db.verbosityLevel < 1 then return end
-	chat_user_notification(format('%sThe target is not a battle pet!', CO.bn))
+	chat_user_notification(format('%sThe target is not a battle pet!', CLR.TXT()))
 end
 
 function ns.msg_target_is_not_companion_battlepet(name)
 	if ns.db.verbosityLevel < 1 then return end
-	chat_user_notification(format('%sTarget pet "%s" is a battle pet, but not a companion battle pet. (Not in your collection and unlikely to be collectible at all.): \nhttps://www.wowhead.com/search?q=%s', CO.bn, name, name:gsub("[ ']", {[" "] = "%20", ["'"] = "%27"})))
+	chat_user_notification(format('%sTarget pet "%s" is a battle pet, but not a companion battle pet. (Not in your collection and unlikely to be collectible at all.): \nhttps://www.wowhead.com/search?q=%s', CLR.TXT(), name, name:gsub("[ ']", {[" "] = "%20", ["'"] = "%27"})))
 end
 
 
@@ -298,25 +262,25 @@ new_pet, or previous_pet or the transitioncheck.
 
 -- Called by the new_pet func
 -- function ns.set_sum_msg_to_newpet(newpet, pool)
--- 	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned %s pet %s.', CO.bn, #pool > 1 and 'a new random' or 'your only pool', ns.id_to_link(np)) or nil
+-- 	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned %s pet %s.', CLR.TXT(), #pool > 1 and 'a new random' or 'your only pool', ns.id_to_link(np)) or nil
 -- end
 function ns.set_sum_msg_to_newpet(newpet, pool)
-	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned %s pet from %s%s: %s.', CO.bn, #pool > 1 and 'a new' or 'your only', curr_pool_str(true), pool == ns.pet_pool_favs and ' (F)' or '', ns.id_to_link(newpet)) or nil
+	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned %s pet from %s%s: %s.', CLR.TXT(), #pool > 1 and 'a new' or 'your only', curr_pool_str(true), pool == ns.pet_pool_favs and ' (F)' or '', ns.id_to_link(newpet)) or nil
 end
 
 -- Called by the restore_pet func
 function ns.set_sum_msg_to_restore_pet(pet)
-	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 3 and format('%sRestored your last pet %s.', CO.bn, ns.id_to_link(pet)) or nil
+	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 3 and format('%sRestored your last pet %s.', CLR.TXT(), ns.id_to_link(pet)) or nil
 end
 
 -- Called by the previous_pet func
 function ns.set_sum_msg_to_previouspet(pet)
-	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned your previous pet %s.', CO.bn, ns.id_to_link(pet)) or nil
+	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned your previous pet %s.', CLR.TXT(), ns.id_to_link(pet)) or nil
 end
 
 -- Called by the transitioncheck func
 function ns.set_sum_msg_to_transcheck(pet)
-	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 3 and format('%sSummoned your last saved pet %s.', CO.bn, ns.id_to_link(pet)) or nil
+	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 3 and format('%sSummoned your last saved pet %s.', CLR.TXT(), ns.id_to_link(pet)) or nil
 end
 
 -- Called by the summon func
@@ -329,7 +293,7 @@ end
 -- Called by the summon func
 function ns.msg_pet_summon_failed()
 	if ns.db.verbosityLevel < 1 then return end
-	chat_user_notification(CO.bw .. "You don't meet the conditions for summoning a pet right now.")
+	chat_user_notification(CLR.WARN() .. "You don't meet the conditions for summoning a pet right now.")
 end
 
 
@@ -339,91 +303,91 @@ Three big messages: Status, Low Pet Pool, and Help
 
 function ns.help_display(print_bottomspace)
 	local header = {
-		CO.bn .. ' Help: ',
-		CO.c .. '\n/pw ', 'or ', CO.c .. '/petwalker ', 'supports these commands: ',
+		CLR.TXT() .. ' Help: ',
+		CLR.CMD() .. '\n/pw ', 'or ', CLR.CMD() .. '/petwalker ', 'supports these commands: ',
 	}
 
 	local body = {
-		{CO.c .. 'd', ' : ', CO.k .. 'Dismiss ', 'current pet and ', CO.k .. 'disable auto-summoning ', '(new pet / restore).'},
+		{CLR.CMD() .. 'd', ' : ', CLR.KEY() .. 'Dismiss ', 'current pet and ', CLR.KEY() .. 'disable auto-summoning ', '(new pet / restore).'},
 
-		{CO.c .. 'a', ' : ', 'Toggle ', CO.k .. 'auto-summoning ', '(new pet / restore).'},
+		{CLR.CMD() .. 'a', ' : ', 'Toggle ', CLR.KEY() .. 'auto-summoning ', '(new pet / restore).'},
 
-		{CO.c .. 'sr', ' : ', 'Toggle ', CO.k .. 'auto-summoning ', 'also ', CO.k .. 'while mounted for Skyriding: ', CO.s .. 'allowed / not allowed', '.'},
+		{CLR.CMD() .. 'sr', ' : ', 'Toggle ', CLR.KEY() .. 'auto-summoning ', 'also ', CLR.KEY() .. 'while mounted for Skyriding: ', CLR.STATE() .. 'allowed / not allowed', '.'},
 
-		{CO.c .. 'n', ' : ', 'Summon ', CO.k .. 'new pet ', 'from pool.'},
+		{CLR.CMD() .. 'n', ' : ', 'Summon ', CLR.KEY() .. 'new pet ', 'from pool.'},
 
-		{CO.c .. 'f', ' : ', 'Toggle ', CO.k .. 'pet pool: ', CO.s .. 'Favorites Only', ', or ', CO.s .. 'All Pets', '.'},
+		{CLR.CMD() .. 'f', ' : ', 'Toggle ', CLR.KEY() .. 'pet pool: ', CLR.STATE() .. 'Favorites Only', ', or ', CLR.STATE() .. 'All Pets', '.'},
 
-		{CO.c .. 'f <0...1>', ' : ', CO.k .. 'Favorites Probability ', 'in All Pets mode: e.g., ', CO.c .. '0.5 ', 'or ', CO.c .. '.5', '. Zero (', CO.c .. '0', ') excludes favorites, ', CO.c .. '1 ', 'means \'no special treatment for favs\'.'},
+		{CLR.CMD() .. 'f <0...1>', ' : ', CLR.KEY() .. 'Favorites Probability ', 'in All Pets mode: e.g., ', CLR.CMD() .. '0.5 ', 'or ', CLR.CMD() .. '.5', '. Zero (', CLR.CMD() .. '0', ') excludes favorites, ', CLR.CMD() .. '1 ', 'means \'no special treatment for favs\'.'},
 
-		{CO.c .. 'c', ' : ', 'Toggle ', CO.k .. 'favorites: ', CO.s .. 'Per-character', ', or ', CO.s .. 'Global Favorites', '.'},
+		{CLR.CMD() .. 'c', ' : ', 'Toggle ', CLR.KEY() .. 'favorites: ', CLR.STATE() .. 'Per-character', ', or ', CLR.STATE() .. 'Global Favorites', '.'},
 
-		{CO.c .. '<number>', ' : ', 'Set ', CO.k .. 'Summon Timer ', 'in minutes (', CO.c .. '1 ', 'to ', CO.c .. '1440', '; ', CO.c .. '0 ', 'to ', CO.k .. 'disable', ').'},
+		{CLR.CMD() .. '<number>', ' : ', 'Set ', CLR.KEY() .. 'Summon Timer ', 'in minutes (', CLR.CMD() .. '1 ', 'to ', CLR.CMD() .. '1440', '; ', CLR.CMD() .. '0 ', 'to ', CLR.KEY() .. 'disable', ').'},
 
-		{CO.c .. 'p', ' : ', 'Cycle through ', CO.k .. 'Previous (recently summoned) Pets', '.'},
+		{CLR.CMD() .. 'p', ' : ', 'Cycle through ', CLR.KEY() .. 'Previous (recently summoned) Pets', '.'},
 
-		{CO.c .. 'p <number>', ' : ', 'Set ', CO.k .. 'number of recorded Previous Pets ', '(', CO.c .. '1 ', 'to ', CO.c .. MAX_NUM_RECENTS, ').'},
+		{CLR.CMD() .. 'p <number>', ' : ', 'Set ', CLR.KEY() .. 'number of recorded Previous Pets ', '(', CLR.CMD() .. '1 ', 'to ', CLR.CMD() .. MAX_NUM_RECENTS, ').'},
 
-		{CO.c .. 'v', ' : ', CO.k .. 'Verbosity: ', CO.s .. 'silent ', '(only failures and warnings are printed to chat); ', CO.c .. 'vv ', 'for ', CO.s .. 'medium ', CO.k .. 'verbosity ', '(new summons); ', CO.c .. 'vvv ', 'for ', CO.s .. 'full ', CO.k .. 'verbosity ', '(also restored pets).'},
+		{CLR.CMD() .. 'v', ' : ', CLR.KEY() .. 'Verbosity: ', CLR.STATE() .. 'silent ', '(only failures and warnings are printed to chat); ', CLR.CMD() .. 'vv ', 'for ', CLR.STATE() .. 'medium ', CLR.KEY() .. 'verbosity ', '(new summons); ', CLR.CMD() .. 'vvv ', 'for ', CLR.STATE() .. 'full ', CLR.KEY() .. 'verbosity ', '(also restored pets).'},
 
-		{CO.c .. 's', ' : ', 'Display current ', CO.k .. 'status/settings.'},
+		{CLR.CMD() .. 's', ' : ', 'Display current ', CLR.KEY() .. 'status/settings.'},
 
-		{CO.c .. 'h', ' : ', 'This help text.'},
+		{CLR.CMD() .. 'h', ' : ', 'This help text.'},
 	}
 
 	local footer = {
-		CO.bn .. '\nExamples: ', CO.c .. '/pw a', ' disables auto-summon/restore, or enables it if disabled. ', CO.c .. '/pw 20', ' sets the new-pet summon timer to 20 minutes.',
+		CLR.TXT() .. '\nExamples: ', CLR.CMD() .. '/pw a', ' disables auto-summon/restore, or enables it if disabled. ', CLR.CMD() .. '/pw 20', ' sets the new-pet summon timer to 20 minutes.',
 		'\nIn Options > Keybindigs you can directly bind some commands.',
 	}
 
-	local header_text = table.concat(header, CO.bn)
-	local footer_text = table.concat(footer, CO.bn)
+	local header_text = table.concat(header, CLR.TXT())
+	local footer_text = table.concat(footer, CLR.TXT())
 
-	print('\n' .. CO.an .. BLOCK_SEP .. '\n' .. ADDON_NAME .. header_text .. '\n')
-	local sep = '\124r' .. CO.bn
+	print('\n' .. CLR.ADDON() .. BLOCK_SEP .. '\n' .. ADDON_NAME .. header_text .. '\n')
+	local sep = '\124r' .. CLR.TXT()
 	for _, v in ipairs(body) do
 		print(table.concat(v, sep))
 	end
-	print(footer_text .. '\n' .. CO.an .. BLOCK_SEP .. (print_bottomspace and '\n ' or ''))
+	print(footer_text .. '\n' .. CLR.ADDON() .. BLOCK_SEP .. (print_bottomspace and '\n ' or ''))
 end
 
 function ns.status_display(print_topsep, print_bottomsep)
 	if not ns.pool_initialized then ns.initialize_pool() end
 	local header = {
-		CO.bn .. ' [v', C_AddOns.GetAddOnMetadata(ADDON_NAME, 'Version'), '] Status & Settings:',
+		CLR.TXT() .. ' [v', C_AddOns.GetAddOnMetadata(ADDON_NAME, 'Version'), '] Status & Settings:',
 	}
 	local body = {
-		{CO.k ..'Automatic Random-summoning / Restore ', 'is ', CO.s .. (ns.db.autoEnabled and 'enabled' or CO.bw .. 'disabled'), '.'},
+		{CLR.KEY() ..'Automatic Random-summoning / Restore ', 'is ', CLR.STATE() .. (ns.db.autoEnabled and 'enabled' or CLR.WARN() .. 'disabled'), '.'},
 
-		{CO.k .. 'Summon Timer ', 'is ', CO.s .. (ns.db.newPetTimer > 0 and (ns.db.newPetTimer/60) .. CO.bn .. ' minutes' or 'disabled'), '. Next random pet in ', CO.e .. ns.remaining_timer_for_display(), '.'},
+		{CLR.KEY() .. 'Summon Timer ', 'is ', CLR.STATE() .. (ns.db.newPetTimer > 0 and (ns.db.newPetTimer/60) .. CLR.TXT() .. ' minutes' or 'disabled'), '. Next random pet in ', CLR.EM() .. ns.remaining_timer_for_display(), '.'},
 
-		{CO.k ..'Automatic summoning while mounted for Skyriding ', 'is ', CO.s .. (ns.db.drSummoning and 'allowed' or 'not allowed'), '.'},
+		{CLR.KEY() ..'Automatic summoning while mounted for Skyriding ', 'is ', CLR.STATE() .. (ns.db.drSummoning and 'allowed' or 'not allowed'), '.'},
 
-		{CO.k .. 'History ', 'of Previous Pets: ', CO.s .. ns.db.numRecents - 1, ' (1 to ' .. MAX_NUM_RECENTS .. ').'},
+		{CLR.KEY() .. 'History ', 'of Previous Pets: ', CLR.STATE() .. ns.db.numRecents - 1, ' (1 to ' .. MAX_NUM_RECENTS .. ').'},
 
-		{CO.k .. 'Verbosity ', 'level of messages: ', CO.s .. ns.db.verbosityLevel, ' (of 3).'},
+		{CLR.KEY() .. 'Verbosity ', 'level of messages: ', CLR.STATE() .. ns.db.verbosityLevel, ' (of 3).'},
 
-		{CO.k .. 'Pet Pool ', 'is ', CO.s .. (curr_pool_str(true)), (not ns.db.favsOnly and ns.db.favsProbability < 1 and ' (favs prob: ' .. CO.s .. ns.db.favsProbability .. CO.bn .. ')' or ''), '. Eligible pets: ', CO.e .. (curr_num_pool_str()), '.'},
+		{CLR.KEY() .. 'Pet Pool ', 'is ', CLR.STATE() .. (curr_pool_str(true)), (not ns.db.favsOnly and ns.db.favsProbability < 1 and ' (favs prob: ' .. CLR.STATE() .. ns.db.favsProbability .. CLR.TXT() .. ')' or ''), '. Eligible pets: ', CLR.EM() .. (curr_num_pool_str()), '.'},
 
-		{CO.k .. 'Per-character Favorites ', 'are ', CO.s .. (ns.dbc.charFavsEnabled and 'enabled' or 'disabled'), ' for ', CO.e .. CHAR_NAME, '.'},
+		{CLR.KEY() .. 'Per-character Favorites ', 'are ', CLR.STATE() .. (ns.dbc.charFavsEnabled and 'enabled' or 'disabled'), ' for ', CLR.EM() .. CHAR_NAME, '.'},
 	}
 	-- Separating this bc it might be a longish list
 	local charfavlist = {
 		'\n', ns:list_charfavs(),
 	}
 
-	local header_text = table.concat(header, CO.bn)
-	local charfavlist_text = table.concat(charfavlist, CO.bn)
-	local extra_settings = (ns.db.eventAlt and table.concat({CO.k ..'\nAlternative Events ', 'are ', CO.s .. 'enabled ', 'for all chars.'}, CO.bn) or nil)
+	local header_text = table.concat(header, CLR.TXT())
+	local charfavlist_text = table.concat(charfavlist, CLR.TXT())
+	local extra_settings = (ns.db.eventAlt and table.concat({CLR.KEY() ..'\nAlternative Events ', 'are ', CLR.STATE() .. 'enabled ', 'for all chars.'}, CLR.TXT()) or nil)
 
-	print((print_topsep and '\n' .. CO.an .. BLOCK_SEP .. '\n' or CO.an) .. ADDON_NAME .. header_text .. '\n')
-	local sep = '\124r' .. CO.bn
+	print((print_topsep and '\n' .. CLR.ADDON() .. BLOCK_SEP .. '\n' or CLR.ADDON()) .. ADDON_NAME .. header_text .. '\n')
+	local sep = '\124r' .. CLR.TXT()
 	for _, v in ipairs(body) do
 		print(table.concat(v, sep))
 	end
 	if extra_settings then print(extra_settings) end
 	print(charfavlist_text)
-	if print_bottomsep then print(CO.an .. BLOCK_SEP .. '\n ') end
+	if print_bottomsep then print(CLR.ADDON() .. BLOCK_SEP .. '\n ') end
 end
 
 -- TODO: different msgs for the situations:
@@ -433,22 +397,22 @@ end
 -- TODO: add db.flags when favsProbability or favsOnly has been force-changed, so we
 -- can show this in the status text.
 function ns.msg_force_changed_pool()
-	chat_user_notification(format('%sYou don\'t have any summonable pets in your active pool, or in one of your active pools (Favorites/Non-favorites). I\'ve set your pet pool to %sAll Pets|r and will try to re-initialize the pool.', CO.bw, CO.k))
+	chat_user_notification(format('%sYou don\'t have any summonable pets in your active pool, or in one of your active pools (Favorites/Non-favorites). I\'ve set your pet pool to %sAll Pets|r and will try to re-initialize the pool.', CLR.WARN(), CLR.KEY()))
 end
 
 function ns.msg_low_petpool(nPool)
 	if ns.db.verbosityLevel < 0 then return end
-	local R = CO.bw
+	local R = CLR.WARN()
 	local poolstr = ns.db.favsProbability == -1 and 'All Pets' or ns.db.favsProbability == 0 and 'Non-fav Pets' or ns.db.favsProbability == 1 and 'Fav Pets' or 'Favs + Non-fav Pets'
 	local content = {
-		('Your current pool (' .. poolstr .. ') contains ' .. nPool < 1 and CO.k .. '0 (zero) ' ..R.. 'pets ' or R.. 'only ' ..CO.k .. '1 ' ..R.. 'pet '),
+		('Your current pool (' .. poolstr .. ') contains ' .. nPool < 1 and CLR.KEY() .. '0 (zero) ' ..R.. 'pets ' or R.. 'only ' ..CLR.KEY() .. '1 ' ..R.. 'pet '),
 		'eligible as random summon!',
-		'\nYou should either ' .. (ns.db.favsOnly and 'flag more pets as favorite, or set the random pool to ' .. CO.s ..'All Pets' or 'collect more pets'), ', or set the random-summon timer to ', CO.s .. '0', '.',
-		'\nAlso check your ', CO.k .. 'Filter ', 'settings in the ', CO.k .. 'Blizz Pet Journal ', '(not in Rematch!), as they are affecting the pool of available pets!',
-		'\nSome pets are ', CO.k .. 'faction-restricted ', 'and cannot be summoned on the other faction, so they may not be eligible on your current toon.',
-		'\nPlease note that certain pets are intentionally ', CO.k .. 'excluded ', 'from random summoning, to not break their usability (for example ',
-		CO.q .. 'Guild Herald', '). ',
-		((ns.dbc.charFavsEnabled and ns.db.favsOnly) and '\nYou have set ' .. CO.e .. CHAR_NAME ..R.. ' to use ' .. CO.s .. 'char-specific favorite ' ..R.. 'pets. Maybe switching to ' .. CO.s .. 'global favorites ' ..R.. '(' .. CO.c .. '/pw c' ..R.. ') will help.' or ''),
+		'\nYou should either ' .. (ns.db.favsOnly and 'flag more pets as favorite, or set the random pool to ' .. CLR.STATE() ..'All Pets' or 'collect more pets'), ', or set the random-summon timer to ', CLR.STATE() .. '0', '.',
+		'\nAlso check your ', CLR.KEY() .. 'Filter ', 'settings in the ', CLR.KEY() .. 'Blizz Pet Journal ', '(not in Rematch!), as they are affecting the pool of available pets!',
+		'\nSome pets are ', CLR.KEY() .. 'faction-restricted ', 'and cannot be summoned on the other faction, so they may not be eligible on your current toon.',
+		'\nPlease note that certain pets are intentionally ', CLR.KEY() .. 'excluded ', 'from random summoning, to not break their usability (for example ',
+		CLR.QUOTE() .. 'Guild Herald', '). ',
+		((ns.dbc.charFavsEnabled and ns.db.favsOnly) and '\nYou have set ' .. CLR.EM() .. CHAR_NAME ..R.. ' to use ' .. CLR.STATE() .. 'char-specific favorite ' ..R.. 'pets. Maybe switching to ' .. CLR.STATE() .. 'global favorites ' ..R.. '(' .. CLR.CMD() .. '/pw c' ..R.. ') will help.' or ''),
 	}
 	local content = table.concat(content, R)
 	chat_user_notification(content)
@@ -507,7 +471,7 @@ function SlashCmdList.PetWalker(msg)
 		ns.help_display(false)
 		ns.status_display(false, true)
 	else
-		chat_user_notification(format('%sInvalid command or arguments. Enter %s/pw help %sfor a list of commands.', CO.bw, CO.c, CO.bw))
+		chat_user_notification(format('%sInvalid command or arguments. Enter %s/pw help %sfor a list of commands.', CLR.WARN(), CLR.CMD(), CLR.WARN()))
 	end
 end
 
@@ -522,27 +486,27 @@ function ns:dismiss_and_disable()
 	end
 	ns.db.autoEnabled = false
 	ns.events:unregister_pw_events()
-	chat_user_notification(format('%sPet dismissed and auto-summoning %s.', CO.bn, ns.db.autoEnabled and 'enabled' or 'disabled'))
+	chat_user_notification(format('%sPet dismissed and auto-summoning %s.', CLR.TXT(), ns.db.autoEnabled and 'enabled' or 'disabled'))
 end
 
 function ns.verbosity_full()
 	ns.db.verbosityLevel = 3
-	chat_user_notification(CO.bn .. 'Verbosity: full (3).')
+	chat_user_notification(CLR.TXT() .. 'Verbosity: full (3).')
 end
 
 function ns.verbosity_medium()
 	ns.db.verbosityLevel = 2
-	chat_user_notification(CO.bn .. 'Verbosity: medium (2).')
+	chat_user_notification(CLR.TXT() .. 'Verbosity: medium (2).')
 end
 
 function ns.verbosity_silent()
 	ns.db.verbosityLevel = 1
-	chat_user_notification(CO.bn .. 'Verbosity: silent (1).')
+	chat_user_notification(CLR.TXT() .. 'Verbosity: silent (1).')
 end
 
 function ns.verbosity_mute()
 	ns.db.verbosityLevel = 0
-	chat_user_notification(CO.bn .. 'Verbosity: mute (0).')
+	chat_user_notification(CLR.TXT() .. 'Verbosity: mute (0).')
 end
 
 function ns:auto_toggle()
@@ -554,7 +518,7 @@ function ns:auto_toggle()
 		ns.events:register_pw_events()
 		ns.autoaction()
 	end
-	chat_user_notification(format('%sPet auto-summoning %s.', CO.bn, ns.db.autoEnabled and 'enabled' or 'disabled'))
+	chat_user_notification(format('%sPet auto-summoning %s.', CLR.TXT(), ns.db.autoEnabled and 'enabled' or 'disabled'))
 end
 
 function ns:event_toggle()
@@ -563,35 +527,35 @@ function ns:event_toggle()
 		ns.events:unregister_summon_events()
 		ns.events:register_summon_events()
 	end
-	chat_user_notification(format('%s%s %s.', CO.bn, ns.db.eventAlt and 'Alternative event(s)' or 'Default event (PLAYER_STARTED_MOVING)', ns.db.autoEnabled and 'registered' or 'selected. Note that auto-summoning is currently disabled; event(s) will be registered when you enable auto-summoning (' .. CO.c .. '/pw a' .. CO.bn .. ')'))
+	chat_user_notification(format('%s%s %s.', CLR.TXT(), ns.db.eventAlt and 'Alternative event(s)' or 'Default event (PLAYER_STARTED_MOVING)', ns.db.autoEnabled and 'registered' or 'selected. Note that auto-summoning is currently disabled; event(s) will be registered when you enable auto-summoning (' .. CLR.CMD() .. '/pw a' .. CLR.TXT() .. ')'))
 end
 
 -- function ns:favs_toggle_OLD()
 -- 	ns.db.favsOnly = not ns.db.favsOnly
 -- 	ns.pool_initialized, ns.pet_verified = false, false
 -- 	if ns.db.autoEnabled then ns:new_pet() end
--- 	chat_user_notification(format('%sPet pool: %s%s.', CO.bn, ns.db.favsOnly and 'favorites' or 'all pets', ns.db.favsOnly and ns.dbc.charFavsEnabled and ' (char-specific)' or ns.db.favsOnly and ' (global)' or ''))
+-- 	chat_user_notification(format('%sPet pool: %s%s.', CLR.TXT(), ns.db.favsOnly and 'favorites' or 'all pets', ns.db.favsOnly and ns.dbc.charFavsEnabled and ' (char-specific)' or ns.db.favsOnly and ' (global)' or ''))
 -- end
 
 function ns:favs_toggle(arg2)
 	if arg2 then
 		arg2 = tonumber(arg2)
 		if not arg2 or arg2 < 0 or arg2 > 1 then
-			chat_user_notification(format('%sThe optional second argument must be a number from %s0|r to %s1|r. For example: %s0|r, %s0.2|r, %s0.45|r, %s0.618|r, %s1|r.', CO.bn, CO.c, CO.c, CO.c, CO.c, CO.c, CO.c, CO.c))
+			chat_user_notification(format('%sThe optional second argument must be a number from %s0|r to %s1|r. For example: %s0|r, %s0.2|r, %s0.45|r, %s0.618|r, %s1|r.', CLR.TXT(), CLR.CMD(), CLR.CMD(), CLR.CMD(), CLR.CMD(), CLR.CMD(), CLR.CMD(), CLR.CMD()))
 			return
 		end
 		ns.db.favsProbability = arg2
 		ns.db.favsProbability_reset_by_pw = false
 		if arg2 < 1 then
-			chat_user_notification(format('%sFavorites probability in All Pets mode set to %s%s|r. Switched to All Pets mode.', CO.bn, CO.k, arg2))
+			chat_user_notification(format('%sFavorites probability in All Pets mode set to %s%s|r. Switched to All Pets mode.', CLR.TXT(), CLR.KEY(), arg2))
 		else
-			chat_user_notification(format('%sFavorites probability in All Pets mode set to %sNo Special Treatment|r. Switched to All Pets mode.', CO.bn, CO.k))
+			chat_user_notification(format('%sFavorites probability in All Pets mode set to %sNo Special Treatment|r. Switched to All Pets mode.', CLR.TXT(), CLR.KEY()))
 		end
 		ns.db.favsOnly = false
 	else
 		ns.db.favsOnly = not ns.db.favsOnly
 		ns.db.favsOnly_reset_by_pw = false
-		chat_user_notification(format('%sPet pool: %s%s.', CO.bn, ns.db.favsOnly and 'Favorites' or 'All Pets', ns.db.favsOnly and ns.dbc.charFavsEnabled and ' (char-specific)' or ns.db.favsOnly and ' (global)' or ''))
+		chat_user_notification(format('%sPet pool: %s%s.', CLR.TXT(), ns.db.favsOnly and 'Favorites' or 'All Pets', ns.db.favsOnly and ns.dbc.charFavsEnabled and ' (char-specific)' or ns.db.favsOnly and ' (global)' or ''))
 	end
 	ns.pool_initialized, ns.pet_verified = false, false
 	if ns.db.autoEnabled then ns:new_pet() end
@@ -608,17 +572,17 @@ function ns.charfavs_slash_toggle() -- for slash command only
 		ns:cfavs_update()
 	end
 	if PetWalkerCharFavsCheckbox then PetWalkerCharFavsCheckbox:SetChecked(ns.dbc.charFavsEnabled) end
-	chat_user_notification(format('%sCharacter-specific favorites %s for %s%s.', CO.bn, ns.dbc.charFavsEnabled and 'enabled' or 'disabled', CO.e, CHAR_NAME))
+	chat_user_notification(format('%sCharacter-specific favorites %s for %s%s.', CLR.TXT(), ns.dbc.charFavsEnabled and 'enabled' or 'disabled', CLR.EM(), CHAR_NAME))
 end
 
 function ns.dr_summoning_toggle()
 	ns.db.drSummoning = not ns.db.drSummoning
-	chat_user_notification(format('%sSummoning while mounted for Skyriding %s.', CO.bn, ns.db.drSummoning and 'enabled' or 'disabled'))
+	chat_user_notification(format('%sSummoning while mounted for Skyriding %s.', CLR.TXT(), ns.db.drSummoning and 'enabled' or 'disabled'))
 end
 
 function ns.debugmode_toggle() -- for slash command only
 	ns.db.debugMode = not ns.db.debugMode
-	chat_user_notification(format('%sDebug mode %s.', CO.bn, ns.db.debugMode and 'enabled' or 'disabled'))
+	chat_user_notification(format('%sDebug mode %s.', CLR.TXT(), ns.db.debugMode and 'enabled' or 'disabled'))
 end
 
 local function is_acceptable_timervalue(v)
@@ -630,9 +594,9 @@ function ns:timer_slash_cmd(value)
 	if is_acceptable_timervalue(value) or ns.db.debugMode then
 		ns.db.newPetTimer = value * 60
 		ns.db.newPetTimer_reset_by_pw = false
-		chat_user_notification(format('%s%s.',CO.bn, ns.db.newPetTimer == 0 and 'Summon timer disabled' or 'Summoning a new pet every ' .. ns.db.newPetTimer/60 .. ' minutes'))
+		chat_user_notification(format('%s%s.',CLR.TXT(), ns.db.newPetTimer == 0 and 'Summon timer disabled' or 'Summoning a new pet every ' .. ns.db.newPetTimer/60 .. ' minutes'))
 	else
-		chat_user_notification(format('%sNot a valid timer value. Enter a number from %s1%1$s to %2$s1440%1$s for a timer in minutes, or %2$s0%1$s (zero) to %3$sdisable%1$s the timer. \nExamples: %2$s/pw 20%1$s will summon a new pet every 20 minutes, %2$s/pw 0%1$s disables the timer. Note that there is a space between "/pw" and the number.', CO.bw, CO.c, CO.k))
+		chat_user_notification(format('%sNot a valid timer value. Enter a number from %s1%1$s to %2$s1440%1$s for a timer in minutes, or %2$s0%1$s (zero) to %3$sdisable%1$s the timer. \nExamples: %2$s/pw 20%1$s will summon a new pet every 20 minutes, %2$s/pw 0%1$s disables the timer. Note that there is a space between "/pw" and the number.', CLR.WARN(), CLR.CMD(), CLR.KEY()))
 	end
 end
 
@@ -645,7 +609,7 @@ function ns.set_num_recents(num)
 		end
 	end
 	chat_user_notification(
-		format('%sPrevious Pets history set to %s.', CO.bn, ns.db.numRecents - 1)
+		format('%sPrevious Pets history set to %s.', CLR.TXT(), ns.db.numRecents - 1)
 	)
 end
 
@@ -658,7 +622,7 @@ function ns:list_charfavs()
 		table.insert(favlinks, name)
 	end
 	local favlinks_text = table.concat(favlinks, ' ')
-	return CO.e .. CHAR_NAME .. CO.bn .. ' has ' .. CO.e .. count .. CO.bn ..
+	return CLR.EM() .. CHAR_NAME .. CLR.TXT() .. ' has ' .. CLR.EM() .. count .. CLR.TXT() ..
 	' character-specific favorite pet' .. (count > 1 and 's:\n' or count > 0 and ':\n' or 's.') .. favlinks_text
 end
 
