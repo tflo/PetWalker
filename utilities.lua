@@ -13,19 +13,19 @@ local format = _G.format
 local COLOR_DEBUG = '|cffEE82EE'
 
 function ns.id_to_name(id)
-	if not id then return "id_to_name() didn't receive a pet GUID!" end
+	if not id then return "<¡id_to_name() didn't receive a pet GUID!>" end
 	local name = select(8, C_PetJournal_GetPetInfoByPetID(id))
 	return tostring(name) or '¿petname?'
 end
 
 function ns.id_to_species(id)
-	if not id then return "id_to_species() didn't receive a pet GUID!" end
+	if not id then return "<¡id_to_species() didn't receive a pet GUID!>" end
 	local spec = C_PetJournal_GetPetInfoByPetID(id)
 	return tostring(spec) or '¿petspecies?'
 end
 
 function ns.id_to_link(id)
-	if not id then return "id_to_link() didn't receive a pet GUID!" end
+	if not id then return "<¡id_to_link() didn't receive a pet GUID!>" end
 	local link = C_PetJournal_GetBattlePetLink(id)
 	return tostring(link) or '¿petlink?'
 end
