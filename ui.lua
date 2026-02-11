@@ -212,7 +212,7 @@ new_pet, or previous_pet or the transitioncheck.
 -- 	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned %s pet %s.', CO.bn, #pool > 1 and 'a new random' or 'your only pool', ns.id_to_link(np)) or nil
 -- end
 function ns.set_sum_msg_to_newpet(newpet, pool)
-	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned %s pet from %s%s: %s.', CO.bn, #pool > 1 and 'a new' or 'your only', ns.db.favsOnly and 'Favs' or ns.db.favsProbability == 0 and 'Non-favs' or 'All', pool == ns.pet_pool_favs and ' (F)' or '', ns.id_to_link(newpet)) or nil
+	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned %s pet from %s%s: %s.', CO.bn, #pool > 1 and 'a new' or 'your only', curr_pool_str(true), pool == ns.pet_pool_favs and ' (F)' or '', ns.id_to_link(newpet)) or nil
 end
 
 -- Called by the restore_pet func
@@ -494,9 +494,9 @@ function ns:favs_toggle(arg2)
 		ns.db.favsProbability = arg2
 		ns.db.favsProbability_reset_by_pw = false
 		if arg2 < 1 then
-			chat_user_notification(format('%sFavorites probability (in %sAll Pets|r mode) set to %s%s|r.', CO.bn, CO.e, CO.k, arg2))
+			chat_user_notification(format('%sFavorites probability in All Pets mode set to %s%s|r. Switched to All Pets mode.', CO.bn, CO.k, arg2))
 		else
-			chat_user_notification(format('%sFavorites probability (in %sAll Pets\124r mode) set to %sNo Special Treatment|r.', CO.bn, CO.e, CO.k))
+			chat_user_notification(format('%sFavorites probability in All Pets mode set to %sNo Special Treatment|r. Switched to All Pets mode.', CO.bn, CO.k))
 		end
 	else
 		ns.db.favsOnly = not ns.db.favsOnly
