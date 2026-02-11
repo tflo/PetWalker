@@ -1,7 +1,8 @@
 -- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 -- Copyright (c) 2022-2026 Thomas Floeren
 
-local ADDON_NAME, ns = ...
+local MYNAME, ns = ...
+local ADDON_NAME = MYNAME -- tmp
 
 -- API
 local C_PetJournal_GetSummonedPetGUID = _G.C_PetJournal.GetSummonedPetGUID
@@ -9,6 +10,7 @@ local C_PetJournal_GetBattlePetLink = _G.C_PetJournal.GetBattlePetLink
 local tostring = _G.tostring
 local format = _G.format
 local print = _G.print
+local WTC = WrapTextInColorCode
 
 local CHAR_NAME = UnitName 'player'
 local MAX_NUM_RECENTS = 20
@@ -26,7 +28,7 @@ local function get_link_savedpet()
 end
 
 --[[===========================================================================
-	Colors
+	Colors - OLD - replace this crap!
 ===========================================================================]]--
 
 local colscheme_green = {
@@ -62,18 +64,51 @@ end
 local CO = set_colors(colscheme_green)
 
 --[[===========================================================================
-Messages
+	Colors
+===========================================================================]]--
+
+local colors = {
+	ADDON = '7CFC00',
+	TXT = '8FBC8F',
+	WARN = 'FA8072',
+	QUOTE = '808000',
+	EM = 'ADFF2F',
+	KEY = '00FA9A',
+	STATE = '32CD32',
+	CMD = 'FF00FF',
+-- 	DEBUG = 'FF00FF', -- magenta
+-- 	HEAD = 'FFE4B5', -- moccasin
+-- 	BAD = 'DC143C', -- crimson
+-- 	ON = '32CD32', -- limegreen
+-- 	OFF = 'C0C0C0', -- silver
+-- 	GOOD = '00FA9A', -- mediumspringgreen
+-- 	YYY = '90EE90', -- lightgreen
+}
+
+local CLR = setmetatable({}, {
+	__index = function(_, k)
+		local color = colors[k]
+		assert(color, format('Color %q not defined.', k))
+		color = 'FF' .. color
+		return function(text) return text and WTC(text, color) or '\124c' .. color end
+	end,
+})
+ns.CLR = CLR
+-- Usage: print('text ' .. CLR.WARN('warning') .. ' text' .. CLR.HEAD() .. ' text')
+
+--[[===========================================================================
+	Helpers
 ===========================================================================]]--
 
 local BLOCK_SEP = strrep('+', 42)
 
-local function chat_user_notification(msg)
+local function chat_user_notification(msg) -- OLD
 	print(CO.an .. ADDON_NAME .. ":", msg)
 end
 
--- local function chat_user_notification_block(msg)
--- 	print('\n' .. CO.an .. BLOCK_SEP .. '\n' .. ADDON_NAME .. ':', msg, '\n' .. CO.an .. BLOCK_SEP , '\n ')
--- end
+local function addonprint(msg)
+	print(format('%s%s: %s', CLR.ADDON(), MYNAME, CLR.TXT(msg)))
+end
 
 local function curr_pool_str(short)
 	local str = '¿POOL_STR?'
@@ -112,55 +147,108 @@ local function curr_num_pool_str()
 	return str
 end
 
+--[[===========================================================================
+	Messages
+===========================================================================]]--
 
 -- Login msg
 function ns.msg_login()
 	if ns.db.verbosityLevel < 2 then return end
-	local sep = CO.bn .. ' | '
 	local petinfo
 	if ns.db.verbosityLevel > 2 then
 		local async = false
 		local ap, sp = get_link_actpet(), get_link_savedpet()
 		if not ap or not sp or ap ~= sp then async = true end
 		ap, sp = ap or 'None', sp or 'None'
-		petinfo = CO.k .. (async and 'Current Pet: ' or 'Pet: ') .. CO.s .. ap .. (async and sep .. CO.k .. 'Saved pet: ' .. CO.s .. sp or '')
+		petinfo = CLR.KEY(async and 'Current Pet: ' or 'Pet: ')
+			.. CLR.STATE()
+			.. ap
+			.. (async and ' | ' .. CLR.KEY('Saved pet: ') .. sp or '')
 	end
-	chat_user_notification(table.concat({CO.k .. 'Auto: ' .. CO.s .. (ns.db.autoEnabled and 'On' or CO.bw .. 'Off'), CO.k .. 'Pet pool: ' .. CO.s .. (ns.db.favsOnly and ns.dbc.charFavsEnabled and 'Char favs' or ns.db.favsOnly and 'Global favs' or 'All pets'), CO.k .. 'Timer: ' .. CO.s .. (ns.db.newPetTimer > 0 and ns.db.newPetTimer/60 .. ' min' or 'Off'), petinfo}, sep))
+	addonprint(
+		format(
+			'%s %s | %s %s | %s %s | %s',
+			CLR.KEY('Auto:'),
+			ns.db.autoEnabled and CLR.STATE('On') or CLR.WARN('Off'),
+			CLR.KEY('Pet pool:'),
+			CLR.STATE(
+				ns.db.favsOnly and ns.dbc.charFavsEnabled and 'Char favs'
+					or ns.db.favsOnly and 'Global favs'
+					or 'All pets'
+			),
+			CLR.KEY('Timer:'),
+			CLR.STATE(ns.db.newPetTimer > 0 and ns.db.newPetTimer / 60 .. ' min' or 'Off'),
+			petinfo
+		)
+	)
 end
 
 function ns.msg_no_saved_pet()
-	if ns.db.verbosityLevel < 0 then return end
-	chat_user_notification(CO.bw .. 'Cannot restore pet because no Current Pet has been saved yet' .. (ns.dbc.charFavsEnabled and ' for ' .. CO.e .. CHAR_NAME or '') .. CO.bw .. '. This can happen when switching to char-specific favorites for the first time on a toon. - Summoned a random pet instead.')
+	if ns.db.verbosityLevel < 1 then return end
+	addonprint(
+		format(
+			'%sCannot restore pet; no pet has been saved yet%s.|r This should only happen when switching to char-specific favorites for the first time on a char. – Summoned a random pet instead.',
+			CLR.WARN(),
+			ns.dbc.charFavsEnabled and ' for ' .. CLR.EM(CHAR_NAME) or ''
+		)
+	)
 end
 
 function ns.msg_no_previous_pet()
-	if ns.db.verbosityLevel < 0 then return end
-	chat_user_notification(CO.bw .. 'No Previous Pet has been saved yet' .. (ns.dbc.charFavsEnabled and ' for ' .. CO.e .. CHAR_NAME or '') .. CO.bw .. '.')
+	if ns.db.verbosityLevel < 1 then return end
+	addonprint(
+		format(
+			'%sNo Previous Pet has been saved yet%s.',
+			CLR.WARN(),
+			ns.dbc.charFavsEnabled and ' for ' .. CLR.EM(CHAR_NAME) or ''
+		)
+	)
 end
 
 function ns.msg_onlyfavisactive(ap)
 	if ns.db.verbosityLevel < 1 then return end
-	chat_user_notification(CO.bn .. 'Your only eligible random pet ' .. ns.id_to_link(ap) .. ' is already active.')
+	addonprint(format('Your only eligible random pet %s is already active.', ns.id_to_link(ap)))
 end
 
+-- addonprint(format('%s', X))
 function ns.msg_removed_invalid_id(counter)
 	if ns.db.verbosityLevel < 2 then return end
-	chat_user_notification(format('%s%s orphaned pet ID%s %s been removed from the char favorites.', CO.bn, counter, counter > 1 and 's' or '', counter > 1 and 'have' or 'has'))
+	addonprint(
+		format(
+			'%s orphaned pet ID%s %s been removed from the char favorites.',
+			counter,
+			counter > 1 and 's' or '',
+			counter > 1 and 'have' or 'has'
+		)
+	)
 end
 
 function ns.msg_saved_pet_unsummonable(reason, number)
-	if ns.db.verbosityLevel < 1 then return end
-	chat_user_notification(format('%sThe saved Current Pet is not summonable. Reason: %s(%s) %s%s\n--> Checking other saved pets (char/global pet, previous pet, etc.) now.', CO.bw, CO.e, number or '?', reason or 'unknown', CO.bw))
+	if ns.db.verbosityLevel < 2 then return end
+	addonprint(
+		format(
+			'%sThe saved pet is not summonable. Reason: %s(%s) %s.|r Trying other saved pets (char/global/previous pet, etc.) now…',
+			CLR.WARN(),
+			CLR.EM(),
+			number or '<??>',
+			reason or '<unknown>'
+		)
+	)
 end
 
 function ns.msg_previous_pet_unsummonable()
 	if ns.db.verbosityLevel < 1 then return end
-	chat_user_notification(CO.bw .. 'The saved Previous Pet or other saved pets are not summonable either.\n--> Saving the currently active pet or summoning a new one.')
+addonprint(
+	format(
+		'%sThe saved Previous Pet or other saved pets are not summonable either. Saving the currently active pet or summoning a new one…',
+		CLR.WARN()
+	)
+)
 end
 
 function ns.msg_manual_summon_stopped()
 	if ns.db.verbosityLevel < 1 then return end
-	chat_user_notification(CO.bw .. 'You are in combat lockdown or flying; pet summoning aborted.')
+	format('%sYou are in combat lockdown or flying; pet summoning aborted.', CLR.WARN())
 end
 
 -- function ns.msg_recents_dupe_removed(idx)
@@ -173,12 +261,13 @@ end
 
 function ns.msg_target_summoned(link)
 	if ns.db.verbosityLevel < 1 then return end
-	chat_user_notification(format('%sTarget pet %s summoned.', CO.bn, link))
+	addonprint(format('Target pet %s summoned.', link))
 end
 
+-- addonprint(format('%s', X)) -- XXX
 function ns.msg_target_is_same(link) -- Without web link
 	if ns.db.verbosityLevel < 1 then return end
-	chat_user_notification(format('%sTarget pet %s is the same pet as you currently have summened.', CO.bn, link))
+	addonprint(format('Target pet %s is the same as your currently summened pet.', link))
 end
 
 -- function ns.msg_target_is_same(link, name) -- With web link
