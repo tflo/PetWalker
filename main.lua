@@ -701,9 +701,9 @@ end
 function ns.initialize_pool(rerun)
 	local pet_pool, pet_pool_favs, pet_pool_other = {}, {}, {}
 	ns.debugprint 'Running `initialize_pool`'
-	table.wipe(ns.pet_pool_favs)
-	table.wipe(ns.pet_pool_other)
-	table.wipe(ns.pet_pool)
+-- 	wipe(ns.pet_pool_favs)
+-- 	wipe(ns.pet_pool_other)
+-- 	wipe(ns.pet_pool)
 	clean_charfavs()
 	local now = time()
 	local can_send_warning = now - time_pool_msg > 60 and ns.db.newPetTimer ~= 0
@@ -759,7 +759,6 @@ function ns.initialize_pool(rerun)
 		end
 	end
 
-	if pet_pool and #pet_pool < 1 then
 		if rerun then
 			if ns.db.newPetTimer ~= 0 then
 				ns.db.newPetTimer = 0
