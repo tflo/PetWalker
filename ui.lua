@@ -265,6 +265,8 @@ function ns.help_display(print_bottomspace)
 
 		{CO.c .. 'f', ' : ', 'Toggle ', CO.k .. 'pet pool: ', CO.s .. 'Favorites Only', ', or ', CO.s .. 'All Pets', '.'},
 
+		{CO.c .. 'f <0...1>', ' : ', CO.k .. 'Favorites Probability ', 'in All Pets mode: e.g., ', CO.c .. '0.5 ', 'or ', CO.c .. '.5', '. Zero (', CO.c .. '0', ') excludes favorites, ', CO.c .. '1 ', 'means \'no special treatment for favs\'.'},
+
 		{CO.c .. 'c', ' : ', 'Toggle ', CO.k .. 'favorites: ', CO.s .. 'Per-character', ', or ', CO.s .. 'Global Favorites', '.'},
 
 		{CO.c .. '<number>', ' : ', 'Set ', CO.k .. 'Summon Timer ', 'in minutes (', CO.c .. '1 ', 'to ', CO.c .. '1440', '; ', CO.c .. '0 ', 'to ', CO.k .. 'disable', ').'},
