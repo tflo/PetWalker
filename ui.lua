@@ -274,7 +274,7 @@ function ns.status_display(print_topsep, print_bottomsep)
 
 		{CO.k .. 'Verbosity ', 'level of messages: ', CO.s .. ns.db.verbosityLevel, ' (of 3).'},
 
-		{CO.k .. 'Pet Pool ', 'is set to ', CO.s .. (ns.db.favsOnly and 'Favorites Only' or 'All Pets'), '. Eligible pets: ', CO.e .. #ns.pool, '.'},
+		{CO.k .. 'Pet Pool ', 'is set to ', CO.s .. (ns.db.favsOnly and 'Favorites Only' or 'All Pets'), '. Eligible pets: ', CO.e .. (ns.pet_pool and #ns.pet_pool or ns.pet_pool_other and #ns.pet_pool_other .. '+' .. #ns.pet_pool_favs), '.'},
 
 		{CO.k .. 'Per-character Favorites ', 'are ', CO.s .. (ns.dbc.charFavsEnabled and 'enabled' or 'disabled'), ' for ', CO.e .. CHAR_NAME, '.'},
 	}
@@ -309,7 +309,7 @@ end
 function ns.msg_low_petpool(nPool)
 	if ns.db.verbosityLevel < 0 then return end
 	local R = CO.bw
-	local poolstr = db.favsProbability == -1 and 'All Pets' or db.favsProbability == 0 and 'Non-fav Pets' or db.favsProbability == 1 and 'Fav Pets' or 'Favs + Non-fav Pets'
+	local poolstr = ns.db.favsProbability == -1 and 'All Pets' or ns.db.favsProbability == 0 and 'Non-fav Pets' or ns.db.favsProbability == 1 and 'Fav Pets' or 'Favs + Non-fav Pets'
 	local content = {
 		('Your current pool (' .. poolstr .. ') contains ' .. nPool < 1 and CO.k .. '0 (zero) ' ..R.. 'pets ' or R.. 'only ' ..CO.k .. '1 ' ..R.. 'pet '),
 		'eligible as random summon!',
@@ -450,10 +450,10 @@ function ns:favs_toggle(arg2)
 			chat_user_notification(format('%sThe optional second argument must be a number from %s0|r to %s1|r. For example: %s0|r, %s0.2|r, %s0.45|r, %s0.618|r, %s1|r.', CO.bn, CO.c, CO.c, CO.c, CO.c, CO.c, CO.c, CO.c))
 			return
 		end
-		db.favsProbability = arg2
+		ns.db.favsProbability = arg2
 		ns.db.favsProbability_reset_by_pw = false
 		if arg2 < 1 then
-			chat_user_notification(format('%sFavorites probability (in %sAll Pets|r mode) set to %s%s|r.', CO.bn, CO.e, CO.k))
+			chat_user_notification(format('%sFavorites probability (in %sAll Pets|r mode) set to %s%s|r.', CO.bn, CO.e, CO.k, arg2))
 		else
 			chat_user_notification(format('%sFavorites probability (in %sAll Pets|r mode) set to %no special treatment|r.', CO.bn, CO.e, CO.k))
 		end

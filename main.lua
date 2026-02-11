@@ -44,7 +44,7 @@ local format = _G.format
 	Some Variables/Constants
 ===========================================================================]]--
 
-ns.pool, ns.pet_pool_favs, ns.pet_pool_other, ns.pet_pool_all = {}, {}, {}, {}
+ns.pet_pool_favs, ns.pet_pool_other, ns.pet_pool = {}, {}, {}
 ns.pool_initialized = false
 --[[ This prevents the "wrong" active pet from being saved. We get a "wrong" pet
 mainly after login, if the game summons the last active pet on this toon,
@@ -422,13 +422,13 @@ function ns:new_pet(the_time, manually_called)
 		ns.initialize_pool()
 	end
 
-	local pool
+	local pool = {}
 	if ns.db.favsOnly or ns.db.favsProbability == 1 or ns.db.favsProbability == 0 then
 		-- Unified pool either by user setting or enforced in initialize_pool()
 		pool = ns.pet_pool
 	else
 		-- Two pools; shouldn't get here if one of the pools is empty
-		pool = rand() <= ns.db.favsProbability and ns.pet_pool_favs or ns.pet_pool_other
+		pool = random() <= ns.db.favsProbability and ns.pet_pool_favs or ns.pet_pool_other
 	end
 
 	local npool = #pool
@@ -455,7 +455,7 @@ function ns:new_pet(the_time, manually_called)
 			end
 		else
 			repeat
-				newpet = pool[rand(npool)]
+				newpet = pool[random(npool)]
 			until actpet ~= newpet
 		end
 		ns.set_sum_msg_to_newpet(newpet, pool)
@@ -705,6 +705,7 @@ function ns.initialize_pool(rerun)
 	table.wipe(ns.pet_pool_other)
 	table.wipe(ns.pet_pool)
 	clean_charfavs()
+	local now = time()
 	local can_send_warning = now - time_pool_msg > 60 and ns.db.newPetTimer ~= 0
 	local idx = 1
 	if ns.db.favsOnly then
@@ -750,7 +751,7 @@ function ns.initialize_pool(rerun)
 			idx = idx + 1
 		end
 		if #pet_pool_favs < 1 or #pet_pool_other < 1 then
-			db.favsProbability = 1
+			ns.db.favsProbability = 1
 			ns.msg_force_changed_pool()
 			pet_pool = #pet_pool_other > 0 and pet_pool_other or pet_pool_favs
 		else
@@ -766,7 +767,7 @@ function ns.initialize_pool(rerun)
 			end
 			if can_send_warning then
 				ns.msg_low_petpool(#pet_pool)
-				time_pool_msg = time()
+				time_pool_msg = now
 			end
 		else
 			if ns.db.favsOnly ~= false then
@@ -785,7 +786,7 @@ function ns.initialize_pool(rerun)
 
 	ns.pool_initialized = true
 	ns.pet_pool_favs, ns.pet_pool_other, ns.pet_pool =
-		pet_pool_favs, pet_pool_other, pet_pool_all
+		pet_pool_favs, pet_pool_other, pet_pool
 end
 
 --[[===========================================================================
