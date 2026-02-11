@@ -75,6 +75,44 @@ end
 -- 	print('\n' .. CO.an .. BLOCK_SEP .. '\n' .. ADDON_NAME .. ':', msg, '\n' .. CO.an .. BLOCK_SEP , '\n ')
 -- end
 
+local function curr_pool_str(short)
+	local str = '¿POOL_STR?'
+	if ns.db.favsOnly then
+		str = short and 'Favs' or 'Favorites'
+	elseif ns.db.favsProbability == 1 then
+		str = short and 'All Pets' or 'All Pets'
+	elseif ns.db.favsProbability == 0 then
+-- 		str = short and 'Non-favs' or 'Non-favorites'
+		str = short and 'NonFavs' or 'NonFavorites'
+	else
+-- 		str = short and 'Favs+Non-favs' or 'Favorites+Non-favorites'
+		str = short and 'Favs+NonFavs' or 'Favorites+NonFavorites'
+	end
+	return str
+end
+
+local function curr_num_pool_str()
+	local str = '¿#POOL?'
+	-- The checks are highly redundant, but it shows me
+	-- when I have a mismatch of setting and existing pools.
+	if
+		ns.pet_pool and not (ns.pet_pool_other or ns.pet_pool_favs) and (ns.db.favsOnly or ns.db.favsProbability == 0 or ns.db.favsProbability == 1)
+	then
+		str = #ns.pet_pool
+	elseif
+		(ns.pet_pool_other and ns.pet_pool_favs) and not ns.pet_pool
+		and not ns.db.favsOnly
+		and ns.db.favsProbability > 0
+		and ns.db.favsProbability < 1
+	then
+		str = #ns.pet_pool_favs .. '+' .. #ns.pet_pool_other
+	end
+	-- str = ns.pet_pool and #ns.pet_pool
+	-- or ns.pet_pool_other and #ns.pet_pool_other .. '+' .. #ns.pet_pool_favs or str
+	return str
+end
+
+
 -- Login msg
 function ns.msg_login()
 	if ns.db.verbosityLevel < 2 then return end
