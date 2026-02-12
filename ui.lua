@@ -267,11 +267,11 @@ The main, success, message when a pet was summoned. Either by restore_pet or
 new_pet, or previous_pet or the transitioncheck.
 ---------------------------------------------------------------------------]]--
 
-function ns.set_sum_msg_to_newpet(newpet, pool)
+function ns.set_sum_msg_to_newpet(newpet, pool, npool)
 	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2
 			and format(
 				'Summoned %s pet from %s%s: %s.',
-				#pool > 1 and 'a new' or 'your only',
+				npool > 1 and 'a new' or 'your only',
 				curr_pool_str(true),
 				pool == ns.pet_pool_favs and ' (F)' or '',
 				ns.id_to_link(newpet)

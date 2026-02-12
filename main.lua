@@ -450,7 +450,7 @@ function ns:new_pet(the_time, manually_called)
 				newpet = pool[random(npool)]
 			until actpet ~= newpet
 		end
-		ns.set_sum_msg_to_newpet(newpet, pool)
+		ns.set_sum_msg_to_newpet(newpet, pool, npool)
 		ns:summon_pet(newpet, true)
 		ns.pool = pool
 	end
