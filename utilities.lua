@@ -9,7 +9,10 @@ local C_PetJournal_GetSummonedPetGUID = C_PetJournal.GetSummonedPetGUID
 local GetTimePreciseSec = _G.GetTimePreciseSec
 local tostring = _G.tostring
 local format = _G.format
-
+ -- Don't use a hyphen (U+002D), it's very short in some fonts (e.g. ArialN)
+ -- If the minus sign glyph "−" (U+2212, \226\136\146) is missing in a user custom chat font,
+ -- go with an en–dash (U+2013, \226\128\147).
+local TEXT_MINUS = '\226\136\146'
 local COLOR_DEBUG = '|cffEE82EE'
 
 function ns.id_to_name(id)
@@ -82,19 +85,46 @@ end
 
 function ns.remaining_timer(time)
 	local rem = ns.time_newpet_success + ns.db.newPetTimer - time
-	return rem > 0 and rem or 0
+	return max(rem, 0)
 end
 
--- Seconds to minutes
-local function sec_to_min(seconds)
-	local min, sec = tostring(floor(seconds / 60)), tostring(seconds % 60)
-	return format('%.0f:%02.0f', min, sec)
+-- Used in: status (×2), timer-change confirmation, login msg,
+function ns.sec_to_format(seconds, symbol, compact, joined)
+	symbol = tonumber(symbol)
+	if tonumber(symbol) == nil then symbol = 1 end
+	symbol = min(max(floor(symbol), 1), 3)
+	if type(compact) ~= 'boolean' then compact = true end
+	if type(joined) ~= 'boolean' then joined = false end
+	-- Sanitize combos
+	if symbol == 1 or joined then compact = true end
+	if symbol == 3 then compact, joined = false, false end
+
+	local space, joiner = compact and '' or ' ', joined and '' or ' '
+	local sd = symbol == 1 and 'd' or 'days'
+	local sh = symbol == 1 and 'h' or symbol == 2 and  'hrs' or 'hours'
+	local sm = symbol == 1 and 'm' or symbol == 2 and 'min' or 'minutes'
+	local ss = symbol == 1 and 's' or symbol == 2 and 'sec' or 'seconds'
+
+	-- Let's output an overdue remaining timer as negative value
+	local sign = seconds < 0 and TEXT_MINUS or ''
+
+	local rem = abs(seconds)
+	local d = floor(rem / 86400); rem = rem % 86400
+	local h = floor(rem / 3600); rem = rem % 3600
+	local m = floor(rem / 60); rem = rem % 60
+	local s = floor(rem)
+
+	local days = d ~= 0 and format('%s%s%s%s', d, space, sd, joiner) or ''
+	local hrs = h ~= 0 and format('%s%s%s%s', h, space, sh, joiner) or ''
+	local min = m ~= 0 and format('%s%s%s%s', m, space, sm, joiner) or ''
+	local sec = s ~= 0 and format('%s%s%s', s, space, ss) or ''
+	return format('%s%s%s%s%s', sign, days, hrs, min, sec):trim()
 end
 
 function ns.remaining_timer_for_display()
-	local rem = ns.time_newpet_success + ns.db.newPetTimer - time()
-	rem = rem > 0 and rem or 0
-	return sec_to_min(rem)
+	local remaining = ns.time_newpet_success + ns.db.newPetTimer - time()
+-- 	remaining = max(remaining, 0) -- should never be negative
+	return ns.sec_to_format(remaining, 1, true, false)
 end
 
 function ns.table_is_empty(t)

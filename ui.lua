@@ -143,7 +143,7 @@ function ns.msg_login()
 					or 'All pets'
 			),
 			CLR.KEY('Timer:'),
-			CLR.STATE(ns.db.newPetTimer > 0 and ns.db.newPetTimer / 60 .. ' min' or 'Off'),
+			CLR.STATE(ns.db.newPetTimer ~= 0 and ns.sec_to_format(ns.db.newPetTimer, 1, true, true) or 'Off'),
 			petinfo
 		)
 	)
@@ -382,7 +382,7 @@ function ns.status_display(print_topsep, print_bottomsep)
 	local body = {
 		{CLR.KEY() ..'Automatic Random-summoning / Restore ', 'is ', CLR.STATE() .. (ns.db.autoEnabled and 'enabled' or CLR.WARN() .. 'disabled'), '.'},
 
-		{CLR.KEY() .. 'Summon Timer ', 'is ', CLR.STATE() .. (ns.db.newPetTimer > 0 and (ns.db.newPetTimer/60) .. CLR.TXT() .. ' minutes' or 'disabled'), '. Next random pet in ', CLR.EM() .. ns.remaining_timer_for_display(), '.'},
+		{CLR.KEY() .. 'Summon Timer ', 'is ', CLR.STATE() .. (ns.db.newPetTimer ~= 0 and ns.sec_to_format(ns.db.newPetTimer, 2, false, false) or 'disabled'), '. Next random pet in ', CLR.EM() .. ns.remaining_timer_for_display(), '.'},
 
 		{CLR.KEY() ..'Automatic summoning while mounted for Skyriding ', 'is ', CLR.STATE() .. (ns.db.drSummoning and 'allowed' or 'not allowed'), '.'},
 
@@ -653,7 +653,7 @@ function ns.debugmode_toggle() -- for slash command only
 end
 
 local function is_acceptable_timervalue(v)
-	return (v >= 1 and v <= 1440 or v == 0)
+	return (v >= 1 and v <= 60*60*24*3 or v == 0)
 end
 
 function ns:timer_slash_cmd(value)
@@ -665,16 +665,16 @@ function ns:timer_slash_cmd(value)
 			format(
 				'%s.',
 				ns.db.newPetTimer == 0 and 'Summon timer disabled'
-					or 'Summoning a new pet every ' .. ns.db.newPetTimer / 60 .. ' minutes'
+					or 'A new pet for you every ' .. ns.sec_to_format(ns.db.newPetTimer, 3, false, false)
 			)
 		)
 	else
 		addonprint(
 			format(
-				'%sNot a valid timer value. Enter a number from %s to %s for a timer in minutes, or %s (zero) to %s the timer. \nExamples: %s will summon a new pet every 20 minutes, %s disables the timer. Note the space between "/pw" and the number.',
+				'%sNot a valid timer value. Enter a number of minutes from %s to %s (3 days), or %s (zero) to %s the timer. \nExamples: %s will summon a new pet every 20 minutes, %s disables the timer. Note the space between "/pw" and the number.',
 				CLR.WARN(),
 				CLR.CMD('1'),
-				CLR.CMD('1440'),
+				CLR.CMD('4320'),
 				CLR.CMD('0'),
 				CLR.KEY('disable'),
 				CLR.CMD('/pw 20'),
