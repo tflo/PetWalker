@@ -234,11 +234,6 @@ function ns.msg_target_is_same(link) -- Without web link
 	addonprint(format('Target pet %s is the same as your currently summened pet.', link))
 end
 
--- function ns.msg_target_is_same(link, name) -- With web link
--- 	if ns.db.verbosityLevel < 1 then return end
--- 	chat_user_notification(format('%sTarget pet %s is the same pet as you currently have summened: \nhttps://www.warcraftpets.com/search?q=%s', CLR.TXT(), link, name:gsub("[ ']", {[" "] = "%20", ["'"] = "%27"})))
--- end
-
 function ns.msg_target_not_in_collection(link, name)
 	if ns.db.verbosityLevel < 1 then return end
 	addonprint(
@@ -271,11 +266,6 @@ end
 The main, success, message when a pet was summoned. Either by restore_pet or
 new_pet, or previous_pet or the transitioncheck.
 ---------------------------------------------------------------------------]]--
-
--- Called by the new_pet func
--- function ns.set_sum_msg_to_newpet(newpet, pool)
--- 	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned %s pet %s.', CLR.TXT(), #pool > 1 and 'a new random' or 'your only pool', ns.id_to_link(np)) or nil
--- end
 
 function ns.set_sum_msg_to_newpet(newpet, pool)
 	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2
@@ -560,13 +550,6 @@ function ns:event_toggle()
 	end
 	addonprint(format('%s %s.', ns.db.eventAlt and 'Alternative event(s)' or 'Default event (PLAYER_STARTED_MOVING)', ns.db.autoEnabled and 'registered' or 'selected. Note that auto-summoning is currently disabled; event(s) will be registered when you enable auto-summoning (' .. CLR.CMD('/pw a') .. ')'))
 end
-
--- function ns:favs_toggle_OLD()
--- 	ns.db.favsOnly = not ns.db.favsOnly
--- 	ns.pool_initialized, ns.pet_verified = false, false
--- 	if ns.db.autoEnabled then ns:new_pet() end
--- 	chat_user_notification(format('%sPet pool: %s%s.', CLR.TXT(), ns.db.favsOnly and 'favorites' or 'all pets', ns.db.favsOnly and ns.dbc.charFavsEnabled and ' (char-specific)' or ns.db.favsOnly and ' (global)' or ''))
--- end
 
 function ns:favs_toggle(arg2)
 	if arg2 then
