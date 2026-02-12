@@ -3,7 +3,7 @@
 
 local MYNAME, ns = ...
 local ADDON_NAME = MYNAME -- tmp
-
+local MYVERSION = C_AddOns.GetAddOnMetadata(ADDON_NAME, 'Version')
 -- API
 local C_PetJournal_GetSummonedPetGUID = _G.C_PetJournal.GetSummonedPetGUID
 local C_PetJournal_GetBattlePetLink = _G.C_PetJournal.GetBattlePetLink
@@ -14,6 +14,7 @@ local WTC = WrapTextInColorCode
 
 local CHAR_NAME = UnitName 'player'
 local MAX_NUM_RECENTS = 20
+local MAX_VERBOSITY = 3
 
 local function get_link_actpet()
 	local p = C_PetJournal_GetSummonedPetGUID()
@@ -34,6 +35,7 @@ end
 local colors = {
 	ADDON = '7CFC00',
 	TXT = '8FBC8F',
+	HEAD = '8FBC8F', -- TODO: find a color for this
 	WARN = 'FA8072',
 	QUOTE = '808000',
 	EM = 'ADFF2F',
@@ -64,7 +66,7 @@ ns.CLR = CLR
 	Helpers
 ===========================================================================]]--
 
-local BLOCK_SEP = strrep('+', 42)
+local BLOCK_SEP = CLR.ADDON() .. strrep('+', 42)
 
 local function chat_user_notification(msg) -- OLD
 	print(CLR.ADDON() .. ADDON_NAME .. ":", msg)
@@ -324,6 +326,19 @@ end
 Three big messages: Status, Low Pet Pool, and Help
 ---------------------------------------------------------------------------]]--
 
+local function print_help_or_status(linestable, linecolor)
+	linecolor = linecolor or CLR.TXT()
+	for _, v in ipairs(linestable) do
+		if type(v) == 'table' then
+			v[1] = linecolor .. v[1]
+			print(format(unpack(v)))
+		elseif v then
+			print(v)
+		end
+	end
+end
+
+
 function ns.help_display(print_bottomspace)
 	local header = {
 		CLR.TXT() .. ' Help: ',
@@ -374,43 +389,81 @@ function ns.help_display(print_bottomspace)
 	print(footer_text .. '\n' .. CLR.ADDON() .. BLOCK_SEP .. (print_bottomspace and '\n ' or ''))
 end
 
-function ns.status_display(print_topsep, print_bottomsep)
-	if not ns.pool_initialized then ns.initialize_pool() end
-	local header = {
-		CLR.TXT() .. ' [v', C_AddOns.GetAddOnMetadata(ADDON_NAME, 'Version'), '] Status & Settings:',
-	}
-	local body = {
-		{CLR.KEY() ..'Automatic Random-summoning / Restore ', 'is ', CLR.STATE() .. (ns.db.autoEnabled and 'enabled' or CLR.WARN() .. 'disabled'), '.'},
-
-		{CLR.KEY() .. 'Summon Timer ', 'is ', CLR.STATE() .. (ns.db.newPetTimer ~= 0 and ns.sec_to_format(ns.db.newPetTimer, 2, false, false) or 'disabled'), '. Next random pet in ', CLR.EM() .. ns.remaining_timer_for_display(), '.'},
-
-		{CLR.KEY() ..'Automatic summoning while mounted for Skyriding ', 'is ', CLR.STATE() .. (ns.db.drSummoning and 'allowed' or 'not allowed'), '.'},
-
-		{CLR.KEY() .. 'History ', 'of Previous Pets: ', CLR.STATE() .. ns.db.numRecents - 1, ' (1 to ' .. MAX_NUM_RECENTS .. ').'},
-
-		{CLR.KEY() .. 'Verbosity ', 'level of messages: ', CLR.STATE() .. ns.db.verbosityLevel, ' (of 3).'},
-
-		{CLR.KEY() .. 'Pet Pool ', 'is ', CLR.STATE() .. (curr_pool_str(true)), (not ns.db.favsOnly and ns.db.favsProbability < 1 and ' (favs prob: ' .. CLR.STATE() .. ns.db.favsProbability .. CLR.TXT() .. ')' or ''), '. Eligible pets: ', CLR.EM() .. (curr_num_pool_str()), '.'},
-
-		{CLR.KEY() .. 'Per-character Favorites ', 'are ', CLR.STATE() .. (ns.dbc.charFavsEnabled and 'enabled' or 'disabled'), ' for ', CLR.EM() .. CHAR_NAME, '.'},
-	}
-	-- Separating this bc it might be a longish list
-	local charfavlist = {
-		'\n', ns:list_charfavs(),
-	}
-
-	local header_text = table.concat(header, CLR.TXT())
-	local charfavlist_text = table.concat(charfavlist, CLR.TXT())
-	local extra_settings = (ns.db.eventAlt and table.concat({CLR.KEY() ..'\nAlternative Events ', 'are ', CLR.STATE() .. 'enabled ', 'for all chars.'}, CLR.TXT()) or nil)
-
-	print((print_topsep and '\n' .. CLR.ADDON() .. BLOCK_SEP .. '\n' or CLR.ADDON()) .. ADDON_NAME .. header_text .. '\n')
-	local sep = '\124r' .. CLR.TXT()
-	for _, v in ipairs(body) do
-		print(table.concat(v, sep))
+local function get_charfavs_for_status()
+	local tab_links, count = {}, 0
+	for id, _ in pairs(ns.dbc.charFavs) do
+		count = count + 1
+		tinsert(tab_links, C_PetJournal_GetBattlePetLink(id))
 	end
-	if extra_settings then print(extra_settings) end
-	print(charfavlist_text)
-	if print_bottomsep then print(CLR.ADDON() .. BLOCK_SEP .. '\n ') end
+	local str_links = table.concat(tab_links, ' ')
+	return count, str_links
+end
+
+function ns.status_display()
+	if not ns.pool_initialized then ns.initialize_pool() end
+	local num_cfavs, list_cfavs = get_charfavs_for_status()
+	local statustext = {
+		BLOCK_SEP,
+		format( -- Header
+			'%s%s [v%s]: Status & Settings:',
+			CLR.HEAD(),
+			CLR.ADDON(MYNAME),
+			CLR.STATE(MYVERSION)
+		),
+		{ -- Enabled
+			'%s is %s.',
+			CLR.KEY('Automatic Random-summoning / Restore'),
+			ns.db.autoEnabled and CLR.STATE('enabled') or CLR.WARN('disabled'),
+		},
+		{ -- Timer
+			'%s is %s. Next random pet in %s.',
+			CLR.KEY('Summon Timer'),
+			CLR.STATE(ns.db.newPetTimer ~= 0 and ns.sec_to_format(ns.db.newPetTimer, 2, false, false) or 'disabled'),
+			CLR.EM(ns.remaining_timer_for_display()),
+		},
+		{ -- Skyride-mounted
+			'%s is %s.',
+			CLR.KEY('Automatic summoning while Skyride-mounted'),
+			CLR.STATE(ns.db.drSummoning and 'allowed' or 'not allowed'),
+		},
+		{ -- descr
+			'%s of Previous Pets: %s (1 to %s).',
+			CLR.KEY('History'),
+			CLR.STATE(ns.db.numRecents - 1),
+			MAX_NUM_RECENTS,
+		},
+		{ -- Verbosity
+			'%s level for messages: %s (of %s).',
+			CLR.KEY('Verbosity'),
+			CLR.STATE(ns.db.verbosityLevel),
+			MAX_VERBOSITY,
+		},
+		{ -- Pool
+			'%s is %s%s. Eligible pets: %s.',
+			CLR.KEY('Pet Pool'),
+			CLR.STATE(curr_pool_str(true)),
+			not ns.db.favsOnly and ns.db.favsProbability < 1 and ' (favs prob: ' .. CLR.STATE(ns.db.favsProbability) ..   ')' or '',
+			CLR.EM(curr_num_pool_str()),
+		},
+		{ -- Per-char favs
+			'%s are %s for %s.',
+			CLR.KEY('Per-character Favorites'),
+			CLR.STATE(ns.dbc.charFavsEnabled and 'enabled' or 'disabled'),
+			CLR.EM(CHAR_NAME),
+		},
+		ns.db.eventAlt and format('%s%s are %s for all chars.', CLR.WARN(), CLR.KEY('Alternative Events'), CLR.STATE('enabled')) or '',
+		-- '\n',
+		{ -- Header for char favs list
+			'%s has %s char-specific favorite%s',
+			CLR.EM(CHAR_NAME),
+			CLR.KEY(num_cfavs),
+			num_cfavs == 0 and 's.' or num_cfavs == 1 and ':' or 's:',
+		},
+		num_cfavs > 0 and list_cfavs,
+		BLOCK_SEP,
+	}
+
+	print_help_or_status(statustext)
 end
 
 -- TODO: different msgs for the situations:
@@ -481,7 +534,7 @@ function SlashCmdList.PetWalker(msg)
 	elseif args[1] == 'p' or args[1] == 'prev' then
 		ns.previous_pet()
 	elseif args[1] == 's' or args[1] == 'status' then
-		ns.status_display(true, true)
+		ns.status_display()
 	elseif tonumber(args[1]) then
 		ns:timer_slash_cmd(args[1])
 	elseif args[1] == 'sr' then
@@ -492,7 +545,7 @@ function SlashCmdList.PetWalker(msg)
 		ns.help_display(true)
 	elseif args[1] == nil then
 		ns.help_display(false)
-		ns.status_display(false, true)
+		ns.status_display()
 	else
 		addonprint(
 			format(
@@ -698,18 +751,6 @@ function ns.set_num_recents(num)
 	)
 end
 
--- Used for info print
-function ns:list_charfavs()
-	local favlinks, count, name = {}, 0, nil
-	for id, _ in pairs(ns.dbc.charFavs) do
-		count = count + 1
-		name = C_PetJournal_GetBattlePetLink(id)
-		table.insert(favlinks, name)
-	end
-	local favlinks_text = table.concat(favlinks, ' ')
-	return CLR.EM() .. CHAR_NAME .. CLR.TXT() .. ' has ' .. CLR.EM() .. count .. CLR.TXT() ..
-	' character-specific favorite pet' .. (count > 1 and 's:\n' or count > 0 and ':\n' or 's.') .. favlinks_text
-end
 
 
 --[[---------------------------------------------------------------------------
