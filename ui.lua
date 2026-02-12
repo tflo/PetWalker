@@ -71,7 +71,9 @@ local function chat_user_notification(msg) -- OLD
 end
 
 local function addonprint(msg)
-	print(format('%s%s: %s', CLR.ADDON(), MYNAME, CLR.TXT(msg)))
+-- 	print(format('%s%s: %s', CLR.ADDON(), MYNAME, CLR.TXT(msg)))
+	-- We dont't need a "|r" at the end of the string, right?
+	print(format('%s%s: %s%s', CLR.ADDON(), MYNAME, CLR.TXT(), msg))
 end
 
 local function curr_pool_str(short)
