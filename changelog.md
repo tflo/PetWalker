@@ -4,7 +4,7 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
-#### 3.0.0-dev3 (2026-02-11)
+#### 3.0.0-dev4 (2026-02-12)
 
 - New feature: **Configurable probability** of favorite pets in *All Pets* mode. Idea by @tsemoana on GitHub.
     - You set the probability with the usual favorites toggle `f` command, but followed by a number between `0` and `1`.
@@ -15,11 +15,13 @@ To see all commits, including all alpha changes, [***go here***](https://github.
     - To summon only favorites, you just toggle from *All Pets* to *Favs Only* with `/pw f` (as it was before).
     - Your probability value is remembered, and used whenever you switch back to *All Pets* mode with `/pw f`.
     - When you set/change the probability value, PW will automatically go into *All Pets* mode, if you were in *Favs Only* mode.
-- **Fighting PEBKACs:** When your active pool (for example, *Favorites Only*) doesn’t contain any summonable pet, PW will now actively try to fix the user’s setting by deactivating *Favs Only* and putting all pets in the pool, as if you typed `/pw f 1`. 
-    - This should significantly reduce cases that trigger the “Low Pool” warning/hints, which some users apparently regarded as spam.
-    - You should get the “Low Pool” warning only if after reinitializing the pool with the fixed settings, there are still no pets in the pool. In this case, PW will also deactivate the auto-summon timer, as with `/pw 0`.
-- Code cleanup (light).
-- Add messages, help, status for the new feature; slightly reworked other chat texts.
+- **Auto-fix settings:** When your active pool (for example, *Favorites*) doesn’t contain any summonable pet, PW will now actively try to fix the setting by switching to All Pets and generating a combined pool, as if you typed `/pw f 1`. 
+    - This should significantly reduce cases that trigger the Zero Pool warning/hints, which some apparently regarded as spam.
+    - You should get the Zero Pool warning only if after reinitializing the pool with the fixed settings, there are still no pets in the pool. In this case, PW will also deactivate the auto-summon timer, as with `/pw 0`.
+- Code cleanup and refactoring.
+- Add messages, help, status for the new feature; reworked other chat prints and coloring.
+- Change verbosity level for some messages.
+- Nicer formatting of timer and remaining timer values in prints.
 
 #### 2.6.10 (2026-06-14)
 
