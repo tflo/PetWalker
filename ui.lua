@@ -176,7 +176,6 @@ function ns.msg_onlyfavisactive(ap)
 	addonprint(format('Your only eligible random pet %s is already active.', ns.id_to_link(ap)))
 end
 
--- addonprint(format('%s', X))
 function ns.msg_removed_invalid_id(counter)
 	if ns.db.verbosityLevel < 2 then return end
 	addonprint(
@@ -230,7 +229,6 @@ function ns.msg_target_summoned(link)
 	addonprint(format('Target pet %s summoned.', link))
 end
 
--- addonprint(format('%s', X)) -- XXX
 function ns.msg_target_is_same(link) -- Without web link
 	if ns.db.verbosityLevel < 1 then return end
 	addonprint(format('Target pet %s is the same as your currently summened pet.', link))
@@ -243,17 +241,29 @@ end
 
 function ns.msg_target_not_in_collection(link, name)
 	if ns.db.verbosityLevel < 1 then return end
-	chat_user_notification(format('%sUnfortunately, the target pet %s is not in your collection: \nhttps://www.warcraftpets.com/search?q=%s', CLR.TXT(), link, name:gsub("[ ']", {[" "] = "%20", ["'"] = "%27"})))
+	addonprint(
+		format( -- Trailing space is for URL parsers (Chattynator), in case we have a "|r" at the end.
+			'Unfortunately, the target pet %s is not in your collection: \nhttps://www.warcraftpets.com/search?q=%s ',
+			link,
+			name:gsub("[ ']", { [' '] = '%20', ["'"] = '%27' })
+		)
+	)
 end
 
 function ns.msg_target_is_not_battlepet()
 	if ns.db.verbosityLevel < 1 then return end
-	chat_user_notification(format('%sThe target is not a battle pet!', CLR.TXT()))
+	addonprint('The target is not a battle pet!')
 end
 
 function ns.msg_target_is_not_companion_battlepet(name)
 	if ns.db.verbosityLevel < 1 then return end
-	chat_user_notification(format('%sTarget pet "%s" is a battle pet, but not a companion battle pet. (Not in your collection and unlikely to be collectible at all.): \nhttps://www.wowhead.com/search?q=%s', CLR.TXT(), name, name:gsub("[ ']", {[" "] = "%20", ["'"] = "%27"})))
+	addonprint(
+		format( -- Trailing space is for URL parsers (Chattynator), in case we have a "|r" at the end.
+			'Target pet %q is a battle pet, but not a companion battle pet. (Not in your collection and unlikely to be collectible at all.): \nhttps://www.wowhead.com/search?q=%s ',
+			name,
+			name:gsub("[ ']", { [' '] = '%20', ["'"] = '%27' })
+		)
+	)
 end
 
 
@@ -266,36 +276,49 @@ new_pet, or previous_pet or the transitioncheck.
 -- function ns.set_sum_msg_to_newpet(newpet, pool)
 -- 	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned %s pet %s.', CLR.TXT(), #pool > 1 and 'a new random' or 'your only pool', ns.id_to_link(np)) or nil
 -- end
+
 function ns.set_sum_msg_to_newpet(newpet, pool)
-	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned %s pet from %s%s: %s.', CLR.TXT(), #pool > 1 and 'a new' or 'your only', curr_pool_str(true), pool == ns.pet_pool_favs and ' (F)' or '', ns.id_to_link(newpet)) or nil
+	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2
+			and format(
+				'Summoned %s pet from %s%s: %s.',
+				#pool > 1 and 'a new' or 'your only',
+				curr_pool_str(true),
+				pool == ns.pet_pool_favs and ' (F)' or '',
+				ns.id_to_link(newpet)
+			)
+		or nil
 end
 
 -- Called by the restore_pet func
 function ns.set_sum_msg_to_restore_pet(pet)
-	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 3 and format('%sRestored your last pet %s.', CLR.TXT(), ns.id_to_link(pet)) or nil
+	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 3
+			and format('Restored your last pet %s.', ns.id_to_link(pet))
+		or nil
 end
 
 -- Called by the previous_pet func
 function ns.set_sum_msg_to_previouspet(pet)
-	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2 and format('%sSummoned your previous pet %s.', CLR.TXT(), ns.id_to_link(pet)) or nil
+	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 2
+			and format('Summoned your previous pet %s.', ns.id_to_link(pet))
+		or nil
 end
 
 -- Called by the transitioncheck func
 function ns.set_sum_msg_to_transcheck(pet)
-	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 3 and format('%sSummoned your last saved pet %s.', CLR.TXT(), ns.id_to_link(pet)) or nil
+	ns.msg_pet_summoned_content = ns.db.verbosityLevel >= 3
+			and format('Summoned your last saved pet %s.', ns.id_to_link(pet))
+		or nil
 end
 
 -- Called by the summon func
 function ns.msg_pet_summon_success()
-	if ns.msg_pet_summoned_content then
-		chat_user_notification(ns.msg_pet_summoned_content)
-	end
+	if ns.msg_pet_summoned_content then addonprint(ns.msg_pet_summoned_content) end
 end
 
 -- Called by the summon func
 function ns.msg_pet_summon_failed()
 	if ns.db.verbosityLevel < 1 then return end
-	chat_user_notification(CLR.WARN() .. "You don't meet the conditions for summoning a pet right now.")
+	addonprint(CLR.WARN() .. "You don't meet the conditions for summoning a pet right now.")
 end
 
 
@@ -473,7 +496,13 @@ function SlashCmdList.PetWalker(msg)
 		ns.help_display(false)
 		ns.status_display(false, true)
 	else
-		chat_user_notification(format('%sInvalid command or arguments. Enter %s/pw help %sfor a list of commands.', CLR.WARN(), CLR.CMD(), CLR.WARN()))
+		addonprint(
+			format(
+				'%sInvalid command or arguments. Enter %s for a list of commands.',
+				CLR.WARN(),
+				CLR.CMD('/pw help')
+			)
+		)
 	end
 end
 
@@ -488,27 +517,27 @@ function ns:dismiss_and_disable()
 	end
 	ns.db.autoEnabled = false
 	ns.events:unregister_pw_events()
-	chat_user_notification(format('%sPet dismissed and auto-summoning %s.', CLR.TXT(), ns.db.autoEnabled and 'enabled' or 'disabled'))
+	addonprint(format('Pet dismissed and auto-summoning %s.', ns.db.autoEnabled and 'enabled' or 'disabled'))
 end
 
 function ns.verbosity_full()
 	ns.db.verbosityLevel = 3
-	chat_user_notification(CLR.TXT() .. 'Verbosity: full (3).')
+	addonprint('Verbosity: full (3).')
 end
 
 function ns.verbosity_medium()
 	ns.db.verbosityLevel = 2
-	chat_user_notification(CLR.TXT() .. 'Verbosity: medium (2).')
+	addonprint('Verbosity: medium (2).')
 end
 
 function ns.verbosity_silent()
 	ns.db.verbosityLevel = 1
-	chat_user_notification(CLR.TXT() .. 'Verbosity: silent (1).')
+	addonprint('Verbosity: silent (1).')
 end
 
 function ns.verbosity_mute()
 	ns.db.verbosityLevel = 0
-	chat_user_notification(CLR.TXT() .. 'Verbosity: mute (0).')
+	addonprint('Verbosity: mute (0).')
 end
 
 function ns:auto_toggle()
@@ -520,7 +549,7 @@ function ns:auto_toggle()
 		ns.events:register_pw_events()
 		ns.autoaction()
 	end
-	chat_user_notification(format('%sPet auto-summoning %s.', CLR.TXT(), ns.db.autoEnabled and 'enabled' or 'disabled'))
+	addonprint(format('Pet auto-summoning %s.', ns.db.autoEnabled and 'enabled' or 'disabled'))
 end
 
 function ns:event_toggle()
@@ -529,7 +558,7 @@ function ns:event_toggle()
 		ns.events:unregister_summon_events()
 		ns.events:register_summon_events()
 	end
-	chat_user_notification(format('%s%s %s.', CLR.TXT(), ns.db.eventAlt and 'Alternative event(s)' or 'Default event (PLAYER_STARTED_MOVING)', ns.db.autoEnabled and 'registered' or 'selected. Note that auto-summoning is currently disabled; event(s) will be registered when you enable auto-summoning (' .. CLR.CMD() .. '/pw a' .. CLR.TXT() .. ')'))
+	addonprint(format('%s %s.', ns.db.eventAlt and 'Alternative event(s)' or 'Default event (PLAYER_STARTED_MOVING)', ns.db.autoEnabled and 'registered' or 'selected. Note that auto-summoning is currently disabled; event(s) will be registered when you enable auto-summoning (' .. CLR.CMD('/pw a') .. ')'))
 end
 
 -- function ns:favs_toggle_OLD()
@@ -539,25 +568,56 @@ end
 -- 	chat_user_notification(format('%sPet pool: %s%s.', CLR.TXT(), ns.db.favsOnly and 'favorites' or 'all pets', ns.db.favsOnly and ns.dbc.charFavsEnabled and ' (char-specific)' or ns.db.favsOnly and ' (global)' or ''))
 -- end
 
+-- XXX here
 function ns:favs_toggle(arg2)
 	if arg2 then
 		arg2 = tonumber(arg2)
 		if not arg2 or arg2 < 0 or arg2 > 1 then
-			chat_user_notification(format('%sThe optional second argument must be a number from %s0|r to %s1|r. For example: %s0|r, %s0.2|r, %s0.45|r, %s0.618|r, %s1|r.', CLR.TXT(), CLR.CMD(), CLR.CMD(), CLR.CMD(), CLR.CMD(), CLR.CMD(), CLR.CMD(), CLR.CMD()))
+			addonprint(
+				format(
+					'The optional second argument must be a number from %s to %s. For example: %s, %s, %s, %s, %s. The zero before the decimal point is optional (%s).',
+					CLR.CMD('0'),
+					CLR.CMD('1'),
+					CLR.CMD('0'),
+					CLR.CMD('0.2'),
+					CLR.CMD('0.45'),
+					CLR.CMD('0.618'),
+					CLR.CMD('1'),
+					CLR.CMD('.5')
+				)
+			)
 			return
 		end
 		ns.db.favsProbability = arg2
 		ns.db.favsProbability_reset_by_pw = false
 		if arg2 < 1 then
-			chat_user_notification(format('%sFavorites probability in All Pets mode set to %s%s|r. Switched to All Pets mode.', CLR.TXT(), CLR.KEY(), arg2))
+			addonprint(
+				format(
+					'Favorites probability in All Pets mode set to %s. Switched to All Pets mode.',
+					CLR.KEY(arg2)
+				)
+			)
 		else
-			chat_user_notification(format('%sFavorites probability in All Pets mode set to %sNo Special Treatment|r. Switched to All Pets mode.', CLR.TXT(), CLR.KEY()))
+			addonprint(
+				format(
+					'Favorites probability in All Pets mode set to %s. Switched to All Pets mode.',
+					CLR.KEY('No Special Treatment')
+				)
+			)
 		end
 		ns.db.favsOnly = false
 	else
 		ns.db.favsOnly = not ns.db.favsOnly
 		ns.db.favsOnly_reset_by_pw = false
-		chat_user_notification(format('%sPet pool: %s%s.', CLR.TXT(), ns.db.favsOnly and 'Favorites' or 'All Pets', ns.db.favsOnly and ns.dbc.charFavsEnabled and ' (char-specific)' or ns.db.favsOnly and ' (global)' or ''))
+		addonprint(
+			format(
+				'Pet pool: %s%s.',
+				CLR.KEY(ns.db.favsOnly and 'Favorites' or 'All Pets'),
+				ns.db.favsOnly and ns.dbc.charFavsEnabled and ' (char-specific)'
+					or ns.db.favsOnly and ' (global)'
+					or ''
+			)
+		)
 	end
 	ns.pool_initialized, ns.pet_verified = false, false
 	if ns.db.autoEnabled then ns:new_pet() end
@@ -573,18 +633,33 @@ function ns.charfavs_slash_toggle() -- for slash command only
 	else -- Needed for a correct display of char/normal favs in the PJ
 		ns:cfavs_update()
 	end
-	if PetWalkerCharFavsCheckbox then PetWalkerCharFavsCheckbox:SetChecked(ns.dbc.charFavsEnabled) end
-	chat_user_notification(format('%sCharacter-specific favorites %s for %s%s.', CLR.TXT(), ns.dbc.charFavsEnabled and 'enabled' or 'disabled', CLR.EM(), CHAR_NAME))
+	if PetWalkerCharFavsCheckbox then
+		PetWalkerCharFavsCheckbox:SetChecked(ns.dbc.charFavsEnabled)
+	end
+	addonprint(
+		format(
+			'Character-specific favorites %s for %s.',
+			CLR.KEY(ns.dbc.charFavsEnabled and 'enabled' or 'disabled'),
+			CLR.EM(CHAR_NAME)
+		)
+	)
 end
 
 function ns.dr_summoning_toggle()
 	ns.db.drSummoning = not ns.db.drSummoning
-	chat_user_notification(format('%sSummoning while mounted for Skyriding %s.', CLR.TXT(), ns.db.drSummoning and 'enabled' or 'disabled'))
+	addonprint(
+		format(
+			'Summoning while mounted for Skyriding %s.',
+			CLR.KEY(ns.db.drSummoning and 'enabled' or 'disabled')
+		)
+	)
 end
 
 function ns.debugmode_toggle() -- for slash command only
 	ns.db.debugMode = not ns.db.debugMode
-	chat_user_notification(format('%sDebug mode %s.', CLR.TXT(), ns.db.debugMode and 'enabled' or 'disabled'))
+	addonprint(
+		format('Debug mode %s.', CLR.KEY(ns.db.debugMode and 'enabled' or 'disabled'))
+	)
 end
 
 local function is_acceptable_timervalue(v)
@@ -596,9 +671,27 @@ function ns:timer_slash_cmd(value)
 	if is_acceptable_timervalue(value) or ns.db.debugMode then
 		ns.db.newPetTimer = value * 60
 		ns.db.newPetTimer_reset_by_pw = false
-		chat_user_notification(format('%s%s.',CLR.TXT(), ns.db.newPetTimer == 0 and 'Summon timer disabled' or 'Summoning a new pet every ' .. ns.db.newPetTimer/60 .. ' minutes'))
+		addonprint(
+			format(
+				'%s.',
+				ns.db.newPetTimer == 0 and 'Summon timer disabled'
+					or 'Summoning a new pet every ' .. ns.db.newPetTimer / 60 .. ' minutes'
+			)
+		)
 	else
-		chat_user_notification(format('%sNot a valid timer value. Enter a number from %s1%1$s to %2$s1440%1$s for a timer in minutes, or %2$s0%1$s (zero) to %3$sdisable%1$s the timer. \nExamples: %2$s/pw 20%1$s will summon a new pet every 20 minutes, %2$s/pw 0%1$s disables the timer. Note that there is a space between "/pw" and the number.', CLR.WARN(), CLR.CMD(), CLR.KEY()))
+		addonprint(
+			format(
+				'%sNot a valid timer value. Enter a number from %s to %s for a timer in minutes, or %s (zero) to %s the timer. \nExamples: %s will summon a new pet every 20 minutes, %s disables the timer. Note the space between "/pw" and the number.',
+				CLR.WARN(),
+				CLR.CMD('1'),
+				CLR.CMD('1440'),
+				CLR.CMD('0'),
+				CLR.KEY('disable'),
+				CLR.CMD('/pw 20'),
+				CLR.CMD('/pw 0'),
+				CLR.KEY()
+			)
+		)
 	end
 end
 
@@ -610,8 +703,8 @@ function ns.set_num_recents(num)
 			table.remove(v)
 		end
 	end
-	chat_user_notification(
-		format('%sPrevious Pets history set to %s.', CLR.TXT(), ns.db.numRecents - 1)
+	addonprint(
+		format('Previous Pets history set to %s.', ns.db.numRecents - 1)
 	)
 end
 
