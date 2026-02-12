@@ -412,6 +412,9 @@ function ns:new_pet(the_time, manually_called)
 	local now = the_time or time()
 	if now - ns.time_newpet_success < 1.5 then return end
 	local actpet = C_PetJournal_GetSummonedPetGUID()
+	-- TODO: if not manually_called, should we also prevent Argent Squire from being replaced?
+	-- See line 77; not really urgent, since the user simply can avoid moving, and additionally
+	-- the bank/mail of Argent Squire does not restart the CD when closed.
 	if actpet and is_excluded_by_id(actpet) then
 		ns.debugprint '`new_pet`: `actpet` is excluded'
 		return
@@ -607,6 +610,9 @@ function ns.save_pet()
 	while #db.recentPets > ns.db.numRecents do
 		table.remove(db.recentPets)
 	end
+	-- TOOD:
+	-- ns.time_newpet_success = now
+	-- ns.debugprint 'Timer reset by save_pet()'
 	ns.debugprint_pet '`save_pet` completed'
 end
 
@@ -631,7 +637,11 @@ function ns:summon_pet(pet, resettimer)
 	end
 	local now = time()
 	ns.pet_verified = true
-	if resettimer then ns.time_newpet_success = now end
+	if resettimer then
+		ns.time_newpet_success = now
+		-- TOOD:
+		-- ns.debugprint 'Timer reset by summon_pet()'
+	end
 	ns.msg_pet_summon_success()
 	C_PetJournal_SummonPetByGUID(pet)
 end

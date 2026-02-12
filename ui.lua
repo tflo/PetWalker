@@ -171,6 +171,14 @@ function ns.msg_no_previous_pet()
 	)
 end
 
+-- Having only one fav and being in favsOnly mode is 100% legit:
+-- It allows the user to manually check out different pets,
+-- while always being reset to his fav when the timer is due.
+-- TODO: Ideally then we should reset the timer on any manual non-PW summoning, but how can
+-- we reliably distinguish?
+-- We could *additionally* reset the timer in save_pet(),as this is not triggered when
+-- restoring. Or we could inverse the 'resettimer' parameter to 'do not reset timer', so we
+-- would reset on every summoning except restore.
 function ns.msg_onlyfavisactive(ap)
 	if ns.db.verbosityLevel < 2 then return end
 	addonprint(format('Your only eligible random pet %s is already active.', ns.id_to_link(ap)))
