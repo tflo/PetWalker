@@ -86,7 +86,7 @@ local function update_db()
 
 	-- Do the migration in ascending order, in case we have historically overlapping changes!
 	if ver < 2.1 then
-		db.favsProbability = db.favsOnly and 1 or 0.2
+		db.favsProbability = db.favsOnly and 0.66 or defaults_global.favsProbability
 	end
 
 	clean_removed(db, defaults_global)
