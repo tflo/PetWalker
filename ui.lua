@@ -172,7 +172,7 @@ function ns.msg_no_previous_pet()
 end
 
 function ns.msg_onlyfavisactive(ap)
-	if ns.db.verbosityLevel < 1 then return end
+	if ns.db.verbosityLevel < 2 then return end
 	addonprint(format('Your only eligible random pet %s is already active.', ns.id_to_link(ap)))
 end
 
