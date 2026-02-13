@@ -473,7 +473,13 @@ end
 -- TODO: add db.flags when favsProbability or favsOnly has been force-changed, so we
 -- can show this in the status text.
 function ns.msg_force_changed_pool()
-	chat_user_notification(format('%sYou don\'t have any summonable pets in your active pool, or in one of your active pools (Favorites/Non-favorites). I\'ve set your pet pool to %sAll Pets|r and will try to re-initialize the pool.', CLR.WARN(), CLR.KEY()))
+	addonprint(
+		format(
+			"%sYou don't have any summonable pets in your active pool, or in one of your active pools (Favorites/Non-favorites). I've set your pet pool to %s and will try to re-initialize the pool.",
+			CLR.WARN(),
+			CLR.KEY('All Pets')
+		)
+	)
 end
 
 function ns.msg_low_petpool(nPool)
