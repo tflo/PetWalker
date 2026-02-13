@@ -49,7 +49,6 @@ local monitored_addons = {
 local function ADDON_LOADED(addon)
 	if not monitored_addons[addon] then return end
 	if addon == ADDON_NAME then
-		ns.debugprint 'Addon "PetWalker" loaded.'
 		ns.time_newpet_success = time() - (ns.db.newPetTimer - ns.db.remainingTimer)
 		-- *Not* with PLAYER_ENTERING_WORLD so that it is not affected
 		-- when all events get unregistered via /pw a
@@ -61,14 +60,13 @@ local function ADDON_LOADED(addon)
 		-- This raises an error if PJ is not loaded yet, so OK doing it here.
 		hooksecurefunc(C_PetJournal, 'SetPetLoadOutInfo', function()
 			-- Note that SetPetLoadOutInfo summons the slot #1 pet, but it does so _not_ via SummonPetByGUID
-			ns.debugprint 'Hook: `SetPetLoadOutInfo` --> Setting `pet_verified` to false'
+			ns.debugprint '‹SetPetLoadOutInfo()› hook called, ‹pet_verified› = false'
 			ns.pet_verified = false
 		end)
 
 	elseif addon == 'Blizzard_Collections' then
 		-- By all measures, this should come after all 3rd-party addons, so safe to stop here.
 		ns.events:UnregisterEvent 'ADDON_LOADED'
-		ns.debugprint 'Addon "Blizzard_Collections" loaded.'
 		--[[ -- Currently disabled due to DF changes
 		for i, btn in ipairs(PetJournal.listScroll.buttons) do
 		for i, btn in ipairs(PetJournal.ScrollBox.ScrollTarget) do
@@ -100,16 +98,16 @@ local function PLAYER_ENTERING_WORLD(is_login, is_reload)
 	-- We do not want summon events before transitioncheck has finished
 	ns.events:unregister_summon_events()
 	if is_login then
-		ns.debugprint 'Event: PLAYER_ENTERING_WORLD: Login'
+		ns.debugprint '"PLAYER_ENTERING_WORLD": login'
 		delay = delay_after_login
 		-- This must run before transitioncheck
 		C_TimerAfter(delay - 1, ns.saved_pet_summonability_check)
 	elseif is_reload then
-		ns.debugprint 'Event: PLAYER_ENTERING_WORLD: Reload'
+		ns.debugprint '"PLAYER_ENTERING_WORLD": reload'
 		delay = delay_after_reload
 	else
 		-- Needed for zone-specific pet exclusions
-		ns.debugprint 'Event: PLAYER_ENTERING_WORLD: Instance change'
+		ns.debugprint '"PLAYER_ENTERING_WORLD": instance change'
 		delay = delay_after_instance
 	end
 	ns.pet_verified = false
@@ -122,26 +120,27 @@ end
 
 -- Regular main event
 local function PLAYER_STARTED_MOVING()
-	ns.debugprint 'Event: PLAYER_STARTED_MOVING --> `autoaction`'
+	ns.debugprint 'Triggered by "PLAYER_STARTED_MOVING"'
 	ns.autoaction()
 end
 
 -- Experimental alternative events
 local function ZONE_CHANGED()
-	ns.debugprint 'Event: ZONE_CHANGED --> `autoaction`'
+	ns.debugprint 'Triggered by "ZONE_CHANGED"'
 	ns.autoaction()
 end
 local function ZONE_CHANGED_INDOORS()
-	ns.debugprint 'Event: ZONE_CHANGED_INDOORS --> `autoaction`'
+	ns.debugprint 'Triggered by "ZONE_CHANGED_INDOORS"'
 	ns.autoaction()
 end
 local function PLAYER_MOUNT_DISPLAY_CHANGED()
-	ns.debugprint 'Event: PLAYER_MOUNT_DISPLAY_CHANGED --> `autoaction`, flight throttle canceled'
 	-- This can lead to a summoning conflict *if* the game itself re-summons the pet after dismounting
 	-- Let's try it with a little delay
 	if use_delay_PMDC then
+		ns.debugprint 'Triggered (delayed) by "PLAYER_MOUNT_DISPLAY_CHANGED"'
 		C_TimerAfter(delay_PMDC, ns.autoaction)
 	else
+		ns.debugprint 'Triggered by "PLAYER_MOUNT_DISPLAY_CHANGED"'
 		ns.autoaction()
 	end
 end
@@ -156,18 +155,16 @@ local function COMPANION_UPDATE(what)
 			ns.save_pet()
 			if ns.db.debugMode then
 				ns.debugprint(
-					'Event: COMPANION_UPDATE (`actpet`: '
-						.. ns.id_to_name(C_PetJournalGetSummonedPetGUID())
-						.. ') --> `save_pet`'
+					'"COMPANION_UPDATE" triggers ‹save_pet()›; ‹actpet›:',
+					ns.id_to_name(C_PetJournalGetSummonedPetGUID())
 				)
 			end
 		else
 			ns.pet_restored = nil
 			if ns.db.debugMode then
 				ns.debugprint(
-					'Event: COMPANION_UPDATE (`actpet`: '
-						.. ns.id_to_name(C_PetJournalGetSummonedPetGUID())
-						.. '): not saving bc `pet_restored`'
+					'"COMPANION_UPDATE": pet restored, not saving; ‹actpet›:',
+					ns.id_to_name(C_PetJournalGetSummonedPetGUID())
 				)
 			end
 		end
@@ -177,7 +174,7 @@ end
 -- See bottom of file for complete pet battle event chain
 
 local function PET_BATTLE_OPENING_START()
-	ns.debugprint 'Event: PET_BATTLE_OPENING_START'
+	ns.debugprint '"PET_BATTLE_OPENING_START" unregisters events'
 	ns.events:unregister_pw_events()
 	ns.events:RegisterEvent 'PET_BATTLE_OVER'
 	ns.in_battlesleep = true
@@ -190,12 +187,7 @@ local function PET_BATTLE_OPENING_START()
 end
 
 local function PET_BATTLE_OVER()
-	ns.debugprint(
-		format(
-			'Event: PET_BATTLE_OVER --> Re-register events in %ss, unless we are in the next battle',
-			delay_after_battle
-		)
-	)
+	ns.debugprint('"PET_BATTLE_OVER" will reregister events in sec:', delay_after_battle)
 	C_TimerAfter(delay_after_battle, function()
 		if C_PetBattlesIsInBattle() then return end
 		ns.events:UnregisterEvent 'PET_BATTLE_OVER'
@@ -207,7 +199,7 @@ local function PET_BATTLE_OVER()
 end
 
 local function PET_JOURNAL_LIST_UPDATE()
-	ns.debugprint 'Event: PET_JOURNAL_LIST_UPDATE --> Setting `pool_initialized` to false'
+	ns.debugprint '"PET_JOURNAL_LIST_UPDATE" sets ‹pool_initialized› = false'
 	ns.pool_initialized = false
 end
 ns.PET_JOURNAL_LIST_UPDATE = PET_JOURNAL_LIST_UPDATE -- Used in main
@@ -251,7 +243,7 @@ ns.events:RegisterEvent 'ADDON_LOADED'
 -- PET_BATTLE_OVER (registered after PET_BATTLE_OPENING_START)
 
 function ns.events:register_summon_events()
-	ns.debugprint 'Registering summon events.'
+	ns.debugprint '‹register_summon_events()› called'
 	if ns.db.eventAlt then -- Alt events, experimental
 		--[[ Pointless if it fires while flying, which is quite often. But this doesn't harm either. ]]
 		self:RegisterEvent 'ZONE_CHANGED'
@@ -270,7 +262,7 @@ function ns.events:register_summon_events()
 end
 
 function ns.events:unregister_summon_events()
-	ns.debugprint 'Unregistering summon events.'
+	ns.debugprint '‹unregister_summon_events()› called'
 	self:UnregisterEvent 'ZONE_CHANGED'
 	self:UnregisterEvent 'ZONE_CHANGED_INDOORS'
 	self:UnregisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED'
@@ -278,7 +270,7 @@ function ns.events:unregister_summon_events()
 end
 
 function ns.events:register_meta_events()
-	ns.debugprint 'Registering meta events.'
+	ns.debugprint '‹register_meta_events()› called'
 	self:RegisterEvent 'PLAYER_ENTERING_WORLD'
 	self:RegisterEvent 'PET_JOURNAL_LIST_UPDATE'
 	self:RegisterEvent 'COMPANION_UPDATE'
@@ -287,7 +279,7 @@ function ns.events:register_meta_events()
 end
 
 function ns.events:unregister_meta_events()
-	ns.debugprint 'Unregistering meta events.'
+	ns.debugprint '‹unregister_meta_events()› called'
 	self:UnregisterEvent 'PLAYER_ENTERING_WORLD'
 	self:UnregisterEvent 'PET_JOURNAL_LIST_UPDATE'
 	self:UnregisterEvent 'COMPANION_UPDATE'
@@ -296,13 +288,13 @@ function ns.events:unregister_meta_events()
 end
 
 function ns.events:register_pw_events()
-	ns.debugprint 'Registering PW events.'
+	ns.debugprint '‹register_pw_events()› called'
 	self:register_meta_events()
 	self:register_summon_events()
 end
 
 function ns.events:unregister_pw_events()
-	ns.debugprint 'Unregistering PW events (`UnregisterAllEvents`).'
+	ns.debugprint '‹unregister_pw_events()› called'
 	self:UnregisterAllEvents()
 end
 
