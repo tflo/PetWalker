@@ -669,7 +669,7 @@ function ns.initialize_pool(rerun)
 	debugprint('‹initialize_pool()› called; rerun:', rerun)
 	clean_charfavs()
 	local now = time()
-	local can_send_warning = now - time_pool_msg > 60 and ns.db.newPetTimer ~= 0
+	local can_send_warning = now - time_pool_msg > 90 and ns.db.newPetTimer ~= 0
 	local idx = 1
 	if ns.db.favsOnly then
 		-- "Favs Only"
