@@ -15,6 +15,7 @@ local WTC = WrapTextInColorCode
 local CHAR_NAME = UnitName 'player'
 local MAX_NUM_RECENTS = 20
 local MAX_VERBOSITY = 3
+local MAX_TIMER = 4320
 
 local function get_link_actpet()
 	local p = C_PetJournal_GetSummonedPetGUID()
@@ -336,55 +337,116 @@ local function print_help_or_status(linestable, linecolor)
 	end
 end
 
-
-function ns.help_display(print_bottomspace)
-	local header = {
-		CLR.TXT() .. ' Help: ',
-		CLR.CMD() .. '\n/pw ', 'or ', CLR.CMD() .. '/petwalker ', 'supports these commands: ',
+function ns.help_display()
+	local text = {
+		BLOCK_SEP,
+		format( -- Header
+			'%s Help: %s or %s supports these commands:',
+			CLR.HEAD(),
+			CLR.CMD('/petwalker'),
+			CLR.CMD('/pw')
+		),
+		{ -- Toggle auto
+			'%s : Toggle %s (new pet or restore); this is the %q.',
+			CLR.CMD('a'),
+			CLR.KEY('auto-summoning'),
+			CLR.EM('Main Switch'),
+		},
+		{ -- Dismiss & disable
+			'%s : Immediately %s current pet and %s; %q.',
+			CLR.CMD('d'),
+			CLR.KEY('dismiss'),
+			CLR.KEY('disable auto-summoning'),
+			CLR.EM('Emergency Off'),
+		},
+		{ -- Skyride-mounted
+			'%s : Toggle %s also %s: %s',
+			CLR.CMD('sr'),
+			CLR.KEY('auto-summoning'),
+			CLR.KEY('while mounted for Skyriding'),
+			CLR.STATE('allowed / not allowed'),
+		},
+		{ -- New pet
+			'%s : Summon %s from pool.',
+			CLR.CMD('n'),
+			CLR.KEY('new random pet'),
+		},
+		{ -- Pool
+			'%s : Toggle %s: %s or %s.',
+			CLR.CMD('f'),
+			CLR.KEY('pet pool'),
+			CLR.STATE('Favorites Only'),
+			CLR.STATE('All Pets'),
+		},
+		{ -- Favorites Probability
+			'%s : %s in All Pets mode: e.g., %s or %s. Zero (%s) excludes favorites, %s means ‘no special treatment for favs’ (combined pool).',
+			CLR.CMD('f <0...1>'),
+			CLR.KEY('Favorites Probability '),
+			CLR.CMD('0.5 '),
+			CLR.CMD('.5'),
+			CLR.CMD('0'),
+			CLR.CMD('1'),
+		},
+		{ -- Per-char / global favs
+			'%s : Toggle %s: %s or %s.',
+			CLR.CMD('c'),
+			CLR.KEY('favorites'),
+			CLR.STATE('Per-character'),
+			CLR.STATE('Global Favorites'),
+		},
+		{ -- Timer
+			'%s : Set %s in minutes: %s to %s (%sd), %s to %s.',
+			CLR.CMD('<number>'),
+			CLR.KEY('Summon Timer'),
+			CLR.CMD('1'),
+			CLR.CMD(MAX_TIMER),
+			MAX_TIMER / 60 / 24,
+			CLR.CMD('0'),
+			CLR.KEY('disable'),
+		},
+		{ -- Previous pets
+			'%s : Cycle through %s (recently summoned) %s.',
+			CLR.CMD('p'),
+			CLR.KEY('Previous'),
+			CLR.KEY('Pets'),
+		},
+		{ -- Max previous
+			'%s : Set %s (%s to %s).',
+			CLR.CMD('p <number>'),
+			CLR.KEY('number of remembered Previous Pets'),
+			CLR.CMD('1'),
+			CLR.CMD(MAX_NUM_RECENTS),
+		},
+		{ -- Verbosity
+			'%s : %s: %s (only failures and warnings are printed to chat); %s for %s verbosity (new summons); %s for %s verbosity (also restored pets).',
+			CLR.CMD('v'),
+			CLR.KEY('Verbosity'),
+			CLR.STATE('silent'),
+			CLR.CMD('vv'),
+			CLR.STATE('medium'),
+			CLR.CMD('vvv'),
+			CLR.STATE('full'),
+		},
+		{ -- Status
+			'%s : Display current %s.',
+			CLR.CMD('s'),
+			CLR.KEY('status/settings'),
+		},
+		{ -- Help
+			'%s : Show this %s text.',
+			CLR.CMD('h'),
+			CLR.KEY('help'),
+		},
+		{ -- Examples
+			'%s %s enables/disables any auto-summoning, %s sets the new-pet summon timer to 20 minutes, %s sets the favorites probability in All Pets mode to 0.33 (33%%). — In Game Options > Keybindigs you can directly bind some commands.',
+			CLR.ADDON('Examples:'),
+			CLR.CMD('/pw a'),
+			CLR.CMD('/pw 20'),
+			CLR.CMD('/pw f .33'),
+		},
+		BLOCK_SEP,
 	}
-
-	local body = {
-		{CLR.CMD() .. 'd', ' : ', CLR.KEY() .. 'Dismiss ', 'current pet and ', CLR.KEY() .. 'disable auto-summoning ', '(new pet / restore).'},
-
-		{CLR.CMD() .. 'a', ' : ', 'Toggle ', CLR.KEY() .. 'auto-summoning ', '(new pet / restore).'},
-
-		{CLR.CMD() .. 'sr', ' : ', 'Toggle ', CLR.KEY() .. 'auto-summoning ', 'also ', CLR.KEY() .. 'while mounted for Skyriding: ', CLR.STATE() .. 'allowed / not allowed', '.'},
-
-		{CLR.CMD() .. 'n', ' : ', 'Summon ', CLR.KEY() .. 'new pet ', 'from pool.'},
-
-		{CLR.CMD() .. 'f', ' : ', 'Toggle ', CLR.KEY() .. 'pet pool: ', CLR.STATE() .. 'Favorites Only', ', or ', CLR.STATE() .. 'All Pets', '.'},
-
-		{CLR.CMD() .. 'f <0...1>', ' : ', CLR.KEY() .. 'Favorites Probability ', 'in All Pets mode: e.g., ', CLR.CMD() .. '0.5 ', 'or ', CLR.CMD() .. '.5', '. Zero (', CLR.CMD() .. '0', ') excludes favorites, ', CLR.CMD() .. '1 ', 'means \'no special treatment for favs\'.'},
-
-		{CLR.CMD() .. 'c', ' : ', 'Toggle ', CLR.KEY() .. 'favorites: ', CLR.STATE() .. 'Per-character', ', or ', CLR.STATE() .. 'Global Favorites', '.'},
-
-		{CLR.CMD() .. '<number>', ' : ', 'Set ', CLR.KEY() .. 'Summon Timer ', 'in minutes (', CLR.CMD() .. '1 ', 'to ', CLR.CMD() .. '1440', '; ', CLR.CMD() .. '0 ', 'to ', CLR.KEY() .. 'disable', ').'},
-
-		{CLR.CMD() .. 'p', ' : ', 'Cycle through ', CLR.KEY() .. 'Previous (recently summoned) Pets', '.'},
-
-		{CLR.CMD() .. 'p <number>', ' : ', 'Set ', CLR.KEY() .. 'number of recorded Previous Pets ', '(', CLR.CMD() .. '1 ', 'to ', CLR.CMD() .. MAX_NUM_RECENTS, ').'},
-
-		{CLR.CMD() .. 'v', ' : ', CLR.KEY() .. 'Verbosity: ', CLR.STATE() .. 'silent ', '(only failures and warnings are printed to chat); ', CLR.CMD() .. 'vv ', 'for ', CLR.STATE() .. 'medium ', CLR.KEY() .. 'verbosity ', '(new summons); ', CLR.CMD() .. 'vvv ', 'for ', CLR.STATE() .. 'full ', CLR.KEY() .. 'verbosity ', '(also restored pets).'},
-
-		{CLR.CMD() .. 's', ' : ', 'Display current ', CLR.KEY() .. 'status/settings.'},
-
-		{CLR.CMD() .. 'h', ' : ', 'This help text.'},
-	}
-
-	local footer = {
-		CLR.TXT() .. '\nExamples: ', CLR.CMD() .. '/pw a', ' disables auto-summon/restore, or enables it if disabled. ', CLR.CMD() .. '/pw 20', ' sets the new-pet summon timer to 20 minutes.',
-		'\nIn Options > Keybindigs you can directly bind some commands.',
-	}
-
-	local header_text = table.concat(header, CLR.TXT())
-	local footer_text = table.concat(footer, CLR.TXT())
-
-	print('\n' .. CLR.ADDON() .. BLOCK_SEP .. '\n' .. ADDON_NAME .. header_text .. '\n')
-	local sep = '\124r' .. CLR.TXT()
-	for _, v in ipairs(body) do
-		print(table.concat(v, sep))
-	end
-	print(footer_text .. '\n' .. CLR.ADDON() .. BLOCK_SEP .. (print_bottomspace and '\n ' or ''))
+	print_help_or_status(text)
 end
 
 local function get_charfavs_for_status()
@@ -555,9 +617,9 @@ function SlashCmdList.PetWalker(msg)
 	elseif args[1] == 't' or args[1] == 'target' then
 		ns.summon_targetpet()
 	elseif args[1] == 'h' or args[1] == 'help' then
-		ns.help_display(true)
+		ns.help_display()
 	elseif args[1] == nil then
-		ns.help_display(false)
+		ns.help_display()
 		ns.status_display()
 	else
 		addonprint(
