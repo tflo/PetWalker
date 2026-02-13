@@ -35,7 +35,6 @@ local delay_PMDC = 0.4 -- [seconds] reasonable range: 0 to 1; 0 means 'next fram
 local use_delay_PMDC = true -- true/false
 -- END PMDC finetuning
 
-
 --[[===========================================================================
 	Events
 ===========================================================================]]--
@@ -207,7 +206,6 @@ ns.PET_JOURNAL_LIST_UPDATE = PET_JOURNAL_LIST_UPDATE -- Used in main
 local function PLAYER_LOGOUT()
 	ns.db.remainingTimer = ns.remaining_timer(time())
 end
-
 
 --[[===========================================================================
 	Event frame

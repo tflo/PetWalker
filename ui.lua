@@ -119,7 +119,6 @@ end
 	Messages
 ===========================================================================]]--
 
--- Login msg
 function ns.msg_login()
 	if ns.db.verbosityLevel < 2 then return end
 	local petinfo
@@ -231,8 +230,9 @@ end
 -- 	chat_user_notification(CLR.TXT() .. 'Removed a duplicate from recent pets at idx ' .. idx .. '.')
 -- end
 
-
--- Summon Target Pet messages
+--[[---------------------------------------------------------------------------
+	Summon Target Pet messages
+---------------------------------------------------------------------------]]--
 
 function ns.msg_target_summoned(link)
 	if ns.db.verbosityLevel < 1 then return end
@@ -271,10 +271,9 @@ function ns.msg_target_is_not_companion_battlepet(name)
 	)
 end
 
-
 --[[---------------------------------------------------------------------------
-The main, success, message when a pet was summoned. Either by restore_pet or
-new_pet, or previous_pet or the transitioncheck.
+	The main, success, message when a pet was summoned. Either by restore_pet or
+	new_pet, or previous_pet or the transitioncheck.
 ---------------------------------------------------------------------------]]--
 
 function ns.set_sum_msg_to_newpet(newpet, pool, npool)
@@ -320,7 +319,6 @@ function ns.msg_pet_summon_failed()
 	if ns.db.verbosityLevel < 1 then return end
 	addonprint(CLR.WARN() .. "You don't meet the conditions for summoning a pet right now.")
 end
-
 
 --[[---------------------------------------------------------------------------
 Three big messages: Status, Low Pet Pool, and Help
@@ -418,7 +416,10 @@ function ns.status_display()
 		{ -- Timer
 			'%s is %s. Next random pet in %s.',
 			CLR.KEY('Summon Timer'),
-			CLR.STATE(ns.db.newPetTimer ~= 0 and ns.sec_to_format(ns.db.newPetTimer, 2, false, false) or 'disabled'),
+			CLR.STATE(
+				ns.db.newPetTimer ~= 0 and ns.sec_to_format(ns.db.newPetTimer, 2, false, false)
+					or 'disabled'
+			),
 			CLR.EM(ns.remaining_timer_for_display()),
 		},
 		{ -- Skyride-mounted
@@ -442,7 +443,9 @@ function ns.status_display()
 			'%s is %s%s. Eligible pets: %s.',
 			CLR.KEY('Pet Pool'),
 			CLR.STATE(curr_pool_str(true)),
-			not ns.db.favsOnly and ns.db.favsProbability < 1 and ' (favs prob: ' .. CLR.STATE(ns.db.favsProbability) ..   ')' or '',
+			not ns.db.favsOnly and ns.db.favsProbability < 1 and ' (favs prob: ' .. CLR.STATE(
+				ns.db.favsProbability
+			) .. ')' or '',
 			CLR.EM(curr_num_pool_str()),
 		},
 		{ -- Per-char favs
@@ -451,7 +454,12 @@ function ns.status_display()
 			CLR.STATE(ns.dbc.charFavsEnabled and 'enabled' or 'disabled'),
 			CLR.EM(CHAR_NAME),
 		},
-		ns.db.eventAlt and format('%s%s are %s for all chars.', CLR.WARN(), CLR.KEY('Alternative Events'), CLR.STATE('enabled')) or '',
+		ns.db.eventAlt and format(
+			'%s%s are %s for all chars.',
+			CLR.WARN(),
+			CLR.KEY('Alternative Events'),
+			CLR.STATE('enabled')
+		) or '',
 		-- '\n',
 		{ -- Header for char favs list
 			'%s has %s char-specific favorite%s',
@@ -499,7 +507,6 @@ function ns.msg_low_petpool(nPool)
 	local content = table.concat(content, R)
 	chat_user_notification(content)
 end
-
 
 --[[===========================================================================
 	Slash UI
@@ -564,17 +571,20 @@ function SlashCmdList.PetWalker(msg)
 end
 
 --[[---------------------------------------------------------------------------
-Toggles, Commands
+	Commands
 ---------------------------------------------------------------------------]]--
 
 function ns:dismiss_and_disable()
 	local actpet = C_PetJournal_GetSummonedPetGUID()
-	if actpet then
-		C_PetJournal.SummonPetByGUID(actpet)
-	end
+	if actpet then C_PetJournal.SummonPetByGUID(actpet) end
 	ns.db.autoEnabled = false
 	ns.events:unregister_pw_events()
-	addonprint(format('Pet dismissed and auto-summoning %s.', ns.db.autoEnabled and 'enabled' or 'disabled'))
+	addonprint(
+		format(
+			'Pet dismissed and auto-summoning %s.',
+			ns.db.autoEnabled and 'enabled' or 'disabled'
+		)
+	)
 end
 
 function ns.verbosity_full()
@@ -615,7 +625,16 @@ function ns:event_toggle()
 		ns.events:unregister_summon_events()
 		ns.events:register_summon_events()
 	end
-	addonprint(format('%s %s.', ns.db.eventAlt and 'Alternative event(s)' or 'Default event (PLAYER_STARTED_MOVING)', ns.db.autoEnabled and 'registered' or 'selected. Note that auto-summoning is currently disabled; event(s) will be registered when you enable auto-summoning (' .. CLR.CMD('/pw a') .. ')'))
+	addonprint(
+		format(
+			'%s %s.',
+			ns.db.eventAlt and 'Alternative event(s)' or 'Default event (PLAYER_STARTED_MOVING)',
+			ns.db.autoEnabled and 'registered'
+				or 'selected. Note that auto-summoning is currently disabled; event(s) will be registered when you enable auto-summoning ('
+					.. CLR.CMD('/pw a')
+					.. ')'
+		)
+	)
 end
 
 function ns:favs_toggle(arg2)
@@ -756,8 +775,6 @@ function ns.set_num_recents(num)
 		format('Previous Pets history set to %s.', ns.db.numRecents - 1)
 	)
 end
-
-
 
 --[[---------------------------------------------------------------------------
 	For the bindings.xml

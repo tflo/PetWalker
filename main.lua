@@ -37,8 +37,8 @@ local IsStealthed = _G.IsStealthed
 local UnitChannelInfo = _G.UnitChannelInfo
 local C_PlayerInfo_GetGlidingInfo = C_PlayerInfo.GetGlidingInfo
 local time = _G.time
-local tostring = _G.tostring
-local format = _G.format
+
+local debugprint = ns.debugprint
 
 --[[===========================================================================
 	Some Variables/Constants
@@ -53,7 +53,6 @@ alt we just logged out). Also when slotting a pet into a team in the Pet Journal
 from being saved.
 ]]
 ns.pet_verified = false
--- ns.skipNextSave = false
 ns.in_battlesleep = false
 -- Last time AutoRestore() was called.
 local time_restore_pet = 0
@@ -89,10 +88,8 @@ local excluded_species = {
 -- 	2403, -- Abyssal Eel
 }
 
-
 -- Debug
 ns.time_summonspell = 0
-
 
 --[[---------------------------------------------------------------------------
 	Summoning prevention
@@ -144,7 +141,7 @@ local function stop_auto_summon(t)
 		throttle = max(throttle, throttle_min)
 		local now = t or time()
 		if now - time_responded_to_summoning_event < throttle then
-			ns.debugprint('‹stop_auto_summon()›: existing throttle found:', throttle)
+			debugprint('‹stop_auto_summon()›: existing throttle found:', throttle)
 			return true
 		end
 		time_responded_to_summoning_event, throttle = now, 0
@@ -156,7 +153,7 @@ local function stop_auto_summon(t)
 	-- Impossible to summon in flight, but this prevents wrong 'restored' messages
 	if is_inair() then
 		throttle = 5 -- throttle_reason = 'inair'
-		ns.debugprint 'We are in the air!'
+		debugprint 'We are in the air!'
 	elseif InCombatLockdown()
 		or not ns.db.drSummoning and is_skyride_mounted()
 		or IsStealthed() -- Includes Hunter Camouflage
@@ -212,7 +209,7 @@ local function stop_auto_summon(t)
 		throttle = 1 -- Must be > 0 to stop the autoaction in progress
 	end
 	if throttle > 0 then
-		ns.debugprint('‹stop_auto_summon()›: new throttle:', throttle)
+		debugprint('‹stop_auto_summon()›: new throttle:', throttle)
 		return true
 	end
 
@@ -317,7 +314,6 @@ function ns.saved_pet_summonability_check() --- After login
 	savedpet_is_summonable = false
 end
 
-
 --[[===========================================================================
 	Main actions
 ===========================================================================]]--
@@ -351,30 +347,26 @@ function ns.autoaction()
 	if stop_auto_summon(now) then return end
 	if ns.db.newPetTimer ~= 0 then
 		if ns.remaining_timer(now) == 0 then
-			ns.debugprint_pet '‹autoaction` --> `new_pet`'
+			ns.debugprint_pet '‹autoaction()› calls ‹new_pet()›'
 			ns:new_pet(now, false)
 			return
 		end
 	end
 	-- TODO: Could we not simply check against the saved db pet, and restore if it isn't correct or missing?
 	if not ns.pet_verified then
-		ns.debugprint_pet '‹autoaction` --> `transitioncheck` (pet not verified)'
+		ns.debugprint_pet '‹autoaction()› calls ‹transitioncheck()›, pet not verified'
 		ns.transitioncheck(true)
 		return
 	end
 	local actpet = C_PetJournal_GetSummonedPetGUID()
 	if not actpet then
-		ns.debugprint_pet '‹autoaction` --> `restore_pet`'
+		ns.debugprint_pet '‹autoaction()› calls ‹restore_pet()›'
 		ns:restore_pet()
 	end
 end
 
 --[[---------------------------------------------------------------------------
 	Restore pet
-	Pet is lost --> restore it.
-	To be called only by autoaction func!
-	No need to check against the current pet, since by definition, if we do have a
-	pet out, then it must be the correct one.
 ---------------------------------------------------------------------------]]--
 
 function ns:restore_pet()
@@ -384,12 +376,12 @@ function ns:restore_pet()
 	savedpet = db.recentPets[1]
 	time_restore_pet = now
 	if savedpet then
-		ns.debugprint '‹restore_pet()› restored saved pet'
+		debugprint '‹restore_pet()› restored saved pet'
 		ns.set_sum_msg_to_restore_pet(savedpet)
 		ns.pet_restored = true
 		ns:summon_pet(savedpet, false)
 	else
-		ns.debugprint '‹restore_pet()› COULD NOT FIND SAVED PET. Summoning new pet via Blizz ‹SummonRandomPet()›'
+		debugprint '‹restore_pet()› COULD NOT FIND SAVED PET. Summoning new pet via Blizz ‹SummonRandomPet()›'
 		ns.msg_no_saved_pet()
 		-- Do not use `new_pet()` as fallback, since it isn't guaranteed that the user has a valid pool.
 		-- (e.g. set to char favs and no char favs defined)
@@ -398,15 +390,13 @@ function ns:restore_pet()
 	end
 end
 
-
 --[[---------------------------------------------------------------------------
-	New pet
-	Called by autoaction when timer is due, or via command/key
+	New pet - timer is due, or via command/key
 ---------------------------------------------------------------------------]]--
 
 function ns:new_pet(the_time, manually_called)
 	if manually_called and stop_manual_summon() then return end
-	ns.debugprint('‹new_pet()› called; manually:', manually_called)
+	debugprint('‹new_pet()› called; manually:', manually_called)
 	local now = the_time or time()
 	if now - ns.time_newpet_success < 1.5 then return end
 	local actpet = C_PetJournal_GetSummonedPetGUID()
@@ -414,15 +404,18 @@ function ns:new_pet(the_time, manually_called)
 	-- See line 77; not really urgent, since the user simply can avoid moving, and additionally
 	-- the bank/mail of Argent Squire does not restart the CD when closed.
 	if actpet and is_excluded_by_id(actpet) then
-		ns.debugprint '‹new_pet()›: ‹actpet› is excluded'
+		debugprint '‹new_pet()›: ‹actpet› is excluded'
 		return
 	end
 	if not ns.pool_initialized then
-		ns.debugprint '‹new_pet()› calls ‹initialize_pool()›'
+		debugprint '‹new_pet()› calls ‹initialize_pool()›'
 		ns.initialize_pool()
 	end
 
-	local pool = ns.pet_pool or random() <= ns.db.favsProbability and ns.pet_pool_favs or ns.pet_pool_other or {}
+	local pool = ns.pet_pool
+		or random() <= ns.db.favsProbability and ns.pet_pool_favs
+		or ns.pet_pool_other
+		or {}
 
 	local npool = #pool
 	local newpet
@@ -435,7 +428,7 @@ function ns:new_pet(the_time, manually_called)
 		-- See the loop issue https://github.com/tflo/PetWalker/issues/20.
 		-- Also, it may just confuse the user if we show the "low pet pool" warning and in the same moment
 		-- summon a new (and unrelated) pet. The next auto-summon trigger will restore the saved pet anyway.
-		ns.debugprint '‹new_pet()›: zero pet pool, warning msg on cooldown'
+		debugprint '‹new_pet()›: zero pet pool, warning msg on cooldown'
 	else
 		if npool == 1 then
 			newpet = pool[1]
@@ -457,12 +450,10 @@ function ns:new_pet(the_time, manually_called)
 	end
 end
 
-
 --[[---------------------------------------------------------------------------
 	Summon previous
 ---------------------------------------------------------------------------]]--
 
--- NewRecents
 function ns.previous_pet()
 	if stop_manual_summon() then return end
 	local db = ns.dbc.charFavsEnabled and ns.db.favsOnly and ns.dbc or ns.db
@@ -513,22 +504,25 @@ function ns.summon_targetpet()
 	end
 end
 
-
 --[[----------------------------------------------------------------------------
 	Transition check
-	One time action, after big transitions, like login, portals, entering instance, etc. Basically a standalone
-	restore_pet func; in addition, it not only checks for presence of a pet, but also against the saved pet. This makes
-	sure that a newly logged toon gets the same pet as the previous toon had at logout. We need more checks here than
-	in restore_pet, bc restore_pet is "prefiltered" by autoaction, and here we are not.
+	One time action, after big transitions, like login, portals, entering instance, etc.
+	Basically a standalone restore_pet func; in addition, it not only checks for presence
+	of a pet, but also against the saved pet. This makes sure that a newly logged toon gets
+	the same pet as the previous toon had at logout. We need more checks here than in
+	restore_pet, as restore_pet is prefiltered by autoaction, and here we are not.
 ----------------------------------------------------------------------------]]--
 
 function ns.transitioncheck(checks_done)
--- 	Can be called via the entering-world events, or via `autoaction`, so we
--- 	if ns.pet_verified or InCombatLockdown() or IsFlying() or UnitOnTaxi 'player' then
+	-- Can be called via the entering-world events, or via `autoaction`, so we
+	-- if ns.pet_verified or InCombatLockdown() or IsFlying() or UnitOnTaxi 'player' then
 	-- TODO: Observe if stop_auto_summon works as expected here!
 	-- Never run the stop_auto_summon check twice, as the 2nd one will always find a throttle then!
 	if not checks_done and stop_auto_summon() then
-			ns.debugprint('‹transitioncheck()› stopped by ‹stop_auto_summon()›; ‹pet_verified›:', ns.pet_verified)
+		debugprint(
+			'‹transitioncheck()› stopped by ‹stop_auto_summon()›; ‹pet_verified›:',
+			ns.pet_verified
+		)
 		return
 	end
 	local now = time()
@@ -536,7 +530,7 @@ function ns.transitioncheck(checks_done)
 	might come before us. Also prevents redundant run in case we use both events
 	NEW_AREA and ENTERING_WORLD. ]]
 	if now - time_restore_pet < 6 then
-		ns.debugprint('‹transitioncheck()› aborted; less than 6s since ‹restore_pet()›')
+		debugprint('‹transitioncheck()› aborted; less than 6s since ‹restore_pet()›')
 		return
 	end
 	ns.current_zone = C_Map_GetBestMapForUnit 'player'
@@ -551,13 +545,13 @@ function ns.transitioncheck(checks_done)
 		end
 	end
 	if savedpet and savedpet_is_summonable then
-		ns.debugprint '‹transitioncheck()› restores saved pet'
+		debugprint '‹transitioncheck()› restores saved pet'
 		ns.set_sum_msg_to_transcheck(savedpet)
 		ns:summon_pet(savedpet, false)
 	--[[ Should only come into play if savedpet is still nil due to a slow
 	loading process ]]
 	elseif not actpet then
-		ns.debugprint '‹transitioncheck()› could not find saved pet; summoning new pet'
+		debugprint '‹transitioncheck()› could not find saved pet; summoning new pet'
 		ns.msg_no_saved_pet()
 		ns:new_pet(now, false)
 	end
@@ -568,14 +562,12 @@ function ns.transitioncheck(checks_done)
 	-- Because we are unregistering now with every type of PLAYER_ENTERING_WORLD
 	-- HACK: Called separately after entering world, bc of the possible early return
 	-- ns.events:register_summon_events()
-	ns.debugprint '‹transitioncheck()› completed'
+	debugprint '‹transitioncheck()› completed'
 end
-
 
 --[[---------------------------------------------------------------------------
 	Save pet
-	Save any summoned pet.
-	Called by the COMPANION_UPDATE event func.
+	Triggered by COMPANION_UPDATE
 ---------------------------------------------------------------------------]]--
 
 function ns.save_pet()
@@ -583,12 +575,12 @@ function ns.save_pet()
 	-- when a pet is force-summoned by the Pet Journal when we put in a team slot,
 	-- after entering world events.
 	if not ns.pet_verified then
-		ns.debugprint '‹save_pet()› ABORTED, pet not verified'
+		debugprint '‹save_pet()› ABORTED, pet not verified'
 		return
 	end
 	local actpet = C_PetJournal_GetSummonedPetGUID()
 	if not actpet or is_excluded_by_id(actpet) then
-		ns.debugprint '‹save_pet()› ABORTED, no ‹actpet› or ‹actpet› is excluded'
+		debugprint '‹save_pet()› ABORTED, no ‹actpet› or ‹actpet› is excluded'
 		return
 	end
 	-- NewRecents
@@ -597,8 +589,8 @@ function ns.save_pet()
 	for i = #db.recentPets, 1, -1 do
 		if db.recentPets[i] == actpet then
 			table.remove(db.recentPets, i)
-			ns.debugprint('‹save_pet()› deduped recent pets at idx:', i)
--- 			ns.msg_recents_dupe_removed(i)
+			debugprint('‹save_pet()› deduped recent pets at idx:', i)
+			-- ns.msg_recents_dupe_removed(i)
 		end
 	end
 	table.insert(db.recentPets, 1, actpet)
@@ -607,10 +599,9 @@ function ns.save_pet()
 	end
 	-- TOOD:
 	-- ns.time_newpet_success = now
-	-- ns.debugprint 'Timer reset by save_pet()'
+	-- debugprint 'Timer reset by save_pet()'
 	ns.debugprint_pet '‹save_pet()› completed'
 end
-
 
 --[[---------------------------------------------------------------------------
 	Summon Pet
@@ -620,13 +611,18 @@ end
 
 function ns:summon_pet(pet, resettimer)
 	if not pet then -- TODO: needed?
-		ns.debugprint '‹summon_pet()› called without ‹pet› arg!'
+		debugprint '‹summon_pet()› called without ‹pet› arg!'
 		return
 	end
 	if ns.db.debugMode then
 		local is_summonable, error_num, error_text = C_PetJournal_GetPetSummonInfo(pet)
 		if not is_summonable then
-			ns.debugprint('‹summon_pet()›: Something is wrong with our summonability check: pet cannot be summoned, ‹GetPetSummonInfo()› returned', is_summonable, error_num, error_text)
+			debugprint(
+				'‹summon_pet()›: Something is wrong with our summonability check: pet cannot be summoned, ‹GetPetSummonInfo()› returned',
+				is_summonable,
+				error_num,
+				error_text
+			)
 			return
 		end
 	end
@@ -635,12 +631,11 @@ function ns:summon_pet(pet, resettimer)
 	if resettimer then
 		ns.time_newpet_success = now
 		-- TOOD:
-		-- ns.debugprint 'Timer reset by summon_pet()'
+		-- debugprint 'Timer reset by summon_pet()'
 	end
 	ns.msg_pet_summon_success()
 	C_PetJournal_SummonPetByGUID(pet)
 end
-
 
 --[[===========================================================================
 	Pet pool
@@ -665,42 +660,13 @@ local function clean_charfavs()
 	if count > 0 then ns.msg_removed_invalid_id(count) end
 end
 
--- function ns.initialize_pool_OLD()
--- 	ns.debugprint 'Running `initialize_pool`'
--- 	table.wipe(ns.pet_pool)
--- 	clean_charfavs()
--- 	local index = 1
--- 	while true do
--- 		local pet_id, species_id, _, _, _, favorite = C_PetJournal_GetPetInfoByIndex(index)
--- 		if not pet_id then break end
--- 		if not is_excluded_by_species(species_id) and is_pet_summonable(pet_id) then
--- 			if ns.db.favsOnly then
--- 				if favorite then table.insert(ns.pet_pool, pet_id) end
--- 			else
--- 				table.insert(ns.pet_pool, pet_id)
--- 			end
--- 		end
--- 		index = index + 1
--- 	end
--- 	ns.pool_initialized = true -- Condition in ns:new_pet and ns.ManualSummonNew
--- 	local now = time()
--- 	if #ns.pet_pool <= 0 and ns.db.newPetTimer ~= 0 and now - time_pool_msg > 30 then
--- 		ns.msg_low_petpool(#ns.pet_pool)
--- 		time_pool_msg = now
--- 	end
--- end
-
 local function can_add_to_pool(species_id, pet_id)
 	return not is_excluded_by_species(species_id) and is_pet_summonable(pet_id)
 end
 
--- TODO: auto-switch to "All" if no Favs available
 function ns.initialize_pool(rerun)
 	local pet_pool, pet_pool_favs, pet_pool_other = {}, {}, {}
-	ns.debugprint('‹initialize_pool()› called; rerun:', rerun)
--- 	wipe(ns.pet_pool_favs)
--- 	wipe(ns.pet_pool_other)
--- 	wipe(ns.pet_pool)
+	debugprint('‹initialize_pool()› called; rerun:', rerun)
 	clean_charfavs()
 	local now = time()
 	local can_send_warning = now - time_pool_msg > 60 and ns.db.newPetTimer ~= 0
@@ -782,14 +748,14 @@ function ns.initialize_pool(rerun)
 			ns.msg_force_changed_pool()
 			ns.initialize_pool(true)
 		end
-		ns.debugprint '‹initialize_pool()› failed!'
+		debugprint '‹initialize_pool()› failed!'
 		return
 	end
 
 	ns.pool_initialized = true
 	ns.pet_pool_favs, ns.pet_pool_other, ns.pet_pool =
 		pet_pool_favs, pet_pool_other, pet_pool
-	ns.debugprint '‹initialize_pool()› completed'
+	debugprint '‹initialize_pool()› completed'
 end
 
 --[[===========================================================================
@@ -800,7 +766,7 @@ local C_PetJournal_PetIsFavorite1, C_PetJournal_SetFavorite1, C_PetJournal_GetPe
 
 -- Largely unaltered code from NugMiniPet
 function ns.cfavs_update()
-	ns.debugprint '‹cfavs_update()› called'
+	debugprint '‹cfavs_update()› called'
 	if ns.dbc.charFavsEnabled then
 		C_PetJournal_PetIsFavorite1 = C_PetJournal_PetIsFavorite1 or C_PetJournal_PetIsFavorite
 		C_PetJournal_SetFavorite1 = C_PetJournal_SetFavorite1 or C_PetJournal_SetFavorite
@@ -831,9 +797,8 @@ function ns.cfavs_update()
 	_G.C_PetJournal.GetPetInfoByIndex = C_PetJournal_GetPetInfoByIndex
 	if PetJournal then PetJournal_OnEvent(PetJournal, 'PET_JOURNAL_LIST_UPDATE') end
 	ns:PET_JOURNAL_LIST_UPDATE() -- Do not remove this
-	ns.debugprint '‹cfavs_update()› completed'
+	debugprint '‹cfavs_update()› completed'
 end
-
 
 --[[===========================================================================
 	GUI stuff for Pet Journal
@@ -846,16 +811,21 @@ see at a glance (in the opened Pet Journal) what type of favs are enabled.
 ]]
 
 function ns:create_cfavs_checkbox()
-	local btn = CreateFrame('CheckButton', 'PetWalkerCharFavsCheckbox', PetJournal, 'UICheckButtonTemplate')
+	local btn =
+		CreateFrame('CheckButton', 'PetWalkerCharFavsCheckbox', PetJournal, 'UICheckButtonTemplate')
 	btn:SetSize(26, 26)
-	btn:SetHitRectInsets(-2,-80,-2,-2)
+	btn:SetHitRectInsets(-2, -80, -2, -2)
 	btn:SetPoint('BOTTOMLEFT', PetJournal, 'BOTTOMLEFT', 400, 1)
 	-- btn:SetChecked(ns.dbc.charFavsEnabled)
 	btn:SetScript('OnEnter', function(self)
 		GameTooltip:SetOwner(self, 'ANCHOR_TOPLEFT')
 		GameTooltip:AddLine('\124cnDIM_GREEN_FONT_COLOR:PetWalker')
-		GameTooltip:AddLine('Select this to use per-character favorites, or toggle with \124cnORANGE_FONT_COLOR:/pw c\124r.')
-		GameTooltip:AddLine('Toggle favs/all: \124cnORANGE_FONT_COLOR:/pw f\124r | Status: \124cnORANGE_FONT_COLOR:/pw s\124r | Help & all commands: \124cnORANGE_FONT_COLOR:/pw h\124r')
+		GameTooltip:AddLine(
+			'Select this to use per-character favorites, or toggle with \124cnORANGE_FONT_COLOR:/pw c\124r.'
+		)
+		GameTooltip:AddLine(
+			'Toggle favs/all: \124cnORANGE_FONT_COLOR:/pw f\124r | Status: \124cnORANGE_FONT_COLOR:/pw s\124r | Help & all commands: \124cnORANGE_FONT_COLOR:/pw h\124r'
+		)
 		GameTooltip:Show()
 	end)
 	btn:SetScript('OnClick', function()
