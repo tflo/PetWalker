@@ -9,6 +9,8 @@ local C_PetJournal_GetSummonedPetGUID = C_PetJournal.GetSummonedPetGUID
 local GetTimePreciseSec = _G.GetTimePreciseSec
 local tostring = _G.tostring
 local format = _G.format
+local GetTimePreciseSec = _G.GetTimePreciseSec
+local GetTime = _G.GetTime
 local WTC = WrapTextInColorCode
  -- Don't use a hyphen (U+002D), it's very short in some fonts (e.g. ArialN)
  -- If the minus sign glyph "−" (U+2212, \226\136\146) is missing in a user custom chat font,
@@ -18,7 +20,7 @@ local MYSHORTNAME = 'PW'
 ns.MYSHORTNAME = MYSHORTNAME
 
 --[[===========================================================================
-	Colors
+	Colors and print
 ===========================================================================]]--
 
 local colors = {
@@ -104,52 +106,89 @@ end
 	Debug
 ===========================================================================]]--
 
+
+local function ts_debug(precise)
+	local func = precise and GetTimePreciseSec or GetTime
+	local ts = func() % 100
+	local num_sec, num_dec = 2, 4
+	local width = num_sec + 1 + num_dec
+	return format('%0' .. width .. '.' .. num_dec .. 'f', ts)
+end
+
 function ns.debug_display()
-	ns.status_display()
+-- 	ns.status_display()
 	local actpet = C_PetJournal_GetSummonedPetGUID()
-	local lines = {
-		format('%s%s Debug:', CLR.DEBUG(), MYSHORTNAME),
-		format('%sDB current pet|r: %s [%s]', CLR.DEBUG(), ns.id_to_name(ns.db.recentPets[1]), tostring(ns.db.recentPets[1])),
-		format('%sDB previous pet|r: %s [%s]', CLR.DEBUG(), ns.id_to_name(ns.db.recentPets[2]), tostring(ns.db.recentPets[2])),
-		format('%sChar DB current pet|r: %s [%s]', CLR.DEBUG(), ns.id_to_name(ns.dbc.recentPets[1]), tostring(ns.dbc.recentPets[1])),
-		format('%sChar DB previous pet|r: %s [%s]', CLR.DEBUG(), ns.id_to_name(ns.dbc.recentPets[2]), tostring(ns.dbc.recentPets[2])),
-		format('%s`pet_verified`|r: %s', CLR.DEBUG(), tostring(ns.pet_verified)),
-		format('%sCurrently summoned pet|r: %s [%s]', CLR.DEBUG(), ns.id_to_name(actpet), tostring(actpet)),
-		'---',
-		format('%s`IsPossessBarVisible()` [in use]: %s', CLR.DEBUG(), tostring(IsPossessBarVisible())),
-		format("%s`UnitIsControlling 'player'`: %s", CLR.DEBUG(), tostring(UnitIsControlling 'player')),
-		format("%s`UnitHasVehicleUI 'player'` [in use]: %s", CLR.DEBUG(), tostring(UnitHasVehicleUI 'player')),
-		format('%s`HasVehicleActionBar()` [in use]: %s', CLR.DEBUG(), tostring(HasVehicleActionBar())),
-		format('%s`HasOverrideActionBar()`: %s', CLR.DEBUG(), tostring(HasOverrideActionBar())),
-		format('%s`HasExtraActionBar()`: %s', CLR.DEBUG(), tostring(HasExtraActionBar())),
-		format('%s`HasBonusActionBar()`: %s', CLR.DEBUG(), tostring(HasBonusActionBar())),
--- 		format('%s`HasTempShapeshiftActionBar()`: %s', CLR.DEBUG(), tostring(HasTempShapeshiftActionBar())),
-		format("%s`UnitInVehicle 'player'`: %s", CLR.DEBUG(), tostring(UnitInVehicle 'player')),
-		format('%s`CanExitVehicle()`: %s', CLR.DEBUG(), tostring(CanExitVehicle())),
-		format('%s`IsMounted()`: %s', CLR.DEBUG(), tostring(IsMounted())),
-		format('%s`IsFlying()` [in use]: %s', CLR.DEBUG(), tostring(IsFlying())),
-		format('%s`IsStealthed()` [in use]: %s', CLR.DEBUG(), tostring(IsStealthed())),
-	}
-	for _, l in ipairs(lines) do print(l) end
+local lines = {
+	{ '%s Debug:', MYSHORTNAME },
+	{
+		'DB current pet|r: %s [%s]',
+		ns.id_to_name(ns.db.recentPets[1]),
+		tostring(ns.db.recentPets[1]),
+	},
+	{
+		'DB previous pet|r: %s [%s]',
+		ns.id_to_name(ns.db.recentPets[2]),
+		tostring(ns.db.recentPets[2]),
+	},
+	{
+		'Char DB current pet|r: %s [%s]',
+		ns.id_to_name(ns.dbc.recentPets[1]),
+		tostring(ns.dbc.recentPets[1]),
+	},
+	{
+		'Char DB previous pet|r: %s [%s]',
+
+		ns.id_to_name(ns.dbc.recentPets[2]),
+		tostring(ns.dbc.recentPets[2]),
+	},
+	{ '‹pet_verified›|r: %s', tostring(ns.pet_verified) },
+	{ 'Currently summoned pet|r: %s [%s]', ns.id_to_name(actpet), tostring(actpet) },
+	'---',
+	{ '‹IsPossessBarVisible()› [in use]: %s', tostring(IsPossessBarVisible()) },
+	{ '‹UnitIsControlling "player"›: %s', tostring(UnitIsControlling "player") },
+	{
+		'‹UnitHasVehicleUI "player"› [in use]: %s',
+
+		tostring(UnitHasVehicleUI "player"),
+	},
+	{ '‹HasVehicleActionBar()› [in use]: %s', tostring(HasVehicleActionBar()) },
+	{ '‹HasOverrideActionBar()›: %s', tostring(HasOverrideActionBar()) },
+	{ '‹HasExtraActionBar()›: %s', tostring(HasExtraActionBar()) },
+	{ '‹HasBonusActionBar()›: %s', tostring(HasBonusActionBar()) },
+	-- {'‹HasTempShapeshiftActionBar()›: %s', tostring(HasTempShapeshiftActionBar())},
+	{ '‹UnitInVehicle "player"›: %s', tostring(UnitInVehicle "player") },
+	{ '‹CanExitVehicle()›: %s', tostring(CanExitVehicle()) },
+	{ '‹IsMounted()›: %s', tostring(IsMounted()) },
+	{ '‹IsFlying()› [in use]: %s', tostring(IsFlying()) },
+	{ '‹IsStealthed()› [in use]: %s', tostring(IsStealthed()) },
+}
+	multiprint(lines, CLR.DEBUG())
 end
 
--- without pet info
-function ns.debugprint(...)
-	if ns.db.debugMode then
-		local a, b = strsplit('.', GetTimePreciseSec())
-		print(format('[%s.%s] %s%s>DEBUG>', a:sub(-3), b:sub(1, 3), CLR.DEBUG(), MYSHORTNAME), ...)
+do
+	local function dprint(...)
+		print(format('%s[%s] %s>DEBUG>', CLR.DEBUG(), ts_debug(true), MYSHORTNAME), ...)
 	end
-end
 
--- with pet info
-function ns.debugprint_pet(msg)
-	if ns.db.debugMode then
-	local a, b = strsplit('.', GetTimePreciseSec())
-	local lines = {
-		format('[%s.%s] %s%s: %s', a:sub(-3), b:sub(1, 3), CLR.DEBUG(), MYSHORTNAME, msg),
-		format('%sCurrent DB (%s) pet|r: %s', CLR.DEBUG(), ns.dbc.charFavsEnabled and ns.db.favsOnly and 'char' or 'global', ns.id_to_name(ns.dbc.charFavsEnabled and ns.db.favsOnly and ns.dbc.recentPets[1] or ns.db.recentPets[1])),
-	}
-	for _, l in ipairs(lines) do print(l) end
+	-- without pet info
+	function ns.debugprint(...)
+		if ns.db.debugMode then dprint(...) end
+	end
+
+	-- with pet info
+	function ns.debugprint_pet(...)
+		if not ns.db.debugMode then return end
+		local perchar = ns.dbc.charFavsEnabled and ns.db.favsOnly
+		local curr_db = perchar and ns.dbc or ns.db
+		dprint(...)
+		print(
+			format(
+				'%sCurrent DB (%s) pet: %s',
+				CLR.DEBUG(),
+				CLR.EM(perchar and 'char' or 'global'),
+				CLR.EM(ns.id_to_name(curr_db.recentPets[1]))
+			)
+		)
 	end
 end
 
