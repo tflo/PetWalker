@@ -41,6 +41,8 @@ local defaults_global = {
 }
 
 local defaults_perchar = {
+	 -- Added recently (Feb 2026) so force an update; remove after a while.
+	dbVersion = DB_VERSION_CURRENT - 0.1,
 	charFavsEnabled = false,
 	charFavs = {},
 	recentPets = {},
@@ -81,19 +83,25 @@ local function clean_removed(trg, ref)
 end
 
 local function update_db()
-	local ver = db.dbVersion or 0
-	if ver == DB_VERSION_CURRENT then return end
+	local ver_glob = db.dbVersion or 0
+	local ver_char = dbc.dbVersion or 0
 
 	-- Do the migration in ascending order, in case we have historically overlapping changes!
-	if ver < 2.1 then
+	if ver_glob < 2.1 then
 		db.favsProbability = db.favsOnly and 0.66 or defaults_global.favsProbability
 	end
 
-	clean_removed(db, defaults_global)
-	clean_removed(dbc, defaults_perchar)
+	if ver_glob ~= DB_VERSION_CURRENT then
+		clean_removed(db, defaults_global)
+		db.dbVersion = DB_VERSION_CURRENT
+		-- TODO: print a message
+	end
+	if ver_char ~= DB_VERSION_CURRENT then
+		clean_removed(dbc, defaults_perchar)
+		dbc.dbVersion = DB_VERSION_CURRENT
+		-- TODO: print a message
+	end
 
-	db.dbVersion = DB_VERSION_CURRENT
-	ns.db_updated = true
 end
 
 update_db()
