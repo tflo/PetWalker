@@ -1,7 +1,7 @@
 -- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 -- Copyright (c) 2022-2026 Thomas Floeren
 
-local ADDON_NAME, ns = ...
+local MYNAME, ns = ...
 
 
 local C_AddOnsIsAddOnLoaded = _G.C_AddOns.IsAddOnLoaded
@@ -40,14 +40,14 @@ local use_delay_PMDC = true -- true/false
 ===========================================================================]]--
 
 local monitored_addons = {
-	[ADDON_NAME] = true,
+	[MYNAME] = true,
 	['Blizzard_Collections'] = true,
 }
 -- dtd(monitored_addons)
 
 local function ADDON_LOADED(addon)
 	if not monitored_addons[addon] then return end
-	if addon == ADDON_NAME then
+	if addon == MYNAME then
 		ns.time_newpet_success = time() - (ns.db.newPetTimer - ns.db.remainingTimer)
 
 		-- The summon events are now registered with transitioncheck or delayed after PLAYER_ENTERING_WORLD
