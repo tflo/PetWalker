@@ -2,15 +2,13 @@
 -- Copyright (c) 2022-2026 Thomas Floeren
 
 local MYNAME, ns = ...
-local ADDON_NAME = MYNAME -- tmp
-local MYVERSION = C_AddOns.GetAddOnMetadata(ADDON_NAME, 'Version')
+local MYVERSION = C_AddOns.GetAddOnMetadata(MYNAME, 'Version')
 -- API
 local C_PetJournal_GetSummonedPetGUID = _G.C_PetJournal.GetSummonedPetGUID
 local C_PetJournal_GetBattlePetLink = _G.C_PetJournal.GetBattlePetLink
 local tostring = _G.tostring
 local format = _G.format
 local print = _G.print
-local WTC = WrapTextInColorCode
 
 local CLR = ns.CLR
 
@@ -38,7 +36,7 @@ end
 local BLOCK_SEP = CLR.ADDON() .. strrep('+', 42)
 
 local function chat_user_notification(msg) -- OLD
-	print(CLR.ADDON() .. ADDON_NAME .. ":", msg)
+	print(CLR.ADDON() .. MYNAME .. ":", msg)
 end
 
 local function addonprint(msg)
@@ -293,7 +291,7 @@ end
 Three big messages: Status, Low Pet Pool, and Help
 ---------------------------------------------------------------------------]]--
 
-local function print_help_or_status(linestable, linecolor)
+local function multiprint(linestable, linecolor)
 	linecolor = linecolor or CLR.TXT()
 	for _, v in ipairs(linestable) do
 		if type(v) == 'table' then
@@ -309,8 +307,9 @@ function ns.help_display()
 	local text = {
 		BLOCK_SEP,
 		format( -- Header
-			'%s Help: %s or %s supports these commands:',
+			'%s%s Help: %s or %s supports these commands:',
 			CLR.HEAD(),
+			CLR.ADDON(ns.MYSHORTNAME),
 			CLR.CMD('/petwalker'),
 			CLR.CMD('/pw')
 		),
@@ -318,14 +317,14 @@ function ns.help_display()
 			'%s : Toggle %s (new pet or restore); this is the %q.',
 			CLR.CMD('a'),
 			CLR.KEY('auto-summoning'),
-			CLR.EM('Main Switch'),
+			CLR.QUOTE('Main Switch'),
 		},
 		{ -- Dismiss & disable
 			'%s : Immediately %s current pet and %s; %q.',
 			CLR.CMD('d'),
 			CLR.KEY('dismiss'),
 			CLR.KEY('disable auto-summoning'),
-			CLR.EM('Emergency Off'),
+			CLR.QUOTE('Emergency Off'),
 		},
 		{ -- Skyride-mounted
 			'%s : Toggle %s also %s: %s',
@@ -414,7 +413,7 @@ function ns.help_display()
 		},
 		BLOCK_SEP,
 	}
-	print_help_or_status(text)
+	multiprint(text)
 end
 
 local function get_charfavs_for_status()
@@ -430,7 +429,7 @@ end
 function ns.status_display()
 	if not ns.pool_initialized then ns.initialize_pool() end
 	local num_cfavs, list_cfavs = get_charfavs_for_status()
-	local statustext = {
+	local text = {
 		BLOCK_SEP,
 		format( -- Header
 			'%s%s [v%s]: Status & Settings:',
@@ -501,7 +500,7 @@ function ns.status_display()
 		BLOCK_SEP,
 	}
 
-	print_help_or_status(statustext)
+	multiprint(text)
 end
 
 -- TODO: different msgs for the situations:

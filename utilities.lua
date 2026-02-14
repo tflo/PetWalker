@@ -9,6 +9,7 @@ local C_PetJournal_GetSummonedPetGUID = C_PetJournal.GetSummonedPetGUID
 local GetTimePreciseSec = _G.GetTimePreciseSec
 local tostring = _G.tostring
 local format = _G.format
+local WTC = WrapTextInColorCode
  -- Don't use a hyphen (U+002D), it's very short in some fonts (e.g. ArialN)
  -- If the minus sign glyph "−" (U+2212, \226\136\146) is missing in a user custom chat font,
  -- go with an en–dash (U+2013, \226\128\147).
@@ -64,6 +65,9 @@ local CLR = setmetatable({}, {
 ns.CLR = CLR
 -- Usage: print('text ' .. CLR.WARN('warning') .. ' text' .. CLR.HEAD() .. ' text')
 
+--[[===========================================================================
+	Helpers
+===========================================================================]]--
 
 function ns.id_to_name(id)
 	if not id then return "<¡id_to_name() didn't receive a pet GUID!>" end
@@ -83,6 +87,9 @@ function ns.id_to_link(id)
 	return tostring(link) or '¿petlink?'
 end
 
+--[[===========================================================================
+	Debug
+===========================================================================]]--
 
 function ns.debug_display()
 	ns.status_display()
@@ -132,6 +139,10 @@ function ns.debugprint_pet(msg)
 	for _, l in ipairs(lines) do print(l) end
 	end
 end
+
+--[[===========================================================================
+	For UI
+===========================================================================]]--
 
 function ns.remaining_timer(time)
 	local rem = ns.time_newpet_success + ns.db.newPetTimer - time
