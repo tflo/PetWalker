@@ -291,18 +291,6 @@ end
 Three big messages: Status, Low Pet Pool, and Help
 ---------------------------------------------------------------------------]]--
 
-local function multiprint(linestable, linecolor)
-	linecolor = linecolor or CLR.TXT()
-	for _, v in ipairs(linestable) do
-		if type(v) == 'table' then
-			v[1] = linecolor .. v[1]
-			print(format(unpack(v)))
-		elseif v then
-			print(v)
-		end
-	end
-end
-
 function ns.help_display()
 	local text = {
 		BLOCK_SEP,
@@ -413,7 +401,7 @@ function ns.help_display()
 		},
 		BLOCK_SEP,
 	}
-	multiprint(text)
+	ns.multiprint(text)
 end
 
 local function get_charfavs_for_status()
@@ -500,7 +488,7 @@ function ns.status_display()
 		BLOCK_SEP,
 	}
 
-	multiprint(text)
+	ns.multiprint(text)
 end
 
 -- TODO: different msgs for the situations:

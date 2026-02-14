@@ -65,6 +65,19 @@ local CLR = setmetatable({}, {
 ns.CLR = CLR
 -- Usage: print('text ' .. CLR.WARN('warning') .. ' text' .. CLR.HEAD() .. ' text')
 
+local function multiprint(linestable, linecolor)
+	linecolor = linecolor or CLR.TXT()
+	for _, v in ipairs(linestable) do
+		if type(v) == 'table' then
+			v[1] = linecolor .. v[1]
+			print(format(unpack(v)))
+		elseif v then
+			print(v)
+		end
+	end
+end
+ns.multiprint = multiprint
+
 --[[===========================================================================
 	Helpers
 ===========================================================================]]--
