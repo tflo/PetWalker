@@ -13,8 +13,8 @@ local C_TimerAfter = _G.C_Timer.After
 local delay_after_login = 14
 local delay_after_reload = 8
 local delay_after_instance = 6
--- C_Timer launched at ADDON_LOADED
-local delay_login_msg = 22
+-- C_Timer launched at FIRST_FRAME_RENDERED
+local delay_login_msg = 10
 -- TODO: Should we delay also after we change or select pet teams in Rematch / PJ
 local delay_after_battle = 15 -- Post-petbattle sleep
 local instasummon_after_battlesleep = true -- Summon without waiting for trigger event
@@ -49,9 +49,6 @@ local function ADDON_LOADED(addon)
 	if not monitored_addons[addon] then return end
 	if addon == ADDON_NAME then
 		ns.time_newpet_success = time() - (ns.db.newPetTimer - ns.db.remainingTimer)
-		-- *Not* with PLAYER_ENTERING_WORLD so that it is not affected
-		-- when all events get unregistered via /pw a
-		C_TimerAfter(delay_login_msg, ns.msg_login)
 
 		-- The summon events are now registered with transitioncheck or delayed after PLAYER_ENTERING_WORLD
 		if ns.db.autoEnabled then ns.events:register_meta_events() end
@@ -203,6 +200,13 @@ local function PET_JOURNAL_LIST_UPDATE()
 end
 ns.PET_JOURNAL_LIST_UPDATE = PET_JOURNAL_LIST_UPDATE -- Used in main
 
+-- This is the latest login-type event; use for login messages
+local function FIRST_FRAME_RENDERED()
+	-- *Not* with PLAYER_ENTERING_WORLD so that it is not affected
+	-- when all events get unregistered via /pw a
+	C_TimerAfter(delay_login_msg, ns.msg_login)
+end
+
 local function PLAYER_LOGOUT()
 	ns.db.remainingTimer = ns.remaining_timer(time())
 end
@@ -214,6 +218,7 @@ end
 local event_handlers = {
 	['ADDON_LOADED'] = ADDON_LOADED,
 	['PLAYER_ENTERING_WORLD'] = PLAYER_ENTERING_WORLD,
+	['FIRST_FRAME_RENDERED'] = FIRST_FRAME_RENDERED,
 	['PLAYER_LOGOUT'] = PLAYER_LOGOUT,
 	['PLAYER_STARTED_MOVING'] = PLAYER_STARTED_MOVING,
 	['ZONE_CHANGED'] = ZONE_CHANGED,
@@ -233,6 +238,7 @@ ns.events:SetScript('OnEvent', function(_, event, ...)
 end)
 
 ns.events:RegisterEvent 'ADDON_LOADED'
+ns.events:RegisterEvent 'FIRST_FRAME_RENDERED'
 
 -- Groups
 
