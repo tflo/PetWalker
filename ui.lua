@@ -12,6 +12,8 @@ local format = _G.format
 local print = _G.print
 local WTC = WrapTextInColorCode
 
+local CLR = ns.CLR
+
 local CHAR_NAME = UnitName 'player'
 local MAX_NUM_RECENTS = 20
 local MAX_VERBOSITY = 3
@@ -28,40 +30,6 @@ local function get_link_savedpet()
 	p = p and C_PetJournal_GetBattlePetLink(p)
 	return p
 end
-
---[[===========================================================================
-	Colors
-===========================================================================]]--
-
-local colors = {
-	ADDON = '7CFC00',
-	TXT = '8FBC8F',
-	HEAD = '8FBC8F', -- TODO: find a color for this
-	WARN = 'FA8072',
-	QUOTE = '808000',
-	EM = 'ADFF2F',
-	KEY = '00FA9A',
-	STATE = '32CD32',
-	CMD = 'FF00FF',
--- 	DEBUG = 'FF00FF', -- magenta
--- 	HEAD = 'FFE4B5', -- moccasin
--- 	BAD = 'DC143C', -- crimson
--- 	ON = '32CD32', -- limegreen
--- 	OFF = 'C0C0C0', -- silver
--- 	GOOD = '00FA9A', -- mediumspringgreen
--- 	YYY = '90EE90', -- lightgreen
-}
-
-local CLR = setmetatable({}, {
-	__index = function(_, k)
-		local color = colors[k]
-		assert(color, format('Color %q not defined.', k))
-		color = 'FF' .. color
-		return function(text) return text and WTC(text, color) or '\124c' .. color end
-	end,
-})
-ns.CLR = CLR
--- Usage: print('text ' .. CLR.WARN('warning') .. ' text' .. CLR.HEAD() .. ' text')
 
 --[[===========================================================================
 	Helpers

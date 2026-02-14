@@ -15,6 +15,55 @@ local format = _G.format
 local TEXT_MINUS = '\226\136\146'
 local COLOR_DEBUG = '|cffEE82EE'
 
+--[[===========================================================================
+	Colors
+===========================================================================]]--
+
+local colors = {
+-- 	ADDON = '0bff9a',
+-- 	TXT = 'b6f2d0',
+-- 	HEAD = '39d1bd', -- TODO: find a color for this
+-- 	WARN = 'ec6950',
+-- 	QUOTE = '88e2ac',
+-- 	EM = '88e2ac',
+-- 	KEY = '54d689',
+-- 	STATE = '2ebc69',
+-- 	CMD = 'e24eef',
+
+-- 	old:
+	ADDON = '7CFC00',
+	TXT = '8FBC8F',
+	HEAD = '7CFC00', -- TODO: find a color for this
+	WARN = 'FA8072',
+	QUOTE = '808000',
+	EM = 'ADFF2F',
+	KEY = '00FA9A',
+	STATE = '32CD32',
+	CMD = 'FF00FF',
+	DEBUG = 'EE82EE',
+
+
+
+-- 	HEAD = 'FFE4B5', -- moccasin
+-- 	BAD = 'DC143C', -- crimson
+-- 	ON = '32CD32', -- limegreen
+-- 	OFF = 'C0C0C0', -- silver
+-- 	GOOD = '00FA9A', -- mediumspringgreen
+-- 	YYY = '90EE90', -- lightgreen
+}
+
+local CLR = setmetatable({}, {
+	__index = function(_, k)
+		local color = colors[k]
+		assert(color, format('Color %q not defined.', k))
+		color = 'FF' .. color
+		return function(text) return text and WTC(text, color) or '\124c' .. color end
+	end,
+})
+ns.CLR = CLR
+-- Usage: print('text ' .. CLR.WARN('warning') .. ' text' .. CLR.HEAD() .. ' text')
+
+
 function ns.id_to_name(id)
 	if not id then return "<¡id_to_name() didn't receive a pet GUID!>" end
 	local name = select(8, C_PetJournal_GetPetInfoByPetID(id))
