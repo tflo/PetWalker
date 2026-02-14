@@ -13,7 +13,8 @@ local format = _G.format
  -- If the minus sign glyph "−" (U+2212, \226\136\146) is missing in a user custom chat font,
  -- go with an en–dash (U+2013, \226\128\147).
 local TEXT_MINUS = '\226\136\146'
-local COLOR_DEBUG = '|cffEE82EE'
+local MYSHORTNAME = 'PW'
+ns.MYSHORTNAME = MYSHORTNAME
 
 --[[===========================================================================
 	Colors
@@ -87,27 +88,27 @@ function ns.debug_display()
 	ns.status_display()
 	local actpet = C_PetJournal_GetSummonedPetGUID()
 	local lines = {
-		format('%sPW Debug:', COLOR_DEBUG),
-		format('%sDB current pet|r: %s [%s]', COLOR_DEBUG, ns.id_to_name(ns.db.recentPets[1]), tostring(ns.db.recentPets[1])),
-		format('%sDB previous pet|r: %s [%s]', COLOR_DEBUG, ns.id_to_name(ns.db.recentPets[2]), tostring(ns.db.recentPets[2])),
-		format('%sChar DB current pet|r: %s [%s]', COLOR_DEBUG, ns.id_to_name(ns.dbc.recentPets[1]), tostring(ns.dbc.recentPets[1])),
-		format('%sChar DB previous pet|r: %s [%s]', COLOR_DEBUG, ns.id_to_name(ns.dbc.recentPets[2]), tostring(ns.dbc.recentPets[2])),
-		format('%s`pet_verified`|r: %s', COLOR_DEBUG, tostring(ns.pet_verified)),
-		format('%sCurrently summoned pet|r: %s [%s]', COLOR_DEBUG, ns.id_to_name(actpet), tostring(actpet)),
+		format('%s%s Debug:', CLR.DEBUG(), MYSHORTNAME),
+		format('%sDB current pet|r: %s [%s]', CLR.DEBUG(), ns.id_to_name(ns.db.recentPets[1]), tostring(ns.db.recentPets[1])),
+		format('%sDB previous pet|r: %s [%s]', CLR.DEBUG(), ns.id_to_name(ns.db.recentPets[2]), tostring(ns.db.recentPets[2])),
+		format('%sChar DB current pet|r: %s [%s]', CLR.DEBUG(), ns.id_to_name(ns.dbc.recentPets[1]), tostring(ns.dbc.recentPets[1])),
+		format('%sChar DB previous pet|r: %s [%s]', CLR.DEBUG(), ns.id_to_name(ns.dbc.recentPets[2]), tostring(ns.dbc.recentPets[2])),
+		format('%s`pet_verified`|r: %s', CLR.DEBUG(), tostring(ns.pet_verified)),
+		format('%sCurrently summoned pet|r: %s [%s]', CLR.DEBUG(), ns.id_to_name(actpet), tostring(actpet)),
 		'---',
-		format('%s`IsPossessBarVisible()` [in use]: %s', COLOR_DEBUG, tostring(IsPossessBarVisible())),
-		format("%s`UnitIsControlling 'player'`: %s", COLOR_DEBUG, tostring(UnitIsControlling 'player')),
-		format("%s`UnitHasVehicleUI 'player'` [in use]: %s", COLOR_DEBUG, tostring(UnitHasVehicleUI 'player')),
-		format('%s`HasVehicleActionBar()` [in use]: %s', COLOR_DEBUG, tostring(HasVehicleActionBar())),
-		format('%s`HasOverrideActionBar()`: %s', COLOR_DEBUG, tostring(HasOverrideActionBar())),
-		format('%s`HasExtraActionBar()`: %s', COLOR_DEBUG, tostring(HasExtraActionBar())),
-		format('%s`HasBonusActionBar()`: %s', COLOR_DEBUG, tostring(HasBonusActionBar())),
--- 		format('%s`HasTempShapeshiftActionBar()`: %s', COLOR_DEBUG, tostring(HasTempShapeshiftActionBar())),
-		format("%s`UnitInVehicle 'player'`: %s", COLOR_DEBUG, tostring(UnitInVehicle 'player')),
-		format('%s`CanExitVehicle()`: %s', COLOR_DEBUG, tostring(CanExitVehicle())),
-		format('%s`IsMounted()`: %s', COLOR_DEBUG, tostring(IsMounted())),
-		format('%s`IsFlying()` [in use]: %s', COLOR_DEBUG, tostring(IsFlying())),
-		format('%s`IsStealthed()` [in use]: %s', COLOR_DEBUG, tostring(IsStealthed())),
+		format('%s`IsPossessBarVisible()` [in use]: %s', CLR.DEBUG(), tostring(IsPossessBarVisible())),
+		format("%s`UnitIsControlling 'player'`: %s", CLR.DEBUG(), tostring(UnitIsControlling 'player')),
+		format("%s`UnitHasVehicleUI 'player'` [in use]: %s", CLR.DEBUG(), tostring(UnitHasVehicleUI 'player')),
+		format('%s`HasVehicleActionBar()` [in use]: %s', CLR.DEBUG(), tostring(HasVehicleActionBar())),
+		format('%s`HasOverrideActionBar()`: %s', CLR.DEBUG(), tostring(HasOverrideActionBar())),
+		format('%s`HasExtraActionBar()`: %s', CLR.DEBUG(), tostring(HasExtraActionBar())),
+		format('%s`HasBonusActionBar()`: %s', CLR.DEBUG(), tostring(HasBonusActionBar())),
+-- 		format('%s`HasTempShapeshiftActionBar()`: %s', CLR.DEBUG(), tostring(HasTempShapeshiftActionBar())),
+		format("%s`UnitInVehicle 'player'`: %s", CLR.DEBUG(), tostring(UnitInVehicle 'player')),
+		format('%s`CanExitVehicle()`: %s', CLR.DEBUG(), tostring(CanExitVehicle())),
+		format('%s`IsMounted()`: %s', CLR.DEBUG(), tostring(IsMounted())),
+		format('%s`IsFlying()` [in use]: %s', CLR.DEBUG(), tostring(IsFlying())),
+		format('%s`IsStealthed()` [in use]: %s', CLR.DEBUG(), tostring(IsStealthed())),
 	}
 	for _, l in ipairs(lines) do print(l) end
 end
@@ -116,7 +117,7 @@ end
 function ns.debugprint(...)
 	if ns.db.debugMode then
 		local a, b = strsplit('.', GetTimePreciseSec())
-		print(format('[%s.%s] %s%s:', a:sub(-3), b:sub(1, 3), COLOR_DEBUG, 'PetWalker Debug|r'), ...)
+		print(format('[%s.%s] %s%s>DEBUG>', a:sub(-3), b:sub(1, 3), CLR.DEBUG(), MYSHORTNAME), ...)
 	end
 end
 
@@ -125,8 +126,8 @@ function ns.debugprint_pet(msg)
 	if ns.db.debugMode then
 	local a, b = strsplit('.', GetTimePreciseSec())
 	local lines = {
-		format('[%s.%s] %sPW Debug|r: %s', a:sub(-3), b:sub(1, 3), COLOR_DEBUG, msg),
-		format('%sCurrent DB (%s) pet|r: %s', COLOR_DEBUG, ns.dbc.charFavsEnabled and ns.db.favsOnly and 'char' or 'global', ns.id_to_name(ns.dbc.charFavsEnabled and ns.db.favsOnly and ns.dbc.recentPets[1] or ns.db.recentPets[1])),
+		format('[%s.%s] %s%s: %s', a:sub(-3), b:sub(1, 3), CLR.DEBUG(), MYSHORTNAME, msg),
+		format('%sCurrent DB (%s) pet|r: %s', CLR.DEBUG(), ns.dbc.charFavsEnabled and ns.db.favsOnly and 'char' or 'global', ns.id_to_name(ns.dbc.charFavsEnabled and ns.db.favsOnly and ns.dbc.recentPets[1] or ns.db.recentPets[1])),
 	}
 	for _, l in ipairs(lines) do print(l) end
 	end
