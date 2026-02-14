@@ -88,17 +88,14 @@ end
 
 function ns.msg_login()
 	if ns.db.verbosityLevel < 2 then return end
-	local petinfo
-	if ns.db.verbosityLevel > 2 then
-		local async = false
-		local ap, sp = get_link_actpet(), get_link_savedpet()
-		if not ap or not sp or ap ~= sp then async = true end
-		ap, sp = ap or 'None', sp or 'None'
-		petinfo = CLR.KEY(async and 'Current Pet: ' or 'Pet: ')
-			.. CLR.STATE()
-			.. ap
-			.. (async and ' | ' .. CLR.KEY('Saved pet: ') .. sp or '')
-	end
+	local async = false
+	local ap, sp = get_link_actpet(), get_link_savedpet()
+	if not ap or not sp or ap ~= sp then async = true end
+	ap, sp = ap or 'None', sp or 'None'
+	local petinfo = CLR.KEY(async and 'Current Pet: ' or 'Pet: ')
+		.. CLR.STATE(ap)
+		.. (async and ' | ' .. CLR.KEY('Saved pet: ') .. CLR.STATE(sp) or '')
+
 	addonprint(
 		format(
 			'%s %s | %s %s | %s %s | %s',
