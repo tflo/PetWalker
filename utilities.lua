@@ -232,9 +232,9 @@ end
 function ns.protect_slashcommand(cmdstr, addonstr, cmdfunc)
 	local failedmsg
 	if type(hash_SlashCmdList) ~= 'table' then
-		failedmsg = 'does not exist (yet)!'
+		failedmsg = 'does not exist (yet)'
 	elseif getmetatable(hash_SlashCmdList) then
-		failedmsg = 'has already a metatable!'
+		failedmsg = 'has already a metatable'
 	end
 	if failedmsg then
 		C_Timer.After(
@@ -243,7 +243,7 @@ function ns.protect_slashcommand(cmdstr, addonstr, cmdfunc)
 				ns.debugprint(
 					'‹hash_SlashCmdList› '
 						.. failedmsg
-						.. ' We could not check for offending slash commands.'
+						.. '! We could not check for offending slash commands.'
 				)
 			end
 		)
@@ -251,16 +251,21 @@ function ns.protect_slashcommand(cmdstr, addonstr, cmdfunc)
 	end
 
 	local function get_offending_addons()
-		local results, globalspace = {}, _G
-		for globalname, value in pairs(globalspace) do
-			if
-				type(value) == 'string'
-				and type(globalname) == 'string'
-				and globalname:sub(1, 6) == 'SLASH_'
-				and value:lower() == cmdstr
-				and globalname:sub(7, -2) ~= addonstr
-			then
-				tinsert(results, globalname:sub(7, -2))
+		local results = {}
+		local mt = getmetatable(SlashCmdList)
+		local backing_table = mt and mt.__index
+		if type(backing_table) == 'table' then
+			for name, _ in pairs(backing_table) do
+				local i = 1
+				while true do
+					local cmd = _G['SLASH_' .. name .. i]
+					if not cmd then break end
+					if cmd:lower() == cmdstr and name ~= addonstr then
+						tinsert(results, name)
+						break -- one hit per addon is enough
+					end
+					i = i + 1
+				end
 			end
 		end
 		return table.concat(results, ', ')
@@ -272,19 +277,19 @@ function ns.protect_slashcommand(cmdstr, addonstr, cmdfunc)
 	-- The value is the corresponding function from `_G.SlashCmdList`;
 	-- So we use `__newindex` to see when this happens;
 	-- If identical strings, the last one added wins; if it's not our cmd, we'll fix that;
-	-- `_G.SlashCmdList` is wiped after that(!)
+	-- `Note: _G.SlashCmdList` is backed via mt.__index
+	-- Offending slash cmds registered later *will* overwrite our command
 	local mt = {}
 	mt.__newindex = function(t, key, value)
 		-- We only need to know when this happens, and fix afterwards
-		-- TODO: is hash_SlashCmdList re-indexed when an addon creates a new cmd later?
+		-- No need to keep the MT, as later overwrites will not trigger `__newindex`
 		setmetatable(t, nil)
 		rawset(t, key, value)
 		ns.debugprint('‹hash_SlashCmdList› indexed.')
-		-- Check only afterwards, as dupe keys are overwriting (no __newindex on 2nd write)
+		-- Make sure everything is written
 		C_Timer.After(0.15, function()
 			-- Everything in hash_SlashCmdList is uppercase
 			local str = cmdstr:upper()
-			-- `_G.SlashCmdList` is empty now, use local func for comparison!
 			if hash_SlashCmdList[str] ~= cmdfunc then
 				hash_SlashCmdList[str] = cmdfunc
 				if ns.db.verbosityLevel > 1 then
