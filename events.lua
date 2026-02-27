@@ -208,6 +208,7 @@ local function FIRST_FRAME_RENDERED()
 		ns.msg_login()
 		ns.msg_db_updated()
 	end)
+	ns.user_is_author = tf6 and tf6.user_is_tflo
 end
 
 local function PLAYER_LOGOUT()
