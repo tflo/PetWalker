@@ -95,11 +95,13 @@ local function update_db()
 		clean_removed(db, defaults_global)
 		db.dbVersion = DB_VERSION_CURRENT
 		-- TODO: print a message
+		ns.db_global_updated = true
 	end
 	if ver_char ~= DB_VERSION_CURRENT then
 		clean_removed(dbc, defaults_perchar)
 		dbc.dbVersion = DB_VERSION_CURRENT
 		-- TODO: print a message
+		ns.db_char_updated = true
 	end
 
 end

@@ -114,6 +114,16 @@ function ns.msg_login()
 	)
 end
 
+function ns.msg_db_updated()
+	if ns.db.verbosityLevel < 1 then return end
+	if ns.db_global_updated then
+		addonprint(format('Global database updated to version %s.', CLR.STATE(ns.db.dbVersion)))
+	end
+	if ns.db_char_updated then
+		addonprint(format('Char database updated to version %s.', CLR.STATE(ns.dbc.dbVersion)))
+	end
+end
+
 function ns.msg_no_saved_pet()
 	if ns.db.verbosityLevel < 1 then return end
 	addonprint(
