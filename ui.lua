@@ -539,8 +539,9 @@ end
 	Slash UI
 ===========================================================================]]--
 
-SLASH_PetWalker1, SLASH_PetWalker2 = '/pw', '/petwalker'
-function SlashCmdList.PetWalker(msg)
+local CMD1, CMD2 = '/petwalker', '/pw'
+
+local function slashfunc(msg)
 	local args = {}
 	for arg in msg:gmatch('[^ ]+') do
 		tinsert(args, arg)
@@ -596,6 +597,12 @@ function SlashCmdList.PetWalker(msg)
 		)
 	end
 end
+
+
+SLASH_PetWalker1, SLASH_PetWalker2 = CMD1, CMD2
+SlashCmdList.PetWalker = slashfunc
+ns.protect_slashcommand(CMD2, 'PetWalker', slashfunc)
+
 
 --[[---------------------------------------------------------------------------
 	Commands

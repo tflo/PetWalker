@@ -226,3 +226,82 @@ end
 function ns.table_is_empty(t)
 	return next(t) == nil
 end
+
+-- Certain addons attempt to steal our "/pw" command
+-- Hook into hash_SlashCmdList and fix it once it's populated
+function ns.protect_slashcommand(cmdstr, addonstr, cmdfunc)
+	local failedmsg
+	if type(hash_SlashCmdList) ~= 'table' then
+		failedmsg = 'does not exist (yet)!'
+	elseif getmetatable(hash_SlashCmdList) then
+		failedmsg = 'has already a metatable!'
+	end
+	if failedmsg then
+		C_Timer.After(
+			25,
+			function()
+				ns.debugprint(
+					'‹hash_SlashCmdList› '
+						.. failedmsg
+						.. ' We could not check for offending slash commands.'
+				)
+			end
+		)
+		return
+	end
+
+	local function get_offending_addons()
+		local results, globalspace = {}, _G
+		for globalname, value in pairs(globalspace) do
+			if
+				type(value) == 'string'
+				and type(globalname) == 'string'
+				and globalname:sub(1, 6) == 'SLASH_'
+				and value:lower() == cmdstr
+				and globalname:sub(7, -2) ~= addonstr
+			then
+				tinsert(results, globalname:sub(7, -2))
+			end
+		end
+		return table.concat(results, ', ')
+	end
+
+	-- `_G.hash_SlashCmdList` exists at load time (contains only Blizz baseline commands);
+	-- On first slash cmd entry, all addon commands are added:
+	-- The key is the cmd string from the global vars like SLASH_PetWalker1,
+	-- The value is the corresponding function from `_G.SlashCmdList`;
+	-- So we use `__newindex` to see when this happens;
+	-- If identical strings, the last one added wins; if it's not our cmd, we'll fix that;
+	-- `_G.SlashCmdList` is wiped after that(!)
+	local mt = {}
+	mt.__newindex = function(t, key, value)
+		-- We only need to know when this happens, and fix afterwards
+		-- TODO: is hash_SlashCmdList re-indexed when an addon creates a new cmd later?
+		setmetatable(t, nil)
+		rawset(t, key, value)
+		ns.debugprint('‹hash_SlashCmdList› indexed.')
+		-- Check only afterwards, as dupe keys are overwriting (no __newindex on 2nd write)
+		C_Timer.After(0.15, function()
+			-- Everything in hash_SlashCmdList is uppercase
+			local str = cmdstr:upper()
+			-- `_G.SlashCmdList` is empty now, use local func for comparison!
+			if hash_SlashCmdList[str] ~= cmdfunc then
+				hash_SlashCmdList[str] = cmdfunc
+				if ns.db.verbosityLevel > 1 then
+					ns.addonprint(
+						format(
+							"%sAnother addon tried to steal your %s slash command. %sThis should be fixed now; if your last command didn't work, please %s. Offending commands: %s.",
+							CLR.WARN(),
+							CLR.KEY(cmdstr),
+							CLR.TXT(),
+							CLR.EM('try again'),
+							CLR.BAD(get_offending_addons())
+						)
+					)
+				end
+			end
+		end)
+	end
+
+	setmetatable(hash_SlashCmdList, mt)
+end
