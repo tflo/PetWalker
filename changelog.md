@@ -18,10 +18,11 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 - **Auto-fix settings:** When your active pool (for example, *Favorites*) doesn’t contain any summonable pet, PW will now actively try to fix the setting by switching to All Pets and generating a combined pool, as if you typed `/pw f 1`. 
     - This should significantly reduce cases that trigger the Zero Pool warning/hints, which some apparently regarded as spam.
     - You should get the Zero Pool warning only if after reinitializing the pool with the fixed settings, there are still no pets in the pool. In this case, PW will also deactivate the auto-summon timer, as with `/pw 0`.
-- Code cleanup and refactoring.
 - Add messages, help, status for the new feature; reworked other chat prints and coloring.
 - Change verbosity level for some messages.
 - Nicer formatting of timer and remaining timer values in prints.
+- Protect our `/pw` slash command from being hijacked by other addons (bad, bad guys).
+- Major code cleanup and refactoring, WiP.
 
 #### 2.6.10 (2026-06-14)
 

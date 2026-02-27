@@ -535,6 +535,7 @@ function ns.transitioncheck(checks_done)
 	end
 	ns.current_zone = C_Map_GetBestMapForUnit 'player'
 	local savedpet
+	-- TODO: shouldn't we initialize here instead?!
 	ns:cfavs_update()
 	local actpet = C_PetJournal_GetSummonedPetGUID()
 	local db = ns.dbc.charFavsEnabled and ns.db.favsOnly and ns.dbc or ns.db
