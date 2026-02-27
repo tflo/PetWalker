@@ -601,8 +601,12 @@ end
 
 SLASH_PetWalker1, SLASH_PetWalker2 = CMD1, CMD2
 SlashCmdList.PetWalker = slashfunc
-ns.protect_slashcommand(CMD2, 'PetWalker', slashfunc)
 
+function ns.protect_slash_pw()
+	ns.protect_slashcommand(CMD2, 'PetWalker', slashfunc)
+end
+
+ns.protect_slash_pw()
 
 --[[---------------------------------------------------------------------------
 	Commands

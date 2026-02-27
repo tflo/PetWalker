@@ -229,6 +229,7 @@ end
 
 -- Certain addons attempt to steal our "/pw" command
 -- Hook into hash_SlashCmdList and fix it once it's populated
+local reapplied
 function ns.protect_slashcommand(cmdstr, addonstr, cmdfunc)
 	local failedmsg
 	if type(hash_SlashCmdList) ~= 'table' then
@@ -286,6 +287,15 @@ function ns.protect_slashcommand(cmdstr, addonstr, cmdfunc)
 		setmetatable(t, nil)
 		rawset(t, key, value)
 		ns.debugprint('‹hash_SlashCmdList› indexed.')
+		-- Debug/curiosity: see if the table gets a new entry somewhere midsession (e.g. an addon adds cmd late)
+		-- This will not catch any overwrites
+		if ns.user_is_author then
+			if reapplied then
+				ns.addonprint('[author-only] Indexed: "' .. key .. '"')
+				PlaySoundFile(1384045)
+			end
+			ns.reapply_slashprot()
+		end
 		-- Make sure everything is written
 		C_Timer.After(0.15, function()
 			-- Everything in hash_SlashCmdList is uppercase
@@ -310,3 +320,20 @@ function ns.protect_slashcommand(cmdstr, addonstr, cmdfunc)
 
 	setmetatable(hash_SlashCmdList, mt)
 end
+
+-- Debug
+function ns.reapply_slashprot()
+-- 	do return end
+	reapplied = true
+	C_Timer.After(3, function()
+		ns.protect_slash_pw()
+		local mt = getmetatable(hash_SlashCmdList)
+		if mt and mt.__newindex then
+			ns.addonprint('[author-only] Reapplied slash protection.')
+		else
+			ns.addonprint('[author-only] Could not reapply slash protection.')
+			PlaySoundFile(1384045)
+		end
+	end)
+end
+
