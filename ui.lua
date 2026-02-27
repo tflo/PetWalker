@@ -44,6 +44,7 @@ local function addonprint(msg)
 	-- We dont't need a "|r" at the end of the string, right?
 	print(format('%s%s: %s%s', CLR.ADDON(), MYNAME, CLR.TXT(), msg))
 end
+ns.addonprint = addonprint
 
 local function curr_pool_str(short)
 	local str = '¿POOL_STR?'
@@ -91,7 +92,7 @@ function ns.msg_login()
 	local async = false
 	local ap, sp = get_link_actpet(), get_link_savedpet()
 	if not ap or not sp or ap ~= sp then async = true end
-	ap, sp = ap or 'None', sp or 'None'
+	ap, sp = ap or '<None>', sp or '<None>'
 	local petinfo = CLR.KEY(async and 'Current Pet: ' or 'Pet: ')
 		.. CLR.STATE(ap)
 		.. (async and ' | ' .. CLR.KEY('Saved pet: ') .. CLR.STATE(sp) or '')
@@ -196,7 +197,7 @@ end
 
 function ns.msg_manual_summon_stopped()
 	if ns.db.verbosityLevel < 1 then return end
-	format('%sYou are in combat lockdown or flying; pet summoning aborted.', CLR.WARN())
+	addonprint(format('%sYou are in combat lockdown or flying; pet summoning aborted.', CLR.WARN()))
 end
 
 -- function ns.msg_recents_dupe_removed(idx)
@@ -505,21 +506,23 @@ end
 -- TODO: add db.flags when favsProbability or favsOnly has been force-changed, so we
 -- can show this in the status text.
 function ns.msg_force_changed_pool()
+	if ns.db.verbosityLevel < 1 then return end
 	addonprint(
 		format(
-			"%sYou don't have any summonable pets in your active pool, or in one of your active pools (Favorites/Non-favorites). I've set your pet pool to %s and will try to re-initialize the pool.",
+			"%sYou don't have any summonable pets in your active pool, or in one of your active pools (Favorites/NonFavorites). I've set your pet pool to %s and will try to re-initialize the pool.",
 			CLR.WARN(),
-			CLR.KEY('All Pets')
+			CLR.KEY('All Pets (f 1)')
 		)
 	)
 end
 
+-- TODO: this needs a rework
 function ns.msg_low_petpool(nPool)
 	if ns.db.verbosityLevel < 0 then return end
 	local R = CLR.WARN()
-	local poolstr = ns.db.favsProbability == -1 and 'All Pets' or ns.db.favsProbability == 0 and 'Non-fav Pets' or ns.db.favsProbability == 1 and 'Fav Pets' or 'Favs + Non-fav Pets'
+	local poolstr = ns.db.favsOnly and 'Favs' or ns.db.favsProbability == 1 and 'All Pets' or ns.db.favsProbability == 0 and 'NonFavs' or 'Favs+NonFavs'
 	local content = {
-		('Your current pool (' .. poolstr .. ') contains ' .. nPool < 1 and CLR.KEY() .. '0 (zero) ' ..R.. 'pets ' or R.. 'only ' ..CLR.KEY() .. '1 ' ..R.. 'pet '),
+		('Your current pet pool (' .. poolstr .. ') contains ' .. nPool < 1 and CLR.KEY() .. '0 (zero) ' ..R.. 'pets ' or R.. 'only ' ..CLR.KEY() .. '1 ' ..R.. 'pet '),
 		'eligible as random summon!',
 		'\nYou should either ' .. (ns.db.favsOnly and 'flag more pets as favorite, or set the random pool to ' .. CLR.STATE() ..'All Pets' or 'collect more pets'), ', or set the random-summon timer to ', CLR.STATE() .. '0', '.',
 		'\nAlso check your ', CLR.KEY() .. 'Filter ', 'settings in the ', CLR.KEY() .. 'Blizz Pet Journal ', '(not in Rematch!), as they are affecting the pool of available pets!',
@@ -685,15 +688,15 @@ function ns:favs_toggle(arg2)
 		if arg2 < 1 then
 			addonprint(
 				format(
-					'Favorites probability in All Pets mode set to %s. Switched to All Pets mode.',
+					'Favorites probability in All Pets mode set to %s. All Pets mode activated.',
 					CLR.KEY(arg2)
 				)
 			)
 		else
 			addonprint(
 				format(
-					'Favorites probability in All Pets mode set to %s. Switched to All Pets mode.',
-					CLR.KEY('No Special Treatment')
+					'Favorites in All Pets mode set to %s. All Pets mode activated.',
+					CLR.QUOTE('No Special Treatment')
 				)
 			)
 		end
@@ -718,10 +721,17 @@ end
 function ns.charfavs_slash_toggle() -- for slash command only
 	ns.dbc.charFavsEnabled = not ns.dbc.charFavsEnabled
 	ns.pool_initialized, ns.pet_verified = false, false
-	--[[ Since we are changing from one saved-pet table to another, we prefer to
-	restore the pet from the new list, rather than doing new_pet like in the favs_toggle. ]]
+	-- Pre-3.0
+-- 	if ns.db.autoEnabled then
+-- 		ns.transitioncheck()
+-- 	else -- Needed for a correct display of char/normal favs in the PJ
+-- 		ns:cfavs_update()
+-- 	end
 	if ns.db.autoEnabled then
-		ns.transitioncheck()
+		-- TODO: is this change benificial?
+		-- I tend to think that we should auto-switch to favsOnly when char favs are activated
+		ns:cfavs_update()
+		ns.initialize_pool()
 	else -- Needed for a correct display of char/normal favs in the PJ
 		ns:cfavs_update()
 	end
