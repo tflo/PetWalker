@@ -270,6 +270,11 @@ local function is_pet_summonable(guid)
 	return true
 end
 
+--[[
+TODO: Rework this function:
+- Since implementation of history we can have more than one "previous" pets
+- A nil at index 2 will stop the iteration! --> done
+]]
 function ns.saved_pet_summonability_check() --- After login
 	local priorities, perchar = {}, nil
 
@@ -290,7 +295,7 @@ function ns.saved_pet_summonability_check() --- After login
 		}
 	end
 
-	for i, guid in ipairs(priorities) do
+	for i, guid in pairs(priorities) do
 		if guid then
 			local is_summonable, error_num, error_text = is_pet_summonable(guid)
 			if i == 1 then
