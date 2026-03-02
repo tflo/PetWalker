@@ -285,13 +285,16 @@ function ns.protect_slashcommand(cmdstr, addonstr, cmdfunc)
 		-- We only need to know when this happens, and fix afterwards
 		-- No need to keep the MT, as later overwrites will not trigger `__newindex`
 		setmetatable(t, nil)
+		-- TODO: *Maybe* check immediately if '/pw == ourFunc', and don't delete the MT; this would save us
+		-- the timed check afterwards, but at the cost of a permanent MT on hash_SlashCmdList,
+		-- and we'd do a check on each new index. But I think this would be negligible.
 		rawset(t, key, value)
-		ns.debugprint('‹hash_SlashCmdList› indexed.')
+		ns.debugprint('‹hash_SlashCmdList› got a new index.')
 		-- Debug/curiosity: see if the table gets a new entry somewhere midsession (e.g. an addon adds cmd late)
 		-- This will not catch any overwrites
 		if ns.user_is_author then
 			if reapplied then
-				ns.addonprint('[author-only] Indexed: "' .. key .. '"')
+				ns.addonprint('[author-only] New index: "' .. key .. '"')
 				PlaySoundFile(1384045)
 			end
 			ns.reapply_slashprot()

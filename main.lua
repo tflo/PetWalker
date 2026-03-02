@@ -133,13 +133,13 @@ local function saved_pet_is_shoulderpet()
 end
 
 -- To be called from autoaction (and - testwise- from transitioncheck)
-local function stop_auto_summon(t)
+local function stop_auto_summon(now)
 
 	-- Base/existing throttle
 
 	if not bypass_throttle then
 		throttle = max(throttle, throttle_min)
-		local now = t or time()
+		now = now or time()
 		if now - time_responded_to_summoning_event < throttle then
 			debugprint('‹stop_auto_summon()›: existing throttle found:', throttle)
 			return true
