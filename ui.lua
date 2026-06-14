@@ -9,6 +9,7 @@ local C_PetJournal_GetBattlePetLink = _G.C_PetJournal.GetBattlePetLink
 local tostring = _G.tostring
 local format = _G.format
 local print = _G.print
+local IsInInstance = _G.IsInInstance
 
 local CHAR_NAME = UnitName 'player'
 local MAX_NUM_RECENTS = 20
@@ -239,6 +240,8 @@ function ns.help_display(print_bottomspace)
 
 		{CO.c .. 'v', ' : ', CO.k .. 'Verbosity: ', CO.s .. 'silent ', '(only failures and warnings are printed to chat); ', CO.c .. 'vv ', 'for ', CO.s .. 'medium ', CO.k .. 'verbosity ', '(new summons); ', CO.c .. 'vvv ', 'for ', CO.s .. 'full ', CO.k .. 'verbosity ', '(also restored pets).'},
 
+		{CO.c .. 'i', ' : ', 'Toggle ', CO.k .. 'auto-summoning in instances', '. (Requires ', CO.c .. '/pw a', ' to be enabled.)'},
+
 		{CO.c .. 's', ' : ', 'Display current ', CO.k .. 'status/settings.'},
 
 		{CO.c .. 'h', ' : ', 'This help text.'},
@@ -269,6 +272,8 @@ function ns.status_display(print_topsep, print_bottomsep)
 		{CO.k ..'Automatic Random-summoning / Restore ', 'is ', CO.s .. (ns.db.autoEnabled and 'enabled' or CO.bw .. 'disabled'), '.'},
 
 		{CO.k .. 'Summon Timer ', 'is ', CO.s .. (ns.db.newPetTimer > 0 and (ns.db.newPetTimer/60) .. CO.bn .. ' minutes' or 'disabled'), '. Next random pet in ', CO.e .. ns.remaining_timer_for_display(), '.'},
+
+		{CO.k ..'Auto-summoning in instances ', 'is ', CO.s .. (ns.db.instanceSummoning and 'enabled' or CO.bw .. 'disabled'), '.'},
 
 		{CO.k ..'Automatic summoning while mounted for Skyriding ', 'is ', CO.s .. (ns.db.drSummoning and 'allowed' or 'not allowed'), '.'},
 
@@ -359,6 +364,8 @@ function SlashCmdList.PetWalker(msg)
 		ns.status_display(true, true)
 	elseif tonumber(args[1]) then
 		ns:timer_slash_cmd(args[1])
+	elseif args[1] == 'i' or args[1] == 'instance' then
+		ns.instance_summoning_toggle()
 	elseif args[1] == 'sr' then
 		ns.dr_summoning_toggle()
 	elseif args[1] == 't' or args[1] == 'target' then
@@ -447,6 +454,14 @@ function ns.charfavs_slash_toggle() -- for slash command only
 	end
 	if PetWalkerCharFavsCheckbox then PetWalkerCharFavsCheckbox:SetChecked(ns.dbc.charFavsEnabled) end
 	chat_user_notification(format('%sCharacter-specific favorites %s for %s%s.', CO.bn, ns.dbc.charFavsEnabled and 'enabled' or 'disabled', CO.e, CHAR_NAME))
+end
+
+function ns.instance_summoning_toggle()
+	ns.db.instanceSummoning = not ns.db.instanceSummoning
+	if not ns.db.instanceSummoning and IsInInstance() then
+		ns.dismiss_current_pet()
+	end
+	chat_user_notification(format('%sPet auto-summoning in instances %s.', CO.bn, ns.db.instanceSummoning and 'enabled' or 'disabled'))
 end
 
 function ns.dr_summoning_toggle()

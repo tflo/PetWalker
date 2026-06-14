@@ -34,6 +34,7 @@ local defaults_global = {
 	recentPets = {},
 	eventAlt = nil,
 	debugMode = false,
+	instanceSummoning = true,
 }
 
 local defaults_perchar = {

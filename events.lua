@@ -114,6 +114,10 @@ local function PLAYER_ENTERING_WORLD(is_login, is_reload)
 	end
 	ns.pet_verified = false
 	C_TimerAfter(delay, function()
+		if not is_login and not is_reload and ns.is_instance_summoning_blocked() then
+			ns.dismiss_current_pet()
+			return
+		end
 		ns.transitioncheck()
 		-- For the moment, calling this separately, since `transitioncheck` in its current form is abortable
 		ns.events:register_summon_events()
