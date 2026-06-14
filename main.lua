@@ -118,6 +118,18 @@ local function forbidden_instance()
 		local _, _, difficulty_id = GetInstanceInfo()
 		if difficulty_id == 8 then return true end
 	end
+	return not ns.db.instanceSummoning
+end
+
+function ns.dismiss_current_pet()
+	local actpet = C_PetJournal_GetSummonedPetGUID()
+	if actpet then
+		C_PetJournal_SummonPetByGUID(actpet)
+	end
+end
+
+function ns.is_instance_summoning_blocked()
+	return forbidden_instance()
 end
 
 -- To test against if pet-on-back aura is found (AFAIK, only Daisy)
