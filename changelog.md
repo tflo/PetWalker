@@ -4,6 +4,11 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 2.6.10 (2026-06-14)
+
+- toc bump, no changes.
+- 3.0 is coming soon, promised! (Probably the week after 12.0.7.)
+
 #### 2.6.9 (2026-02-12)
 
 - Set the default pet pool (when freshly installed) to All Pets, instead of Favorites.
