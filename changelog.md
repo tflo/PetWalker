@@ -4,7 +4,7 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
-#### 3.0.0-dev4 (2026-02-12)
+#### 3.0.0-dev6 (2026-03-02)
 
 - New feature: **Configurable probability** of favorite pets in *All Pets* mode. Idea by @tsemoana on GitHub.
     - You set the probability with the usual favorites toggle `f` command, but followed by a number between `0` and `1`.
@@ -23,6 +23,7 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 - Nicer formatting of timer and remaining timer values in prints.
 - Protect our `/pw` slash command from being hijacked by other addons (bad, bad guys).
 - Major code cleanup and refactoring, WiP.
+- Fix a malfunction in `saved_pet_summonability_check` (pairs).
 
 #### 2.6.10 (2026-06-14)
 
