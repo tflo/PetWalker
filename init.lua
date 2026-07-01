@@ -41,8 +41,7 @@ local defaults_global = {
 }
 
 local defaults_perchar = {
-	 -- Added recently (Feb 2026) so force an update; remove after a while.
-	dbVersion = DB_VERSION_CURRENT - 0.1,
+	dbVersion = DB_VERSION_CURRENT,
 	charFavsEnabled = false,
 	charFavs = {},
 	recentPets = {},
