@@ -11,6 +11,9 @@ The addon helps you to always have a companion pet out (summoned). You can choos
 
 ## Features
 
+__NOTE:__ PetWalker __3.0__ (July 2026) introduces a few new things and changes, most notably the _Configurable probability of favorite pets in All Pets mode._
+- These are not yet, or not yet completely, covered in this description. Please refer to the 3.0 (and subsequent) change notes, available on CF (Versions or [Files tab](https://www.curseforge.com/wow/addons/petwalker/files/all) > click latest version), or as `changelog.md` inside the PetWalker addon folder on your disk.
+
 ### Main Features
 
 - Resummon (restore) your pet if it has “disappeared”. Most of the time this happens due to faulty game mechanics: using portals or teleports, mounting/dismounting, end of combat, entering or exiting instances, and other seemingly random occasions.
