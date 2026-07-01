@@ -269,6 +269,12 @@ function ns.protect_slashcommand(cmdstr, addonstr, cmdfunc)
 				end
 			end
 		end
+		-- NOTE (TODO?):
+		-- There is also the global `hash_ChatTypeInfoList`; check out OPie:
+		-- OPie/Libs/ActionBook/Rewire.lua L1245
+		-- This returns the addon that is actually overwriting our slash cmd,
+		-- i.e. we do *not* get all conflicting addons:
+		-- print('PW TEST:', hash_ChatTypeInfoList[cmdstr:upper()]) -- test
 		return table.concat(results, ', ')
 	end
 
