@@ -19,8 +19,13 @@ local function merge_defaults(src, dst)
 	end
 end
 
--- 1/2: v2.6, Nov 2025: currentPet/previousPet --> recentPets ==> reset specific
-local DB_VERSION_CURRENT = 2.1
+-- Do not sync the DB version to the addon version; update DB version only if needed!
+-- Use minors (e.g. 2.1) for intermediate alpha/beta/dev versions.
+-- HISTORY:
+-- 1 or 2: v2.6, Nov 2025: currentPet/previousPet --> recentPets ==> reset specific
+-- 2.1: v3.0 dev versions, before July: favs probability
+-- 3: v3.0, July 2026: favs probability
+local DB_VERSION_CURRENT = 3
 
 local defaults_global = {
 	dbVersion = DB_VERSION_CURRENT,
@@ -87,6 +92,7 @@ local function update_db()
 
 	-- Do the migration in ascending order, in case we have historically overlapping changes!
 	if ver_glob < 2.1 then
+		-- User likes favs, so give them a higher fav ratio in All mode.
 		db.favsProbability = db.favsOnly and 0.66 or defaults_global.favsProbability
 	end
 
