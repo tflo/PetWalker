@@ -200,6 +200,16 @@ function ns.msg_manual_summon_stopped()
 	addonprint(format('%sYou are in combat lockdown or flying; pet summoning aborted.', CLR.WARN()))
 end
 
+function ns.msg_nopet_instance_entered()
+	if ns.db.verbosityLevel < 2 then return end
+	addonprint(format('You are in a no-pet instance; pet dismissed and auto-summoning disabled.'))
+end
+
+function ns.msg_nopet_instance_left()
+	if ns.db.verbosityLevel < 3 then return end
+	addonprint(format('You left a no-pet instance; pet restored and auto-summoning enabled.'))
+end
+
 -- function ns.msg_recents_dupe_removed(idx)
 -- 	if ns.db.verbosityLevel < 3 then return end
 -- 	chat_user_notification(CLR.TXT() .. 'Removed a duplicate from recent pets at idx ' .. idx .. '.')
@@ -299,6 +309,10 @@ end
 Three big messages: Status, Low Pet Pool, and Help
 ---------------------------------------------------------------------------]]--
 
+local INSTANCEDETAILS0 = 'pets allowed in all instances'
+local INSTANCEDETAILS1 = 'no pets in Keys, Arenas, H/M Raids'
+local INSTANCEDETAILS2 = 'no pets in any instance'
+
 function ns.help_display()
 	local text = {
 		BLOCK_SEP,
@@ -328,6 +342,13 @@ function ns.help_display()
 			CLR.KEY('auto-summoning'),
 			CLR.KEY('while mounted for Skyriding'),
 			CLR.STATE('allowed / not allowed'),
+		},
+		{ -- Instance mode; don't expose Ignore mode
+			'%s : Toggle %s: %s or %s.',
+			CLR.CMD('i'),
+			CLR.KEY('instance restrictions'),
+			CLR.STATE('Normal (' ..INSTANCEDETAILS1 .. ')'),
+			CLR.STATE('Strict (' ..INSTANCEDETAILS2 .. ')'),
 		},
 		{ -- New pet
 			'%s : Summon %s from pool.',
@@ -452,7 +473,14 @@ function ns.status_display()
 			CLR.KEY('Automatic summoning while Skyride-mounted'),
 			CLR.STATE(ns.db.drSummoning and 'allowed' or 'not allowed'),
 		},
-		{ -- descr
+		{ -- Instances
+			'%s: %s.',
+			CLR.KEY('Instance restrictions'),
+			ns.db.instanceMode == 1 and CLR.STATE('Normal') .. ' (' .. INSTANCEDETAILS1 .. ')'
+				or ns.db.instanceMode == 2 and CLR.STATE('Strict') .. ' (' .. INSTANCEDETAILS2 .. ')'
+				or CLR.STATE('Ignore') .. ' (' .. INSTANCEDETAILS0 .. ')',
+		},
+		{ -- History
 			'%s of Previous Pets: %s (1 to %s).',
 			CLR.KEY('History'),
 			CLR.STATE(ns.db.numRecents - 1),
@@ -584,8 +612,8 @@ local function slashfunc(msg)
 		ns.summon_targetpet()
 	elseif args[1] == 'i' or args[1] == 'instance' or args[1] == 'instances' then
 		ns.instance_toggle()
-	elseif args[1] == 'i0' or args[1] == 'ignoreinstance' or args[1] == 'ignoreinstances' then
-		ns.db.instanceMode = 0
+	elseif args[1] == '!i' or args[1] == 'i!' or args[1] == 'ignoreinstance' or args[1] == 'ignoreinstances' then
+		ns.instance_toggle(0)
 	elseif args[1] == 'h' or args[1] == 'help' then
 		ns.help_display()
 	elseif args[1] == nil then
@@ -825,11 +853,17 @@ function ns.set_num_recents(num)
 	)
 end
 
-function ns.instance_toggle()
-	ns.db.instanceMode = ns.db.instanceMode ~= 1 and 1 or 2
+function ns.instance_toggle(mode)
+	ns.db.instanceMode = mode or ns.db.instanceMode ~= 1 and 1 or 2
 	addonprint(
-		format('Instance mode set to %s.', ns.db.instanceMode == 1 and CLR.KEY('Standard') ..' (no pets allowed in certain instance types)' or ns.db.instanceMode == 2 and CLR.KEY('Strict') .. ' (no pets allowed in any instance)' or CLR.KEY('Ignore') .. ' (pets allowed in any instance)')
+		format(
+			'Instance restrictions set to %s.',
+			ns.db.instanceMode == 1 and CLR.KEY('Normal') .. ' (' .. INSTANCEDETAILS1 .. ')'
+				or ns.db.instanceMode == 2 and CLR.KEY('Strict') .. ' (' .. INSTANCEDETAILS2 .. ')'
+				or CLR.KEY('Ignore') .. ' (' .. INSTANCEDETAILS0 .. ')'
+		)
 	)
+	ns.transitioncheck()
 end
 
 --[[---------------------------------------------------------------------------
