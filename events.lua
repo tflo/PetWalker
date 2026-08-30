@@ -13,7 +13,7 @@ local C_TimerAfter = _G.C_Timer.After
 local DELAY_AFTER_LOGIN = 14
 local DELAY_AFTER_RELOAD = 8
 -- C_Timers launched at PLAYER_MAP_CHANGED
-local DELAY_AFTER_INSTANCE = 5
+local DELAY_AFTER_INSTANCE = 6
 -- C_Timer launched at FIRST_FRAME_RENDERED
 local delay_login_msg = 10
 -- TODO: Should we delay also after we change or select pet teams in Rematch / PJ
