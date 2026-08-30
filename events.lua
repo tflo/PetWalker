@@ -10,9 +10,10 @@ local C_PetBattlesIsInBattle = _G.C_PetBattles.IsInBattle
 local C_TimerAfter = _G.C_Timer.After
 
 -- C_Timers launched at PLAYER_ENTERING_WORLD
-local delay_after_login = 14
-local delay_after_reload = 8
-local delay_after_instance = 6
+local DELAY_AFTER_LOGIN = 14
+local DELAY_AFTER_RELOAD = 8
+-- C_Timers launched at PLAYER_MAP_CHANGED
+local DELAY_AFTER_INSTANCE = 5
 -- C_Timer launched at FIRST_FRAME_RENDERED
 local delay_login_msg = 10
 -- TODO: Should we delay also after we change or select pet teams in Rematch / PJ
@@ -90,27 +91,37 @@ local function ADDON_LOADED(addon)
 end
 
 local function PLAYER_ENTERING_WORLD(is_login, is_reload)
+	-- Instance changes are now handled by P_M_C
+	if not is_login and not is_reload then return end
 	local delay
 	-- We do not want summon events before transitioncheck has finished
 	ns.events:unregister_summon_events()
 	if is_login then
 		ns.debugprint '"PLAYER_ENTERING_WORLD": login'
-		delay = delay_after_login
+		delay = DELAY_AFTER_LOGIN
 		-- This must run before transitioncheck
+		-- Not needed if reload (=same char)
 		C_TimerAfter(delay - 1, ns.saved_pet_summonability_check)
 	elseif is_reload then
 		ns.debugprint '"PLAYER_ENTERING_WORLD": reload'
-		delay = delay_after_reload
-	else
-		-- Needed for zone-specific pet exclusions
-		ns.debugprint '"PLAYER_ENTERING_WORLD": instance change'
-		delay = delay_after_instance
+		delay = DELAY_AFTER_RELOAD
 	end
 	ns.pet_verified = false
 	C_TimerAfter(delay, function()
 		ns.transitioncheck()
-		-- For the moment, calling this separately, since `transitioncheck` in its current form is abortable
-		ns.events:register_summon_events()
+		-- For the moment, calling this separately, since `transitioncheck` has early returns
+		-- The instance guard is for when the user reloads inside an instance
+		if not ns.in_nopet_instance then ns.events:register_summon_events() end
+	end)
+end
+
+-- Fires reliably after *any* instance change, also the ones w/o P_E_W or loading screen (e.g. delves).
+-- Does *not* fire after login/reload, so P_E_W, P_L, or F_F_R is still needed.
+-- Caution: It fires very early, so if we use GetInstanceInfo and friends, we need a delay of 2+ seconds.
+local function PLAYER_MAP_CHANGED()
+	ns.debugprint '"PLAYER_MAP_CHANGED": instance change'
+	C_TimerAfter(DELAY_AFTER_INSTANCE, function()
+		ns.transitioncheck()
 	end)
 end
 
@@ -223,6 +234,7 @@ local event_handlers = {
 	['ADDON_LOADED'] = ADDON_LOADED,
 	['PLAYER_ENTERING_WORLD'] = PLAYER_ENTERING_WORLD,
 	['FIRST_FRAME_RENDERED'] = FIRST_FRAME_RENDERED,
+	['PLAYER_MAP_CHANGED'] = PLAYER_MAP_CHANGED,
 	['PLAYER_LOGOUT'] = PLAYER_LOGOUT,
 	['PLAYER_STARTED_MOVING'] = PLAYER_STARTED_MOVING,
 	['ZONE_CHANGED'] = ZONE_CHANGED,
@@ -280,6 +292,7 @@ end
 function ns.events:register_meta_events()
 	ns.debugprint '‹register_meta_events()› called'
 	self:RegisterEvent 'PLAYER_ENTERING_WORLD'
+	self:RegisterEvent 'PLAYER_MAP_CHANGED'
 	self:RegisterEvent 'PET_JOURNAL_LIST_UPDATE'
 	self:RegisterEvent 'COMPANION_UPDATE'
 	self:RegisterEvent 'PET_BATTLE_OPENING_START'
@@ -289,6 +302,7 @@ end
 function ns.events:unregister_meta_events()
 	ns.debugprint '‹unregister_meta_events()› called'
 	self:UnregisterEvent 'PLAYER_ENTERING_WORLD'
+	self:UnregisterEvent 'PLAYER_MAP_CHANGED'
 	self:UnregisterEvent 'PET_JOURNAL_LIST_UPDATE'
 	self:UnregisterEvent 'COMPANION_UPDATE'
 	self:UnregisterEvent 'PET_BATTLE_OPENING_START'
