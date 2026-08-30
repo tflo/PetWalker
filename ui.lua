@@ -684,7 +684,7 @@ function ns:auto_toggle()
 	else
 		ns.db.autoEnabled = true
 		ns.events:register_pw_events()
-		ns.autoaction()
+		ns.transitioncheck()
 	end
 	addonprint(format('Pet auto-summoning %s.', ns.db.autoEnabled and 'enabled' or 'disabled'))
 end
