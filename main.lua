@@ -88,6 +88,22 @@ local excluded_species = {
 -- 	2403, -- Abyssal Eel
 }
 
+-- https://warcraft.wiki.gg/wiki/DifficultyID
+-- https://warcraft.wiki.gg/wiki/Structure_DifficultyInfo
+local nopet_instance_difficulties = {
+	[8] = true, -- Mythic keystone; isChallengeMode
+-- 	[23] = true, -- Mythic dung
+-- 	[2] = true, -- Heroic dung
+	[16] = true, -- Mythic raid
+	[15] = true, -- Heroic raid
+}
+-- https://warcraft.wiki.gg/wiki/API:IsInInstance
+local nopet_instance_types = {
+	['arena'] = true, -- PvP arena
+-- 	['pvp'] = true, -- PvP battleground
+-- 	['raid'] = true, -- PvE raid
+}
+
 -- Debug
 ns.time_summonspell = 0
 
