@@ -274,6 +274,7 @@ end
 TODO: Rework this function:
 - Since implementation of history we can have more than one "previous" pets
 - A nil at index 2 will stop the iteration! --> done
+See https://github.com/tflo/PetWalker/issues/28
 ]]
 function ns.saved_pet_summonability_check() --- After login
 	local priorities, perchar = {}, nil
