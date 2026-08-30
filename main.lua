@@ -42,7 +42,7 @@ local time = _G.time
 local debugprint = ns.debugprint
 
 --[[===========================================================================
-	Some Variables/Constants
+	Some Variables/Constants/Flags
 ===========================================================================]]--
 
 ns.pool_initialized = false
@@ -127,6 +127,7 @@ end
 
 local function nopet_instance()
 	local _, type, diff_id = GetInstanceInfo()
+	if type == 'none' or diff_id == 0 or ns.db.instanceMode == 0 then return false end
 	if
 		ns.db.instanceMode == 2
 		or ns.db.instanceMode == 1
@@ -539,6 +540,15 @@ end
 	restore_pet, as restore_pet is prefiltered by autoaction, and here we are not.
 ----------------------------------------------------------------------------]]--
 
+-- Called by:
+-- PLAYER_ENTERING_WORLD
+-- PLAYER_MAP_CHANGED
+-- PET_BATTLE_OVER
+-- ns.autoaction (true)
+-- PetWalkerCharFavsCheckbox OnClick script
+-- ns.instance_toggle
+-- ns.auto_toggle
+
 function ns.transitioncheck(checks_done)
 	if not checks_done then
 		if nopet_instance() then
@@ -560,6 +570,7 @@ function ns.transitioncheck(checks_done)
 	-- if ns.pet_verified or InCombatLockdown() or IsFlying() or UnitOnTaxi 'player' then
 	-- TODO: Observe if stop_auto_summon works as expected here!
 	-- Never run the stop_auto_summon check twice, as the 2nd one will always find a throttle then!
+	-- checks_done is true currently only when called by autoaction
 	if not checks_done and stop_auto_summon() then
 		debugprint(
 			'‹transitioncheck()› stopped by ‹stop_auto_summon()›; ‹pet_verified›:',
@@ -575,6 +586,7 @@ function ns.transitioncheck(checks_done)
 		debugprint('‹transitioncheck()› aborted; less than 6s since ‹restore_pet()›')
 		return
 	end
+	-- TODO: leverage nopet_instance() to get the instance ID
 	ns.current_zone = C_Map_GetBestMapForUnit 'player'
 	local savedpet
 	-- TODO: shouldn't we initialize here instead?!

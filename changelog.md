@@ -4,6 +4,20 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 3.1-beta1 (2026-09-30)
+
+- Changes to pet handling in instances:
+    - Previous normal behavior: auto-summoning/restoring was disabled in M+ Key and Arena.
+    - New Normal mode:
+        - Auto-summoning/restoring disabled in M+ Keys, Arena, Heroic Raid, Mythic Raid.
+        - In an instance where auto-summoning is disabled, your pet will also be auto-dismissed after entering.
+    - New Strict “No Pets in Any Instance” mode:
+        - Toggle with `/pw i` between this and Normal mode.
+        - In this mode, the new Normal behavior is extended to *all instances*, no matter the type or difficulty (this includes things like Delves, Normal Dungeons, Battlegrounds, Story Mode Raid, etc.).
+        - If you don’t care about instances and just want your pet around everywhere, you can disable the instance restrictions entirely with `/pw !i`. PetWalker will then treat any instance as open world. Go back to Normal instance mode with `/pw i`.
+        - The setting is account-wide.
+        - No matter the restrictions, PetWalker will not dismiss a *manually* summoned pet in instances. This is intentional. Also your PetWalker keybinds for New Pet or Previous Pet remain functional (the pet will just not be auto-restored when lost).
+
 #### 3.0.0 (2026-07-01)
 
 - New feature: **Configurable probability** of favorite pets in *All Pets* mode. Idea by @tsemoana on GitHub.

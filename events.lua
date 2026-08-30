@@ -215,6 +215,7 @@ ns.PET_JOURNAL_LIST_UPDATE = PET_JOURNAL_LIST_UPDATE -- Used in main
 local function FIRST_FRAME_RENDERED()
 	-- *Not* with PLAYER_ENTERING_WORLD so that it is not affected
 	-- when all events get unregistered via /pw a
+	ns.events:UnregisterEvent 'FIRST_FRAME_RENDERED'
 	C_TimerAfter(delay_login_msg, function()
 		ns.msg_login()
 		ns.msg_db_updated()

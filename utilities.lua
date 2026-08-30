@@ -97,7 +97,6 @@ end
 	Debug
 ===========================================================================]]--
 
-
 local function ts_debug(precise)
 	local func = precise and GetTimePreciseSec or GetTime
 	local ts = func() % 100

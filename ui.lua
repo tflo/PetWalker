@@ -337,7 +337,7 @@ function ns.help_display()
 			CLR.QUOTE('Emergency Off'),
 		},
 		{ -- Skyride-mounted
-			'%s : Toggle %s also %s: %s',
+			'%s : Toggle %s also %s: %s.',
 			CLR.CMD('sr'),
 			CLR.KEY('auto-summoning'),
 			CLR.KEY('while mounted for Skyriding'),
@@ -645,8 +645,7 @@ ns.protect_slash_pw()
 ---------------------------------------------------------------------------]]--
 
 function ns:dismiss_and_disable()
-	local actpet = C_PetJournal_GetSummonedPetGUID()
-	if actpet then C_PetJournal.SummonPetByGUID(actpet) end
+	ns.dismiss_pet()
 	ns.db.autoEnabled = false
 	ns.events:unregister_pw_events()
 	addonprint(
