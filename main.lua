@@ -36,6 +36,7 @@ local IsStealthed = _G.IsStealthed
 -- local UnitIsControlling = _G.UnitIsControlling
 local UnitChannelInfo = _G.UnitChannelInfo
 local C_PlayerInfo_GetGlidingInfo = C_PlayerInfo.GetGlidingInfo
+local GetInstanceInfo = _G.GetInstanceInfo
 local time = _G.time
 
 local debugprint = ns.debugprint
@@ -103,6 +104,8 @@ local nopet_instance_types = {
 -- 	['pvp'] = true, -- PvP battleground
 -- 	['raid'] = true, -- PvE raid
 }
+
+ns.in_nopet_instance = nil
 
 -- Debug
 ns.time_summonspell = 0
@@ -537,6 +540,22 @@ end
 ----------------------------------------------------------------------------]]--
 
 function ns.transitioncheck(checks_done)
+	if not checks_done then
+		if nopet_instance() then
+			ns.events:unregister_summon_events()
+			ns.dismiss_pet()
+			ns.in_nopet_instance = true
+			ns.msg_nopet_instance_entered()
+			return
+		else
+			-- User may change the setting while autoEnabled is off
+			if ns.db.autoEnabled then ns.events:register_summon_events() end
+			if ns.in_nopet_instance then
+				ns.msg_nopet_instance_left()
+			end
+			ns.in_nopet_instance = nil
+		end
+	end
 	-- Can be called via the entering-world events, or via `autoaction`, so we
 	-- if ns.pet_verified or InCombatLockdown() or IsFlying() or UnitOnTaxi 'player' then
 	-- TODO: Observe if stop_auto_summon works as expected here!

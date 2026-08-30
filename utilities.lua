@@ -6,6 +6,7 @@ local _, ns = ...
 local C_PetJournal_GetPetInfoByPetID = C_PetJournal.GetPetInfoByPetID
 local C_PetJournal_GetBattlePetLink = C_PetJournal.GetBattlePetLink
 local C_PetJournal_GetSummonedPetGUID = C_PetJournal.GetSummonedPetGUID
+local C_PetJournal_SummonPetByGUID = C_PetJournal.SummonPetByGUID
 local GetTimePreciseSec = _G.GetTimePreciseSec
 local tostring = _G.tostring
 local format = _G.format
@@ -83,6 +84,13 @@ function ns.id_to_link(id)
 	if not id then return "<¡id_to_link() didn't receive a pet GUID!>" end
 	local link = C_PetJournal_GetBattlePetLink(id)
 	return tostring(link) or '¿petlink?'
+end
+
+function ns.dismiss_pet()
+	local p = C_PetJournal_GetSummonedPetGUID()
+	if p then
+		C_PetJournal_SummonPetByGUID(p)
+	end
 end
 
 --[[===========================================================================
