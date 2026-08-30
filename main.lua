@@ -122,13 +122,14 @@ local function is_skyride_mounted()
 end
 
 
-local function forbidden_instance()
-	local in_instance, instance_type = IsInInstance()
-	if not in_instance then return false end
-	if instance_type == 'arena' then return true end
-	if instance_type == 'party' then
-		local _, _, difficulty_id = GetInstanceInfo()
-		if difficulty_id == 8 then return true end
+local function nopet_instance()
+	local _, type, diff_id = GetInstanceInfo()
+	if
+		ns.db.instanceMode == 2
+		or ns.db.instanceMode == 1
+			and (nopet_instance_difficulties[diff_id] or nopet_instance_types[type])
+	then
+		return true
 	end
 end
 
@@ -219,7 +220,7 @@ local function stop_auto_summon(now)
 		or C_UnitAuras_GetPlayerAuraBySpellID(43883) -- Rental Racing Ram (Brewfest daily)
 	then
 		throttle = 40
-	elseif forbidden_instance() then
+	elseif nopet_instance() then
 		-- Our events will be re-enabled at the next PLAYER_ENTERING_WORLD
 		ns.events:unregister_summon_events()
 		throttle = 1 -- Must be > 0 to stop the autoaction in progress

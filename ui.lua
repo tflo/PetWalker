@@ -582,6 +582,10 @@ local function slashfunc(msg)
 		ns.dr_summoning_toggle()
 	elseif args[1] == 't' or args[1] == 'target' then
 		ns.summon_targetpet()
+	elseif args[1] == 'i' or args[1] == 'instance' or args[1] == 'instances' then
+		ns.instance_toggle()
+	elseif args[1] == 'i0' or args[1] == 'ignoreinstance' or args[1] == 'ignoreinstances' then
+		ns.db.instanceMode = 0
 	elseif args[1] == 'h' or args[1] == 'help' then
 		ns.help_display()
 	elseif args[1] == nil then
@@ -818,6 +822,13 @@ function ns.set_num_recents(num)
 	end
 	addonprint(
 		format('Previous Pets history set to %s.', ns.db.numRecents - 1)
+	)
+end
+
+function ns.instance_toggle()
+	ns.db.instanceMode = ns.db.instanceMode ~= 1 and 1 or 2
+	addonprint(
+		format('Instance mode set to %s.', ns.db.instanceMode == 1 and CLR.KEY('Standard') ..' (no pets allowed in certain instance types)' or ns.db.instanceMode == 2 and CLR.KEY('Strict') .. ' (no pets allowed in any instance)' or CLR.KEY('Ignore') .. ' (pets allowed in any instance)')
 	)
 end
 

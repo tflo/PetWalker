@@ -41,6 +41,7 @@ local defaults_global = {
 	drSummoning = true,
 	numRecents = 4,
 	recentPets = {},
+	instanceMode = 1, -- 0: ignore instances; 1: some instances forbidden (standard); 2: all instances forbidden
 	eventAlt = nil,
 	debugMode = false,
 }
