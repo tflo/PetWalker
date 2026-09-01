@@ -225,10 +225,6 @@ local function stop_auto_summon(now)
 		or C_UnitAuras_GetPlayerAuraBySpellID(43883) -- Rental Racing Ram (Brewfest daily)
 	then
 		throttle = 40
-	elseif nopet_instance() then
-		-- Our events will be re-enabled at the next PLAYER_ENTERING_WORLD
-		ns.events:unregister_summon_events()
-		throttle = 1 -- Must be > 0 to stop the autoaction in progress
 	end
 	if throttle > 0 then
 		debugprint('‹stop_auto_summon()›: new throttle:', throttle)
