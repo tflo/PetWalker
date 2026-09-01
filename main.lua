@@ -563,7 +563,10 @@ function ns.transitioncheck(checks_done)
 			return
 		else
 			-- User may change the setting while autoEnabled is off
-			if ns.db.autoEnabled then ns.events:register_summon_events() end
+			if ns.db.autoEnabled then
+				-- This must be the *only* place where register_summon_events is called!
+				ns.events:register_summon_events()
+			end
 			if ns.in_nopet_instance then
 				ns.msg_nopet_instance_left()
 			end

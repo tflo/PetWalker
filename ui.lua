@@ -682,7 +682,7 @@ function ns:auto_toggle()
 		ns.events:unregister_pw_events()
 	else
 		ns.db.autoEnabled = true
-		ns.events:register_pw_events()
+		ns.events:register_meta_events()
 		ns.transitioncheck()
 	end
 	addonprint(format('Pet auto-summoning %s.', ns.db.autoEnabled and 'enabled' or 'disabled'))
@@ -692,7 +692,7 @@ function ns:event_toggle()
 	ns.db.eventAlt = not ns.db.eventAlt
 	if ns.db.autoEnabled then
 		ns.events:unregister_summon_events()
-		ns.events:register_summon_events()
+		ns.transitioncheck()
 	end
 	addonprint(
 		format(

@@ -192,7 +192,7 @@ end
 
 local function PET_BATTLE_OPENING_START()
 	ns.debugprint '"PET_BATTLE_OPENING_START" unregisters events'
-	ns.events:unregister_pw_events()
+	ns.events:unregister_summon_events()
 	ns.events:RegisterEvent 'PET_BATTLE_OVER'
 	ns.in_battlesleep = true
 	-- In theory, this is redundant here. However I noticed that since the
@@ -209,7 +209,6 @@ local function PET_BATTLE_OVER()
 		if C_PetBattlesIsInBattle() then return end
 		ns.events:UnregisterEvent 'PET_BATTLE_OVER'
 		ns.in_battlesleep = false
-		ns.events:register_pw_events()
 		-- Summon without waiting for trigger event
 		if instasummon_after_battlesleep then ns.transitioncheck() end
 	end)
@@ -327,11 +326,14 @@ function ns.events:unregister_meta_events()
 	self:UnregisterEvent 'PLAYER_LOGOUT'
 end
 
-function ns.events:register_pw_events()
-	ns.debugprint '‹register_pw_events()› called'
-	self:register_meta_events()
-	self:register_summon_events()
-end
+-- v3.1: no longer needed.
+-- We now call register_summon_events exclusively from transitioncheck, i.e.
+-- register_meta_events and register_summon_events should never be called together
+-- function ns.events:register_pw_events()
+-- 	ns.debugprint '‹register_pw_events()› called'
+-- 	self:register_meta_events()
+-- 	self:register_summon_events()
+-- end
 
 function ns.events:unregister_pw_events()
 	ns.debugprint '‹unregister_pw_events()› called'
