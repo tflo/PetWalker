@@ -126,6 +126,8 @@ end
 -- Fires reliably after *any* instance change, also the ones w/o P_E_W or loading screen (e.g. delves).
 -- Does *not* fire after login/reload, so P_E_W, P_L, or F_F_R is still needed.
 -- Caution: It fires very early, so if we use GetInstanceInfo and friends, we need a delay of 2+ seconds.
+-- NOTE: We could maybe use WALK_IN_DATA_UPDATE, which presumably fires when the data for GetInstanceInfo
+-- becomes available; problem is that it doesn't fire when leaving a delve.
 local function PLAYER_MAP_CHANGED()
 	ns.debugprint '"PLAYER_MAP_CHANGED": calling ‹transitioncheck()›'
 	C_Timer_After(DELAY_AFTER_PMC, function()
@@ -389,15 +391,16 @@ Leaving a dungeon:
 
 Entering a delve:
 
-[438.495] PLAYER_MAP_CHANGED: 0 --> 2933
-[438.495] ADDON_RESTRICTION_STATE_CHANGED : Map (4): Activating
-[438.547] ZONE_CHANGED_NEW_AREA
+[971.635] PLAYER_MAP_CHANGED: 0 --> 3038
+[971.635] ADDON_RESTRICTION_STATE_CHANGED : Map (4): Activating
+[971.653] ZONE_CHANGED_NEW_AREA
+[972.166] WALK_IN_DATA_UPDATE
 
 Leaving a delve:
 
-[537.279] PLAYER_MAP_CHANGED: 2933 --> 0
-[537.279] ADDON_RESTRICTION_STATE_CHANGED : Map (4): Inactive
-[537.687] ZONE_CHANGED_NEW_AREA
+[046.723] PLAYER_MAP_CHANGED: 3038 --> 0
+[046.723] ADDON_RESTRICTION_STATE_CHANGED : Map (4): Inactive
+[046.763] ZONE_CHANGED_NEW_AREA
 
 ]]
 
