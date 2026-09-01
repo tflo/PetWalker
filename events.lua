@@ -9,11 +9,12 @@ local C_PetJournalGetSummonedPetGUID = _G.C_PetJournal.GetSummonedPetGUID
 local C_PetBattlesIsInBattle = _G.C_PetBattles.IsInBattle
 local C_TimerAfter = _G.C_Timer.After
 
--- C_Timers launched at PLAYER_ENTERING_WORLD
-local DELAY_AFTER_LOGIN = 14
-local DELAY_AFTER_RELOAD = 8
--- C_Timers launched at PLAYER_MAP_CHANGED
-local DELAY_AFTER_INSTANCE = 6
+-- C_Timer launched at PLAYER_MAP_CHANGED
+-- We can afford a short delay, since PMC is only used for walk-in instances.
+-- Never use less than 2s.
+local DELAY_AFTER_PMC = 4
+-- C_Timer launched at LOADING_SCREEN_DISABLED
+local DELAY_AFTER_LOADINGSCREEN = 1
 -- C_Timer launched at FIRST_FRAME_RENDERED
 local delay_login_msg = 10
 -- TODO: Should we delay also after we change or select pet teams in Rematch / PJ
@@ -90,28 +91,37 @@ local function ADDON_LOADED(addon)
 	end
 end
 
-local function PLAYER_ENTERING_WORLD(is_login, is_reload)
-	-- Instance changes are now handled by P_M_C
-	if not is_login and not is_reload then return end
-	local delay
-	-- We do not want summon events before transitioncheck has finished
-	ns.events:unregister_summon_events()
-	if is_login then
+local function PLAYER_ENTERING_WORLD(islogin, isreload)
+	-- v3.1: We delegated everything to LOADING_SCREEN_DISABLED and
+	-- PLAYER_MAP_CHANGED, so we need P_E_W only as initial-login detector;
+	ns.events:UnregisterEvent 'PLAYER_ENTERING_WORLD'
+	if islogin then
 		ns.debugprint '"PLAYER_ENTERING_WORLD": login'
-		delay = DELAY_AFTER_LOGIN
-		-- This must run before transitioncheck
-		-- Not needed if reload (=same char)
-		C_TimerAfter(delay - 1, ns.saved_pet_summonability_check)
-	elseif is_reload then
-		ns.debugprint '"PLAYER_ENTERING_WORLD": reload'
-		delay = DELAY_AFTER_RELOAD
+		ns.is_initial_login = true
+	elseif isreload then
+		-- Currently not needed
 	end
+end
+
+local function LOADING_SCREEN_ENABLED()
+	ns.events:unregister_summon_events()
+	-- Not a walk-in instance, P_M_C not needed
+	ns.events:UnregisterEvent 'PLAYER_MAP_CHANGED'
+	ns.debugprint '"LOADING_SCREEN_ENABLED": summon events unregistered'
 	ns.pet_verified = false
-	C_TimerAfter(delay, function()
-		ns.transitioncheck()
-		-- For the moment, calling this separately, since `transitioncheck` has early returns
-		-- The instance guard is for when the user reloads inside an instance
-		if not ns.in_nopet_instance then ns.events:register_summon_events() end
+end
+
+local function LOADING_SCREEN_DISABLED()
+-- 	if ns.db.autoEnabled then
+-- 		ns.events:register_summon_events()
+-- 		ns.debugprint '"LOADING_SCREEN_DISABLED": summon events registered'
+-- 	else
+-- 		ns.debugprint '"LOADING_SCREEN_DISABLED": Auto is disabled'
+-- 	end
+	ns.debugprint '"LOADING_SCREEN_DISABLED": calling ‹transitioncheck()›'
+	ns.events:RegisterEvent 'PLAYER_MAP_CHANGED'
+	C_TimerAfter(DELAY_AFTER_LOADINGSCREEN, function()
+		ns.transitioncheck() -- register_summon_events will be done here
 	end)
 end
 
@@ -119,8 +129,8 @@ end
 -- Does *not* fire after login/reload, so P_E_W, P_L, or F_F_R is still needed.
 -- Caution: It fires very early, so if we use GetInstanceInfo and friends, we need a delay of 2+ seconds.
 local function PLAYER_MAP_CHANGED()
-	ns.debugprint '"PLAYER_MAP_CHANGED": instance change'
-	C_TimerAfter(DELAY_AFTER_INSTANCE, function()
+	ns.debugprint '"PLAYER_MAP_CHANGED": calling ‹transitioncheck()›'
+	C_TimerAfter(DELAY_AFTER_PMC, function()
 		ns.transitioncheck()
 	end)
 end
@@ -233,6 +243,8 @@ end
 
 local event_handlers = {
 	['ADDON_LOADED'] = ADDON_LOADED,
+	['LOADING_SCREEN_ENABLED'] = LOADING_SCREEN_ENABLED,
+	['LOADING_SCREEN_DISABLED'] = LOADING_SCREEN_DISABLED,
 	['PLAYER_ENTERING_WORLD'] = PLAYER_ENTERING_WORLD,
 	['FIRST_FRAME_RENDERED'] = FIRST_FRAME_RENDERED,
 	['PLAYER_MAP_CHANGED'] = PLAYER_MAP_CHANGED,
@@ -255,7 +267,8 @@ ns.events:SetScript('OnEvent', function(_, event, ...)
 end)
 
 ns.events:RegisterEvent 'ADDON_LOADED'
-ns.events:RegisterEvent 'FIRST_FRAME_RENDERED'
+ns.events:RegisterEvent 'FIRST_FRAME_RENDERED' -- Only needed at initial login
+ns.events:RegisterEvent 'PLAYER_ENTERING_WORLD' -- Only needed at initial login
 
 -- Groups
 
@@ -292,7 +305,9 @@ end
 
 function ns.events:register_meta_events()
 	ns.debugprint '‹register_meta_events()› called'
-	self:RegisterEvent 'PLAYER_ENTERING_WORLD'
+	self:RegisterEvent 'LOADING_SCREEN_ENABLED'
+	self:RegisterEvent 'LOADING_SCREEN_DISABLED'
+-- 	self:RegisterEvent 'PLAYER_ENTERING_WORLD'
 	self:RegisterEvent 'PLAYER_MAP_CHANGED'
 	self:RegisterEvent 'PET_JOURNAL_LIST_UPDATE'
 	self:RegisterEvent 'COMPANION_UPDATE'
@@ -302,7 +317,9 @@ end
 
 function ns.events:unregister_meta_events()
 	ns.debugprint '‹unregister_meta_events()› called'
-	self:UnregisterEvent 'PLAYER_ENTERING_WORLD'
+	self:UnregisterEvent 'LOADING_SCREEN_ENABLED'
+	self:UnregisterEvent 'LOADING_SCREEN_DISABLED'
+-- 	self:UnregisterEvent 'PLAYER_ENTERING_WORLD'
 	self:UnregisterEvent 'PLAYER_MAP_CHANGED'
 	self:UnregisterEvent 'PET_JOURNAL_LIST_UPDATE'
 	self:UnregisterEvent 'COMPANION_UPDATE'

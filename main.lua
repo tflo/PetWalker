@@ -551,6 +551,10 @@ end
 
 function ns.transitioncheck(checks_done)
 	if not checks_done then
+		if ns.is_initial_login then
+			ns.saved_pet_summonability_check()
+			ns.is_initial_login = nil
+		end
 		if nopet_instance() then
 			ns.events:unregister_summon_events()
 			ns.dismiss_pet()
