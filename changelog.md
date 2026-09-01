@@ -10,10 +10,12 @@ To see all commits, including all alpha changes, [***go here***](https://github.
     - PLAYER_ENTERING_WORLD is no longer used for activation.
     - LOADING_SCREEN_ENABLED disables all summoning.
     - LOADING_SCREEN_DISABLED conditionally enables summoning.
-    - PLAYER_MAP_CHANGED is used only for walk-in instances (i.e., when LOADING_SCREEN_ENABLED did not fire).
-    - The new logic eliminates the previous guesswork for determining the required after-event delays.
-    - Auto-dismissing the pet when entering a no-pet instance should now be bulletproof, even if you get a 30-seconds loading screen.
-    - Likely also eliminates (some of) the occasional restore glitches immediately after login/reload/instance-change.
+    - PLAYER_MAP_CHANGED is used only for walk-in instances (i.e., if LOADING_SCREEN_ENABLED does not fire, e.g. Delves).
+- The new logic… 
+    - eliminates the previous guesswork for determining the required after-event delays;
+    - auto-dismissing the pet when entering a no-pet instance should now be bulletproof, even if you get a 30-seconds loading screen;
+    - likely also eliminates (some of) the occasional restore glitches immediately after login/reload/instance-change;
+    - allows for a shorter delay after entering walk-in instances (a minimum delay is still required for `GetInstanceInfo`).
 
 #### 3.1-beta1 (2026-09-30)
 
