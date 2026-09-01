@@ -6,7 +6,6 @@ local MYVERSION = C_AddOns.GetAddOnMetadata(MYNAME, 'Version')
 -- API
 local C_PetJournal_GetSummonedPetGUID = _G.C_PetJournal.GetSummonedPetGUID
 local C_PetJournal_GetBattlePetLink = _G.C_PetJournal.GetBattlePetLink
-local tostring = _G.tostring
 local format = _G.format
 local print = _G.print
 

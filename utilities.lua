@@ -10,7 +10,6 @@ local C_PetJournal_SummonPetByGUID = C_PetJournal.SummonPetByGUID
 local GetTimePreciseSec = _G.GetTimePreciseSec
 local tostring = _G.tostring
 local format = _G.format
-local GetTimePreciseSec = _G.GetTimePreciseSec
 local GetTime = _G.GetTime
 local WTC = WrapTextInColorCode
  -- Don't use a hyphen (U+002D), it's very short in some fonts (e.g. ArialN)

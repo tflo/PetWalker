@@ -4,10 +4,9 @@
 local MYNAME, ns = ...
 
 
-local C_AddOnsIsAddOnLoaded = _G.C_AddOns.IsAddOnLoaded
-local C_PetJournalGetSummonedPetGUID = _G.C_PetJournal.GetSummonedPetGUID
-local C_PetBattlesIsInBattle = _G.C_PetBattles.IsInBattle
-local C_TimerAfter = _G.C_Timer.After
+local C_PetJournal_GetSummonedPetGUID = _G.C_PetJournal.GetSummonedPetGUID
+local C_PetBattles_IsInBattle = _G.C_PetBattles.IsInBattle
+local C_Timer_After = _G.C_Timer.After
 
 -- C_Timer launched at PLAYER_MAP_CHANGED
 -- We can afford a short delay, since PMC is only used for walk-in instances.
@@ -16,9 +15,9 @@ local DELAY_AFTER_PMC = 4
 -- C_Timer launched at LOADING_SCREEN_DISABLED
 local DELAY_AFTER_LOADINGSCREEN = 1
 -- C_Timer launched at FIRST_FRAME_RENDERED
-local delay_login_msg = 10
+local DELAY_LOGIN_MSG = 10
 -- TODO: Should we delay also after we change or select pet teams in Rematch / PJ
-local delay_after_battle = 15 -- Post-petbattle sleep
+local DELAY_AFTER_BATTLE = 15 -- Post-petbattle sleep
 local instasummon_after_battlesleep = true -- Summon without waiting for trigger event
 
 local eventthrottle_companionupdate
@@ -28,27 +27,26 @@ local eventthrottle_companionupdate
 -- This is for the experimental usage of PLAYER_MOUNT_DISPLAY_CHANGED as second summoning event;
 -- see v2.5.0 change notes for more info.
 -- Disable/enable usage of the event
-local use_PMDC = true -- true/false
+local USE_PMDC = true -- true/false
 -- Delay after dismounting (applies also to mounting, but this is irrelevant)
 -- The shorter the better, but the risk of colliding with a summoning attempt by the game will probably be higher.
-local delay_PMDC = 0.4 -- [seconds] reasonable range: 0 to 1; 0 means 'next frame'
+local DELAY_PMDC = 0.4 -- [seconds] reasonable range: 0 to 1; 0 means 'next frame'
 -- Disable/enable the above delay
 -- If false, no delay will be used, not even a single frame (risk of colliding will be high).
-local use_delay_PMDC = true -- true/false
+local USE_DELAY_PMDC = true -- true/false
 -- END PMDC finetuning
 
 --[[===========================================================================
 	Events
 ===========================================================================]]--
 
-local monitored_addons = {
+local MONITORED_ADDONS = {
 	[MYNAME] = true,
 	['Blizzard_Collections'] = true,
 }
--- dtd(monitored_addons)
 
 local function ADDON_LOADED(addon)
-	if not monitored_addons[addon] then return end
+	if not MONITORED_ADDONS[addon] then return end
 	if addon == MYNAME then
 		ns.time_newpet_success = time() - (ns.db.newPetTimer - ns.db.remainingTimer)
 
@@ -120,7 +118,7 @@ local function LOADING_SCREEN_DISABLED()
 -- 	end
 	ns.debugprint '"LOADING_SCREEN_DISABLED": calling ‹transitioncheck()›'
 	ns.events:RegisterEvent 'PLAYER_MAP_CHANGED'
-	C_TimerAfter(DELAY_AFTER_LOADINGSCREEN, function()
+	C_Timer_After(DELAY_AFTER_LOADINGSCREEN, function()
 		ns.transitioncheck() -- register_summon_events will be done here
 	end)
 end
@@ -130,7 +128,7 @@ end
 -- Caution: It fires very early, so if we use GetInstanceInfo and friends, we need a delay of 2+ seconds.
 local function PLAYER_MAP_CHANGED()
 	ns.debugprint '"PLAYER_MAP_CHANGED": calling ‹transitioncheck()›'
-	C_TimerAfter(DELAY_AFTER_PMC, function()
+	C_Timer_After(DELAY_AFTER_PMC, function()
 		ns.transitioncheck()
 	end)
 end
@@ -153,9 +151,9 @@ end
 local function PLAYER_MOUNT_DISPLAY_CHANGED()
 	-- This can lead to a summoning conflict *if* the game itself re-summons the pet after dismounting
 	-- Let's try it with a little delay
-	if use_delay_PMDC then
+	if USE_DELAY_PMDC then
 		ns.debugprint 'Triggered (delayed) by "PLAYER_MOUNT_DISPLAY_CHANGED"'
-		C_TimerAfter(delay_PMDC, ns.autoaction)
+		C_Timer_After(DELAY_PMDC, ns.autoaction)
 	else
 		ns.debugprint 'Triggered by "PLAYER_MOUNT_DISPLAY_CHANGED"'
 		ns.autoaction()
@@ -166,14 +164,14 @@ local function COMPANION_UPDATE(what)
 	-- This event fires always 2 times, so let's listen to the last one.
 	if what ~= 'CRITTER' or eventthrottle_companionupdate then return end
 	eventthrottle_companionupdate = true
-	C_TimerAfter(0.7, function()
+	C_Timer_After(0.7, function()
 		eventthrottle_companionupdate = nil
 		if not ns.pet_restored then
 			ns.save_pet()
 			if ns.db.debugMode then
 				ns.debugprint(
 					'"COMPANION_UPDATE" triggers ‹save_pet()›; ‹actpet›:',
-					ns.id_to_name(C_PetJournalGetSummonedPetGUID())
+					ns.id_to_name(C_PetJournal_GetSummonedPetGUID())
 				)
 			end
 		else
@@ -181,7 +179,7 @@ local function COMPANION_UPDATE(what)
 			if ns.db.debugMode then
 				ns.debugprint(
 					'"COMPANION_UPDATE": pet restored, not saving; ‹actpet›:',
-					ns.id_to_name(C_PetJournalGetSummonedPetGUID())
+					ns.id_to_name(C_PetJournal_GetSummonedPetGUID())
 				)
 			end
 		end
@@ -204,9 +202,9 @@ local function PET_BATTLE_OPENING_START()
 end
 
 local function PET_BATTLE_OVER()
-	ns.debugprint('"PET_BATTLE_OVER" will reregister events in sec:', delay_after_battle)
-	C_TimerAfter(delay_after_battle, function()
-		if C_PetBattlesIsInBattle() then return end
+	ns.debugprint('"PET_BATTLE_OVER" will reregister events in sec:', DELAY_AFTER_BATTLE)
+	C_Timer_After(DELAY_AFTER_BATTLE, function()
+		if C_PetBattles_IsInBattle() then return end
 		ns.events:UnregisterEvent 'PET_BATTLE_OVER'
 		ns.in_battlesleep = false
 		-- Summon without waiting for trigger event
@@ -228,7 +226,7 @@ local function FIRST_FRAME_RENDERED()
 	-- *Not* with PLAYER_ENTERING_WORLD so that it is not affected
 	-- when all events get unregistered via /pw a
 	ns.events:UnregisterEvent 'FIRST_FRAME_RENDERED'
-	C_TimerAfter(delay_login_msg, function()
+	C_Timer_After(DELAY_LOGIN_MSG, function()
 		ns.msg_login()
 		ns.msg_db_updated()
 	end)
@@ -293,7 +291,7 @@ function ns.events:register_summon_events()
 		-- Added this because:
 			-- To cancel flight throttle instantly
 			-- Possibly smoother summoning at dismounting
-		if use_PMDC then self:RegisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED' end
+		if USE_PMDC then self:RegisterEvent 'PLAYER_MOUNT_DISPLAY_CHANGED' end
 	end
 end
 
@@ -384,6 +382,22 @@ Leaving a dungeon:
 [938.913] PLAYER_ENTERING_WORLD: Loadscreen
 [939.001] LOADING_SCREEN_DISABLED
 [939.348] ZONE_CHANGED_NEW_AREA
+
+]]
+
+--[[ Typical event chain at instance change (walk-in instance): ]]--[[
+
+Entering a delve:
+
+[438.495] PLAYER_MAP_CHANGED: 0 --> 2933
+[438.495] ADDON_RESTRICTION_STATE_CHANGED : Map (4): Activating
+[438.547] ZONE_CHANGED_NEW_AREA
+
+Leaving a delve:
+
+[537.279] PLAYER_MAP_CHANGED: 2933 --> 0
+[537.279] ADDON_RESTRICTION_STATE_CHANGED : Map (4): Inactive
+[537.687] ZONE_CHANGED_NEW_AREA
 
 ]]
 
