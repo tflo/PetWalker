@@ -4,7 +4,7 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
-#### 3.1-beta2 (2026-10-01)
+#### 3.1.0-beta2 (2026-10-01)
 
 - Completely overhauled the meta events logic:
     - PLAYER_ENTERING_WORLD is no longer used for activation.
@@ -17,7 +17,7 @@ To see all commits, including all alpha changes, [***go here***](https://github.
     - likely also eliminates (some of) the occasional restore glitches immediately after login/reload/instance-change;
     - allows for a shorter delay after entering walk-in instances (a minimum delay is still required for `GetInstanceInfo`).
 
-#### 3.1-beta1 (2026-09-30)
+#### 3.1.0-beta1 (2026-09-30)
 
 - Changes to pet handling in instances:
     - Previous normal behavior: auto-summoning/restoring was disabled in M+ Key and Arena.
