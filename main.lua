@@ -127,6 +127,7 @@ end
 
 local function nopet_instance()
 	local _, type, diff_id = GetInstanceInfo()
+	debugprint('‹nopet_instance()›: type:', type, '; difficulty ID:', diff_id)
 	if type == 'none' or diff_id == 0 or ns.db.instanceMode == 0 then return false end
 	if
 		ns.db.instanceMode == 2

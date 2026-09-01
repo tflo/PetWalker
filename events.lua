@@ -210,6 +210,9 @@ local function PET_BATTLE_OVER()
 		ns.events:UnregisterEvent 'PET_BATTLE_OVER'
 		ns.in_battlesleep = false
 		-- Summon without waiting for trigger event
+		-- TODO: change the default to not instasummon:
+		-- Restoring the pet when moving should be sufficient, and it will eliminate possible
+		-- glitches while standing still and selecting teams in Rematch.
 		if instasummon_after_battlesleep then ns.transitioncheck() end
 	end)
 end
@@ -339,6 +342,50 @@ function ns.events:unregister_pw_events()
 	ns.debugprint '‹unregister_pw_events()› called'
 	self:UnregisterAllEvents()
 end
+
+--[[ Typical event chain at login (not in instance): ]]--[[
+
+[286.773] VARIABLES_LOADED
+[287.869] PLAYER_LOGIN
+[290.314] PLAYER_ENTERING_WORLD: Login
+[291.881] LOADING_SCREEN_DISABLED
+[294.388] FIRST_FRAME_RENDERED
+[295.735] ZONE_CHANGED_NEW_AREA
+
+]]
+
+--[[ Typical event chain at reload (not in instance): ]]--[[
+
+[423.132] VARIABLES_LOADED
+[423.602] PLAYER_LOGIN
+[426.664] PLAYER_ENTERING_WORLD: Reload
+[426.897] LOADING_SCREEN_DISABLED
+[427.212] FIRST_FRAME_RENDERED
+]]
+
+--[[ Typical event chain at instance change (not walk-in instance): ]]--[[
+
+Entering a dungeon:
+
+[783.837] LOADING_SCREEN_ENABLED
+[784.742] PLAYER_LEAVING_WORLD
+[784.787] PLAYER_MAP_CHANGED: -1 --> 2923
+[784.788] ADDON_RESTRICTION_STATE_CHANGED : Map (4): Activating
+[789.616] PLAYER_ENTERING_WORLD: Loadscreen
+[789.701] LOADING_SCREEN_DISABLED
+[789.951] ZONE_CHANGED_NEW_AREA
+
+Leaving a dungeon:
+
+[927.525] LOADING_SCREEN_ENABLED
+[928.637] PLAYER_LEAVING_WORLD
+[928.671] PLAYER_MAP_CHANGED: -1 --> 0
+[928.671] ADDON_RESTRICTION_STATE_CHANGED : Map (4): Inactive
+[938.913] PLAYER_ENTERING_WORLD: Loadscreen
+[939.001] LOADING_SCREEN_DISABLED
+[939.348] ZONE_CHANGED_NEW_AREA
+
+]]
 
 
 --[[ Typical pet battle event chain: ]]--[[

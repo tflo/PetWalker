@@ -4,6 +4,17 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 3.1-beta2 (2026-10-01)
+
+- Completely overhauled the meta events logic:
+    - PLAYER_ENTERING_WORLD is no longer used for activation.
+    - LOADING_SCREEN_ENABLED disables all summoning.
+    - LOADING_SCREEN_DISABLED conditionally enables summoning.
+    - PLAYER_MAP_CHANGED is used only for walk-in instances (i.e., when LOADING_SCREEN_ENABLED did not fire).
+    - The new logic eliminates the previous guesswork for determining the required after-event delays.
+    - Auto-dismissing the pet when entering a no-pet instance should now be bulletproof, even if you get a 30-seconds loading screen.
+    - Likely also eliminates (some of) the occasional restore glitches immediately after login/reload/instance-change.
+
 #### 3.1-beta1 (2026-09-30)
 
 - Changes to pet handling in instances:
