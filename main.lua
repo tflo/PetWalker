@@ -570,11 +570,16 @@ function ns.transitioncheck(checks_done)
 			ns.in_nopet_instance = nil
 		end
 	end
-	-- Can be called via the entering-world events, or via `autoaction`, so we
-	-- if ns.pet_verified or InCombatLockdown() or IsFlying() or UnitOnTaxi 'player' then
-	-- TODO: Observe if stop_auto_summon works as expected here!
-	-- Never run the stop_auto_summon check twice, as the 2nd one will always find a throttle then!
-	-- checks_done is true currently only when called by autoaction
+	-- Can be called from e.g. the login/instance events, or `autoaction`.
+	-- In the latter case, the checks are already done.
+	-- Never run the stop_auto_summon check twice, as the 2nd one will always find a throttle.
+	-- `checks_done` is true currently only when called by `autoaction`.
+
+	-- TOOD:
+	-- Don't do `stop_auto_summon` here.
+	-- Don't do `new_pet` here.
+	-- Just do verifications and `savepet`, and pass to `autoaction`.
+
 	if not checks_done and stop_auto_summon() then
 		debugprint(
 			'‹transitioncheck()› stopped by ‹stop_auto_summon()›; ‹pet_verified›:',
@@ -890,6 +895,9 @@ function ns:create_cfavs_checkbox()
 	btn:SetScript('OnClick', function()
 		ns.dbc.charFavsEnabled = not ns.dbc.charFavsEnabled
 		if ns.db.autoEnabled then
+			-- TODO: We should bypass the throttle from `stop_auto_summon` here; otherwise `cfavs_update`
+			-- inside `transitioncheck` will not run if the user ticks/unticks quickly.
+			-- Or run `cfavs_update` here and pass a `cfavs_update_done` flag to `transitioncheck`.
 			ns.transitioncheck()
 		else
 			ns:cfavs_update()

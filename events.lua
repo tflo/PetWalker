@@ -128,6 +128,8 @@ end
 -- Caution: It fires very early, so if we use GetInstanceInfo and friends, we need a delay of 2+ seconds.
 -- NOTE: We could maybe use WALK_IN_DATA_UPDATE, which presumably fires when the data for GetInstanceInfo
 -- becomes available; problem is that it doesn't fire when leaving a delve.
+-- Our logic is simple: If it's a loadingscreen instance, P_M_C always fires between L_S_E and L_S_D;
+-- L_S_E unregisters it, L_S_D re-registers it, so we don't have any redundancy.
 local function PLAYER_MAP_CHANGED()
 	ns.debugprint '"PLAYER_MAP_CHANGED": calling ‹transitioncheck()›'
 	C_Timer_After(DELAY_AFTER_PMC, function()
@@ -371,7 +373,7 @@ Entering a dungeon:
 [784.742] PLAYER_LEAVING_WORLD
 [784.787] PLAYER_MAP_CHANGED: -1 --> 2923
 [784.788] ADDON_RESTRICTION_STATE_CHANGED : Map (4): Activating
-[789.616] PLAYER_ENTERING_WORLD: Loadscreen
+[789.616] PLAYER_ENTERING_WORLD: Instance
 [789.701] LOADING_SCREEN_DISABLED
 [789.951] ZONE_CHANGED_NEW_AREA
 
@@ -381,7 +383,7 @@ Leaving a dungeon:
 [928.637] PLAYER_LEAVING_WORLD
 [928.671] PLAYER_MAP_CHANGED: -1 --> 0
 [928.671] ADDON_RESTRICTION_STATE_CHANGED : Map (4): Inactive
-[938.913] PLAYER_ENTERING_WORLD: Loadscreen
+[938.913] PLAYER_ENTERING_WORLD: Instance
 [939.001] LOADING_SCREEN_DISABLED
 [939.348] ZONE_CHANGED_NEW_AREA
 
