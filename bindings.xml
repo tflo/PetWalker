@@ -7,6 +7,9 @@ Copyright (c) 2022-2026 Thomas Floeren
 	<Binding name="PETWALKER_TOGGLE_AUTO" category="PetWalker ">
         PetWalker_binding_toggle_autosummon()
     </Binding>
+    <Binding name="PETWALKER_DISMISS_PET" category="PetWalker ">
+        PetWalker_binding_dismiss_and_disable()
+    </Binding>
     <Binding name="PETWALKER_NEW_PET" category="PetWalker ">
 		 PetWalker_binding_new_pet()
     </Binding>
@@ -15,9 +18,6 @@ Copyright (c) 2022-2026 Thomas Floeren
     </Binding>
     <Binding name="PETWALKER_TARGET_PET" category="PetWalker ">
 		 PetWalker_binding_target_pet()
-    </Binding>
-    <Binding name="PETWALKER_DISMISS_PET" category="PetWalker ">
-        PetWalker_binding_dismiss_and_disable()
     </Binding>
 </Bindings>
 

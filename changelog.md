@@ -29,7 +29,7 @@ To see all commits, including all alpha changes, [***go here***](https://github.
         - In this mode, the new Normal behavior is extended to *all instances*, no matter the type or difficulty (this includes things like Delves, Normal Dungeons, Battlegrounds, Story Mode Raid, etc.).
         - If you don’t care about instances and just want your pet around everywhere, you can disable the instance restrictions entirely with `/pw !i`. PetWalker will then treat any instance as open world. Go back to Normal instance mode with `/pw i`.
         - The setting is account-wide.
-        - No matter the restrictions, PetWalker will not dismiss a *manually* summoned pet in instances. This is intentional. Also your PetWalker keybinds for New Pet or Previous Pet remain functional (the pet will just not be auto-restored when lost).
+        - No matter the restrictions, PetWalker will not dismiss a pet you *manually* summoned inside an instance. This is intentional. Also your keybinds for New Pet or Previous Pet remain functional (but the pet will not be auto-restored when lost).
 
 #### 3.0.0 (2026-07-01)
 
