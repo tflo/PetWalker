@@ -780,6 +780,9 @@ function ns.initialize_pool(rerun)
 			end
 			idx = idx + 1
 		end
+		-- Foce-fix a low/zero pet pool.
+		-- TODO: We should first try to clear any filters and search box text in th PJ, and
+		-- only in a second step force-change PW's settings.
 		if #pet_pool_favs < 1 or #pet_pool_other < 1 then
 			ns.db.favsProbability = 1
 			ns.msg_force_changed_pool()

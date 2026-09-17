@@ -18,7 +18,7 @@ local DELAY_AFTER_LOADINGSCREEN = 1
 local DELAY_LOGIN_MSG = 10
 -- TODO: Should we delay also after we change or select pet teams in Rematch / PJ
 local DELAY_AFTER_BATTLE = 15 -- Post-petbattle sleep
-local instasummon_after_battlesleep = true -- Summon without waiting for trigger event
+local INSTASUMMON_AFTER_BATTLESLEEP = true -- Summon without waiting for trigger event
 
 local eventthrottle_companionupdate
 
@@ -215,7 +215,7 @@ local function PET_BATTLE_OVER()
 		-- TODO: change the default to not instasummon:
 		-- Restoring the pet when moving should be sufficient, and it will eliminate possible
 		-- glitches while standing still and selecting teams in Rematch.
-		if instasummon_after_battlesleep then ns.transitioncheck() end
+		if INSTASUMMON_AFTER_BATTLESLEEP then ns.transitioncheck() end
 	end)
 end
 
