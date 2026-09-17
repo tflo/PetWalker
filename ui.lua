@@ -522,7 +522,7 @@ function ns.msg_low_petpool(nPool)
 	local R = CLR.WARN()
 	local poolstr = ns.db.favsOnly and 'Favs' or ns.db.favsProbability == 1 and 'All Pets' or ns.db.favsProbability == 0 and 'NonFavs' or 'Favs+NonFavs'
 	local content = {
-		('Your current pet pool (' .. poolstr .. ') contains ' .. nPool < 1 and CLR.KEY() .. '0 (zero) ' ..R.. 'pets ' or R.. 'only ' ..CLR.KEY() .. '1 ' ..R.. 'pet '),
+		'Your current pet pool (' .. poolstr .. ') contains ' .. (nPool < 1 and CLR.KEY() .. '0 (zero) ' ..R.. 'pets ' or R.. 'only ' ..CLR.KEY() .. '1 ' ..R.. 'pet '),
 		'eligible as random summon!',
 		'\nYou should either ' .. (ns.db.favsOnly and 'flag more pets as favorite, or set the random pool to ' .. CLR.STATE() ..'All Pets' or 'collect more pets'), ', or set the random-summon timer to ', CLR.STATE() .. '0', '.',
 		'\nAlso check your ', CLR.KEY() .. 'Filter ', 'settings in the ', CLR.KEY() .. 'Blizz Pet Journal ', '(not in Rematch!), as they are affecting the pool of available pets!',

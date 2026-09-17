@@ -4,6 +4,10 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 3.0.1 (2026-09-17)
+
+- Fix error from composition of Low Pool message. Should fix issues [31](https://github.com/tflo/PetWalker/issues/31) and [32](https://github.com/tflo/PetWalker/issues/32).
+
 #### 3.0.0 (2026-07-01)
 
 - New feature: **Configurable probability** of favorite pets in *All Pets* mode. Idea by @tsemoana on GitHub.
