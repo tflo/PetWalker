@@ -6,10 +6,10 @@ local _, ns = ...
 local C_PetJournal_GetPetInfoByPetID = C_PetJournal.GetPetInfoByPetID
 local C_PetJournal_GetBattlePetLink = C_PetJournal.GetBattlePetLink
 local C_PetJournal_GetSummonedPetGUID = C_PetJournal.GetSummonedPetGUID
+local C_PetJournal_SummonPetByGUID = C_PetJournal.SummonPetByGUID
 local GetTimePreciseSec = _G.GetTimePreciseSec
 local tostring = _G.tostring
 local format = _G.format
-local GetTimePreciseSec = _G.GetTimePreciseSec
 local GetTime = _G.GetTime
 local WTC = WrapTextInColorCode
  -- Don't use a hyphen (U+002D), it's very short in some fonts (e.g. ArialN)
@@ -85,10 +85,16 @@ function ns.id_to_link(id)
 	return tostring(link) or '¿petlink?'
 end
 
+function ns.dismiss_pet()
+	local p = C_PetJournal_GetSummonedPetGUID()
+	if p then
+		C_PetJournal_SummonPetByGUID(p)
+	end
+end
+
 --[[===========================================================================
 	Debug
 ===========================================================================]]--
-
 
 local function ts_debug(precise)
 	local func = precise and GetTimePreciseSec or GetTime

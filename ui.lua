@@ -6,7 +6,6 @@ local MYVERSION = C_AddOns.GetAddOnMetadata(MYNAME, 'Version')
 -- API
 local C_PetJournal_GetSummonedPetGUID = _G.C_PetJournal.GetSummonedPetGUID
 local C_PetJournal_GetBattlePetLink = _G.C_PetJournal.GetBattlePetLink
-local tostring = _G.tostring
 local format = _G.format
 local print = _G.print
 
@@ -200,6 +199,16 @@ function ns.msg_manual_summon_stopped()
 	addonprint(format('%sYou are in combat lockdown or flying; pet summoning aborted.', CLR.WARN()))
 end
 
+function ns.msg_nopet_instance_entered()
+	if ns.db.verbosityLevel < 2 then return end
+	addonprint(format('You are in a no-pet instance; pet dismissed and auto-summoning disabled.'))
+end
+
+function ns.msg_nopet_instance_left()
+	if ns.db.verbosityLevel < 3 then return end
+	addonprint(format('You left a no-pet instance; pet restored and auto-summoning enabled.'))
+end
+
 -- function ns.msg_recents_dupe_removed(idx)
 -- 	if ns.db.verbosityLevel < 3 then return end
 -- 	chat_user_notification(CLR.TXT() .. 'Removed a duplicate from recent pets at idx ' .. idx .. '.')
@@ -299,6 +308,10 @@ end
 Three big messages: Status, Low Pet Pool, and Help
 ---------------------------------------------------------------------------]]--
 
+local INSTANCEDETAILS0 = 'pets allowed in all instances'
+local INSTANCEDETAILS1 = 'no pets in Keys, Arenas, H/M Raids'
+local INSTANCEDETAILS2 = 'no pets in any instance'
+
 function ns.help_display()
 	local text = {
 		BLOCK_SEP,
@@ -323,11 +336,18 @@ function ns.help_display()
 			CLR.QUOTE('Emergency Off'),
 		},
 		{ -- Skyride-mounted
-			'%s : Toggle %s also %s: %s',
+			'%s : Toggle %s also %s: %s.',
 			CLR.CMD('sr'),
 			CLR.KEY('auto-summoning'),
 			CLR.KEY('while mounted for Skyriding'),
 			CLR.STATE('allowed / not allowed'),
+		},
+		{ -- Instance mode; don't expose Ignore mode
+			'%s : Toggle %s: %s or %s.',
+			CLR.CMD('i'),
+			CLR.KEY('instance restrictions'),
+			CLR.STATE('Normal (' ..INSTANCEDETAILS1 .. ')'),
+			CLR.STATE('Strict (' ..INSTANCEDETAILS2 .. ')'),
 		},
 		{ -- New pet
 			'%s : Summon %s from pool.',
@@ -452,7 +472,14 @@ function ns.status_display()
 			CLR.KEY('Automatic summoning while Skyride-mounted'),
 			CLR.STATE(ns.db.drSummoning and 'allowed' or 'not allowed'),
 		},
-		{ -- descr
+		{ -- Instances
+			'%s: %s.',
+			CLR.KEY('Instance restrictions'),
+			ns.db.instanceMode == 1 and CLR.STATE('Normal') .. ' (' .. INSTANCEDETAILS1 .. ')'
+				or ns.db.instanceMode == 2 and CLR.STATE('Strict') .. ' (' .. INSTANCEDETAILS2 .. ')'
+				or CLR.STATE('Ignore') .. ' (' .. INSTANCEDETAILS0 .. ')',
+		},
+		{ -- History
 			'%s of Previous Pets: %s (1 to %s).',
 			CLR.KEY('History'),
 			CLR.STATE(ns.db.numRecents - 1),
@@ -582,6 +609,10 @@ local function slashfunc(msg)
 		ns.dr_summoning_toggle()
 	elseif args[1] == 't' or args[1] == 'target' then
 		ns.summon_targetpet()
+	elseif args[1] == 'i' or args[1] == 'instance' or args[1] == 'instances' then
+		ns.instance_toggle()
+	elseif args[1] == '!i' or args[1] == 'i!' or args[1] == 'ignoreinstance' or args[1] == 'ignoreinstances' then
+		ns.instance_toggle(0)
 	elseif args[1] == 'h' or args[1] == 'help' then
 		ns.help_display()
 	elseif args[1] == nil then
@@ -613,8 +644,7 @@ ns.protect_slash_pw()
 ---------------------------------------------------------------------------]]--
 
 function ns:dismiss_and_disable()
-	local actpet = C_PetJournal_GetSummonedPetGUID()
-	if actpet then C_PetJournal.SummonPetByGUID(actpet) end
+	ns.dismiss_pet()
 	ns.db.autoEnabled = false
 	ns.events:unregister_pw_events()
 	addonprint(
@@ -651,8 +681,8 @@ function ns:auto_toggle()
 		ns.events:unregister_pw_events()
 	else
 		ns.db.autoEnabled = true
-		ns.events:register_pw_events()
-		ns.autoaction()
+		ns.events:register_meta_events()
+		ns.transitioncheck()
 	end
 	addonprint(format('Pet auto-summoning %s.', ns.db.autoEnabled and 'enabled' or 'disabled'))
 end
@@ -661,7 +691,7 @@ function ns:event_toggle()
 	ns.db.eventAlt = not ns.db.eventAlt
 	if ns.db.autoEnabled then
 		ns.events:unregister_summon_events()
-		ns.events:register_summon_events()
+		ns.transitioncheck()
 	end
 	addonprint(
 		format(
@@ -821,6 +851,19 @@ function ns.set_num_recents(num)
 	)
 end
 
+function ns.instance_toggle(mode)
+	ns.db.instanceMode = mode or ns.db.instanceMode ~= 1 and 1 or 2
+	addonprint(
+		format(
+			'Instance restrictions set to %s.',
+			ns.db.instanceMode == 1 and CLR.KEY('Normal') .. ' (' .. INSTANCEDETAILS1 .. ')'
+				or ns.db.instanceMode == 2 and CLR.KEY('Strict') .. ' (' .. INSTANCEDETAILS2 .. ')'
+				or CLR.KEY('Ignore') .. ' (' .. INSTANCEDETAILS0 .. ')'
+		)
+	)
+	ns.transitioncheck()
+end
+
 --[[---------------------------------------------------------------------------
 	For the bindings.xml
 ---------------------------------------------------------------------------]]--
@@ -828,7 +871,7 @@ end
 -- BINDING_HEADER_PETWALKER = "PetWalker  "
 BINDING_NAME_PETWALKER_TOGGLE_AUTO = 'Toggle Auto-Summoning'
 BINDING_NAME_PETWALKER_NEW_PET = 'Summon New Pet'
-BINDING_NAME_PETWALKER_PREVIOUS_PET = 'Summon Previous Pet(s)'
+BINDING_NAME_PETWALKER_PREVIOUS_PET = 'Summon Previous Pets'
 BINDING_NAME_PETWALKER_TARGET_PET = 'Summon Same Pet as Target'
 BINDING_NAME_PETWALKER_DISMISS_PET = 'Dismiss Pet & Disable Auto-Summoning'
 
