@@ -11,8 +11,8 @@ The addon helps you to always have a companion pet out (summoned). You can choos
 
 ## Features
 
-__NOTE:__ PetWalker __3.0__ (July 2026) introduces a few new things and changes, most notably the _Configurable probability of favorite pets in All Pets mode._
-- These are not yet, or not yet completely, covered in this description. Please refer to the 3.0 (and subsequent) change notes, available on CF (Versions or [Files tab](https://www.curseforge.com/wow/addons/petwalker/files/all) > click latest version), or as `changelog.md` inside the PetWalker addon folder on your disk.
+- New September 2026 (v3.1): Different instance modes (restrictions). See `/pw i` in the Settings section.
+- New July 2026 (v3.0): Configurable probability (see section “Advanced setting: Configurable probability of favorite pets”).
 
 ### Main Features
 
@@ -30,11 +30,10 @@ __NOTE:__ PetWalker __3.0__ (July 2026) introduces a few new things and changes,
 ### Other Features / Notes
 
 - No GUI settings. Basically it’s a set-and-forget addon.
-- No nasty Minimap button, and thus no conflicts with minimap mods.
 - 100% standalone, no libraries or other dependencies.
-- Resource friendly in terms of CPU and memory usage.
+- Lightweight in terms of CPU and memory usage.
 - Alt friendly: All settings are account wide (except for char-specific favorite pets, ofc).
-- For obvious reasons conflicting with [NugMiniPet](https://www.curseforge.com/wow/addons/nugminipet), [Zone Pet](https://www.curseforge.com/wow/addons/zonepet), [Mount Mini-Me](https://www.curseforge.com/wow/addons/mount-mini-me) and probably any similar addon that auto-summons pets.
+- For obvious reasons, conflicting with any similar addon that auto-summons pets.
 - Fully compatible with [Rematch](https://www.curseforge.com/wow/addons/rematch).
 
 ---
@@ -45,28 +44,19 @@ __NOTE:__ PetWalker __3.0__ (July 2026) introduces a few new things and changes,
 
 ## Usage
 
-PetWalker has a rich chat console interface:
+PetWalker works out of the box, you don’t need to set anything. This doesn’t mean it can’t be customized or lacks features.
 
-- __`/pw a`:__ Toggle all automatic summoning of pets. Basically the main switch of the addon (all events are unregistered/registered), but manual summoning via keybind or slash command (see below) is still available.
-- __`/pw sr`:__ Allow/disallow automatic summoning of pets while _mounted_ (and on the ground) _and in Skyride mode._
-    - As of version 1.2.0 (March 2023), automatic pet summoning can also happen while you are mounted. With “normal” mounts, this behavior is trouble-free and only beneficial, but in Skyride mode it can cause occasional GCD glitches. Therefore, you can disable it with this toggle. _It is enabled by default._ More on that topic in the FAQ below!
-- __`/pw d`:__ Dismiss current pet and disable auto-summoning. A kind of emergency command, if you want to get rid of your pet immediately and prevent all automatic summoning. Re-enable with `/pw a`.
-- __`/pw <number>`:__ Interval [minutes] for summoning a new pet. ‘0’ disables summoning of new pets, though the pet-_restore_ functionality is still active (use `/pw a` to disable it).
-- __`/pw f`:__ Toggle the random-summon pool between Favorites and All Pets.
-    - With the All Pets setting, the currently active filters of the Pet Journal still apply (Pet Family and Sources). Since these filters can be combined, this offers quite some possibilities to create varied pools for random summoning, without the need to select favorites.
-    - Hint: You can also use the search box of the Pet Journal as filter: If your summon pool is set to All Pets and the search box contains “rabbit”, PetWalker will only summon pets with “rabbit” in their name.
-    - Note that this works only with the filters or search box in Blizz’s Pet Journal, not in Rematch.
-    - If you set the pool to Favorites, make sure that your favorites are not excluded by the Pet Journal filters or search string.
-- __`/pw c`:__ Toggle char-specific favorites list. (Applies if Favorites are enabled via `/pw f`.)
-- __`/pw n`:__ Summon new pet (from the active pet pool: Favs or All, see commands explained above). Summoning a pet with `/pw n` (or the keybind) resets your current auto-summon timer.
-- __`/pw p`:__ Cycle through your recent (previously summoned) pets. For example, if your auto-summon timer gives you a new pet, but you actually liked one of the last ones better, you can quickly get it back with this command. By default, the last 3 pets before the current one are recorded. You can also set a keybind for this command.
-- __`/pw p <number>`: New in v2.6, Nov 2025!__ Set how many of your previous pets should be recorded (1 to 20; default: 3).
-- __`/pw v[vv]`:__ Verbosity level for messages:
-    - `/pw v`: _silent:_ only important messages (missing favorites, failed summons, etc.) are printed to the chat.
-    - `/pw vv`: _medium:_ you get a message when a _new_ pet is summoned (either via auto-timer or manually via `/pw n` or keybind).
-    - `/pw vvv`: _full:_ all messages; you get a message also when a lost pet is restored, which happens quite often.
-- __`/pw h`:__ Display the Help text in the console. (Also `/pw help` or just `/pw`.)
-- __`/pw s`:__ Display the Status & Settings report in the console, with these infos:
+Most things are done via the chat console interface. The base command is `/pw`; if `/pw` is conflicting with another addon’s command, then use the long form `/petwalker` instead. The most important actions can be bound to hotkeys via Blizz standard keybindings.
+
+### Commands
+
+- `/pw a` : Toggle all automatic summoning of pets. Basically the main switch of the addon (all events are unregistered/registered), but manual summoning via keybind or slash command (see below) is still available. — Keybind available.
+- `/pw d` : Dismiss current pet and disable auto-summoning. A kind of emergency command, if you want to get rid of your pet immediately and prevent all automatic summoning. Re-enable with `/pw a`. — Keybind available.
+- `/pw n` : Summon new pet (from the active pet pool: Favs or All, see Settings). Summoning a pet with `/pw n` (or the keybind) resets your current auto-summon timer, if enabled. — Keybind available.
+- `/pw p` : Cycle through your recent (previously summoned) pets. For example, if your auto-summon timer gives you a new pet, but you actually liked one of the last ones better, you can quickly get it back with this command. By default, the last 3 pets before the current one are recorded. You can also set a keybind for this command. — Keybind available.
+- `/pw t` : Summon the targeted pet of another player (if it’s in your collection).
+    - If the target pet is not in your collection, PetWalker will print a weblink for the pet to the chat (from warcraftpets.com or wowhead.com). — Keybind available.
+- `/pw s` : Display the Status & Settings report in the console, with these infos:
     - Addon version.
     - If the addon is active (auto-summoning/restore enabled or disabled).
     - The summon timer interval and the remaining time (that is, when you will get the next new pet).
@@ -77,26 +67,59 @@ PetWalker has a rich chat console interface:
   - Type of favorites: global or character-specific.
   - A list of character-specific favorite pets (if you have set any).
         - A list of global favorites is not displayed because you can easily get that list by sorting the Pet Journal or Rematch by favorites.
+- `/pw h` : Display the Help text in the console. (Also `/pw help` or just `/pw`.) This command lists all available commands and settings with a short description for each. This is your best friend if you are new to PetWalker!
 
-### New feature since version 1.1.5: Summon same pet as targeted pet
+### Settings
 
-1. Target a summoned pet of another player.
-2. Enter `/pw t` or `/pw target` or set and use the keybind in the Keybinding section of the client.
-3. If the targeted pet is in your collection, it should be summoned.
+- `/pw <number>` : Interval [minutes] for summoning a new pet. ‘0’ disables summoning of new pets, though the pet-_restore_ functionality is still active (use `/pw a` to disable any auto actions).
+- `/pw f` : Toggle the random-summon pool between Favorites and All Pets.
+    - With the All Pets setting, the currently active filters of the Pet Journal still apply (Pet Family and Sources). Since these filters can be combined, this offers quite some possibilities to create varied pools for random summoning, without the need to select favorites.
+    - Hint: You can also use the search box of the Pet Journal as filter: If your summon pool is set to All Pets and the search box contains “rabbit”, PetWalker will only summon pets with “rabbit” in their name.
+    - Note that this works only with the filters or search box in Blizz’s Pet Journal, not in Rematch.
+    - If you set the pool to Favorites, make sure that your favorites are not excluded by the Pet Journal filters or search string.
+    - For the `/pw f <number>` setting (new in v3.0, July 2026), see “Advanced setting: Configurable probability” below.
+- `/pw c` : Toggle global vs char-specific favorites. (Applies if Favorites are enabled via `/pw f`.) You can also use the Petwalker “Char Favs” checkbox in the Pet Journal, at the bottom.
+- `/pw p <number>` : Set how many of your previous pets should be remembered (1 to 20; default: 3).
+- `/pw i` : [New in v3.1, September 2026] Toggle instance restrictions between Normal (default) and Strict:
+    - _Normal:_ Auto-summoning/restoring disabled in M+ Keys, Arena, Heroic Raid, Mythic Raid. In all other instances, PW works just like in the open world.
+    - _Strict:_ Auto-summoning/restoring disabled in all instances.
+    - In instances where auto-summoning is disabled, your existing pet will also be dismissed automatically after entering.
+    - If you don’t care about instances and just want your pet around _everywhere_, you can disable the instance restrictions entirely with `/pw !i` (or `/pw i!`). PetWalker will then treat any instance as open world. Go back to Normal instance mode with `/pw i`.
+    - No matter the restrictions, PetWalker will not dismiss a pet you _manually_ summoned inside an instance. This is intentional. Also your keybinds for New Pet or Previous Pet remain functional (but the pet will not be auto-restored when lost).
+- `/pw sr` : Allow/disallow automatic summoning of pets while _mounted_ (and on the ground) _and in Skyride mode._
+    - As of version 1.2.0 (March 2023), automatic pet summoning can also happen while you are mounted. With “normal” mounts, this behavior is trouble-free and only beneficial, but in Skyride mode it can cause occasional GCD glitches. Therefore, you can disable it with this toggle. _It is enabled by default._ More on that topic in the FAQ below!
+- `/pw v[vv]` : Verbosity level for messages:
+    - `/pw v`: _silent:_ Only important messages (missing favorites, failed summons, etc.) are printed to the chat.
+    - `/pw vv`: _medium:_ You get a message when a _new_ pet is summoned (either via auto-timer or manually via `/pw n` or keybind).
+    - `/pw vvv`: _full:_ All messages; you get a message also when a lost pet is restored, which happens quite often.
 
-If the target pet is not in your collection, you get a weblink to the pet’s page on warcraftpets.com, or on wowhead.com if it’s not collectible.
+#### Advanced setting: Configurable probability of favorite pets in All Pets mode
 
-If `/pw` is conflicting with another addon’s command, then use the long form `/petwalker` instead.
+This is a relatively new feature, introduced in version 3.0, July 2026:
 
-### Keybinds
+- You set the probability with the usual favorites toggle `/pw f`, but followed by a number between `0` and `1` (inclusive).
+- For example, `/pw f 0.5` gives you an equal probability (50%) that a random pet is picked from your favorites or from your non-favorites pool. With `0.9`, nine out of ten pets (on average) will be from your favorites, and so on.
+- Hint: You don’t have to type the zero before the decimal point, `.5` is valid too.
+- With `/pw f 0`, you’ll only ever get non-favorites.
+- `/pw f 1` doesn’t do what you’d expect, but will simply activate the old *All Pets* mode as you know it (all pets, favs and non-favs, in one single pool).
+- To summon only favorites, you just toggle from *All Pets* to *Favs Only* with `/pw f` as usual.
+- Your probability value is remembered, and used whenever you switch back to *All Pets* mode with `/pw f`.
+- When you set/change the probability value, PW will automatically go into *All Pets* mode, if you were in *Favs Only* mode.
 
-You’ll find five bindable commands for PetWalker in the Keybindings settings of the client:
 
-- Toggle automatic summoning of pets (same as `/pw a`)
-- Dismiss current pet and disable auto-summoning (same as `/pw d`)
-- Summon new pet (same as `/pw n`)
-- Cycle through previous pets (same as `/pw p`)
-- Summon same pet as target (same as `/pw t`)
+### Keybinds for commands
+
+You’ll find five bindable commands in the Keybindings section of the Blizz Options panel:
+
+- Toggle automatic summoning of pets; same as `/pw a`.
+- Dismiss current pet and disable auto-summoning; same as `/pw d`.
+- Summon new pet; same as `/pw n`.
+- Cycle through previous pets; same as `/pw p`.
+- Summon same pet as target; same as `/pw t`.
+
+### GUI elements
+
+In the Pet Journal, at the bottom, you’ll find a “Char Favs” checkbox. This does the same as the `/pw c` toggle.
 
 ---
 
@@ -117,7 +140,7 @@ Simply set the Summon New Pet timer to ‘0’ (zero). You can set it to 0 with 
 
 ### PetWalker only summons a few pets out of my pool, or I get the “0 (zero) eligible pets” message
 
-The Filter settings in the Pet Journal can actually restrict the pet pool, i.e. you can actively use the filters to “shape” your pet pool without using favorites. This includes any text in the search box(!).
+The Filter settings in the Pet Journal can actually restrict the pet pool, i.e. you can actively use the filters to “shape” your pet pool without using explicit favorites. This includes any text in the search box(!).
 
 However, it is also possible that the game has messed up the filters (I often see this after a hard disconnect), or you have been searching for a pet and forgot to reset the filters.
 
@@ -129,20 +152,21 @@ Note that you must have access to the _Blizz Pet Journal_ to do this, so make su
 
 See also [issue#6](https://github.com/tflo/PetWalker/issues/6).
 
-### Where/when does PetWalker fail to keep my pet out?
+### How does PetWalker handle pet battle situations?
 
-~~The most difficult situation is when you select a team for a pet battle. If you are using Rematch, you should select the “Keep Companion” option (in “Miscellaneous Options”). This will definitely help, but it is not guaranteed that, after the pet battle, you have the same pet out as before.~~
+PetWalker reliably restores your previous pet 15 seconds after a pet battle. The delay is intentional and allows you to chain pet battles (e.g., when power-leveling), without any annoying automatic summoning/unsummoning of your pet in-between. 
 
-__As of version 2.0.0 (April 2023),__ PetWalker’s behavior in the context of pet battles has dramatically improved. For the gory details, see the change notes of version 2.0.0 from 2023-04-28.
+Pets that have been auto-summoned by the game mechanics because they are slotted into a team are ignored by PW and the pet restoration of your pre-battle pet works reliably 98% (estimated) of the time. 
 
-TL;DR: PetWalker now reliably restores your previous pet 15 seconds after a pet battle. The delay is intentional and allows you to chain pet battles, without any annoying automatic summoning/unsummoning of your pet in-between. Pets that were auto-summoned because they are slotted into a team are ignored and the pet restoration now works reliably also without Rematch’s “Keep Companion” setting. But, if you prefer, you can still enable Rematch’s “Keep Companion”. (The difference is that Rematch restores your pet more or less immediately after a battle.)
+### Which events does PetWalker listen to?
 
-### What events does PetWalker monitor?
-
-The main event that causes PetWalker to check for the pet and summon it if necessary is `PLAYER_STARTED_MOVING`.
+The main event that causes PetWalker to check for the pet and summon it if necessary is `PLAYER_STARTED_MOVING`.  
 This is a fairly common event. I have experimented with several other events, but overall I have found that this one gives the best results. (After all, the aim of PetWalker is to ensure that your pet is _always_ out, not that it’s out from time to time).
 
-On rare occasions, a summoning action can interfere with other casts (GCD conflict), e.g. Druids who shape-shift immediately after they start moving. But since PetWalker does nothing in combat (and other sensitive situations), it should be pretty safe.
+On rare occasions, a summoning action can interfere with other casts (GCD conflict), for example Druids who shape-shift immediately after they start moving. But since PetWalker does nothing in combat (and other sensitive situations), it should be pretty safe.
+
+Despite PLAYER_STARTED_MOVING being such a frequent event, PetWalker doesn’t have any noticeable impact on performance. All checks and actions it performs are optimized and throttled.
+
 
 ### Should I disable “auto-summoning while mounted for Skyriding” (`/pw sr`)?
 
