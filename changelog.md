@@ -4,32 +4,32 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
-#### 3.1.0-beta2 (2026-09-01)
+#### 3.1.0 (2026-09-17)
 
-- Completely overhauled the meta events logic:
-    - PLAYER_ENTERING_WORLD is no longer used for activation.
-    - LOADING_SCREEN_ENABLED disables all summoning.
-    - LOADING_SCREEN_DISABLED conditionally enables summoning.
-    - PLAYER_MAP_CHANGED is used only for walk-in instances (i.e., if LOADING_SCREEN_ENABLED does not fire, e.g. Delves).
-- The new logic… 
-    - eliminates the previous guesswork for determining the required after-event delays;
-    - auto-dismissing the pet when entering a no-pet instance should now be bulletproof, even if you get a 30-seconds loading screen;
-    - likely also eliminates (some of) the occasional restore glitches immediately after login/reload/instance-change;
-    - allows for a shorter delay after entering walk-in instances (a minimum delay is still required for `GetInstanceInfo`).
-
-#### 3.1.0-beta1 (2026-08-30)
-
-- Changes to pet handling in instances:
+- **Changes to pet handling in instances** (inspired by [@neonvid’s PR](https://github.com/tflo/PetWalker/pull/30)):
     - Previous normal behavior: auto-summoning/restoring was disabled in M+ Key and Arena.
-    - New Normal mode:
+    - **New Normal mode:**
         - Auto-summoning/restoring disabled in M+ Keys, Arena, Heroic Raid, Mythic Raid.
         - In an instance where auto-summoning is disabled, your pet will also be auto-dismissed after entering.
-    - New Strict “No Pets in Any Instance” mode:
+    - **New *Strict* “No Pets in Any Instance” mode:**
         - Toggle with `/pw i` between this and Normal mode.
         - In this mode, the new Normal behavior is extended to *all instances*, no matter the type or difficulty (this includes things like Delves, Normal Dungeons, Battlegrounds, Story Mode Raid, etc.).
         - If you don’t care about instances and just want your pet around everywhere, you can disable the instance restrictions entirely with `/pw !i`. PetWalker will then treat any instance as open world. Go back to Normal instance mode with `/pw i`.
         - The setting is account-wide.
         - No matter the restrictions, PetWalker will not dismiss a pet you *manually* summoned inside an instance. This is intentional. Also your keybinds for New Pet or Previous Pet remain functional (but the pet will not be auto-restored when lost).
+- **Completely overhauled the meta events logic:**
+    - PLAYER_ENTERING_WORLD is no longer used for activation.
+    - LOADING_SCREEN_ENABLED disables all summoning.
+    - LOADING_SCREEN_DISABLED conditionally enables summoning.
+    - PLAYER_MAP_CHANGED is used for walk-in instances (i.e., where L_S_E and P_E_W does not fire, e.g. Delves).
+    - **The new logic…** 
+        - eliminates the previous guesswork for determining the required after-event delays;
+        - auto-dismissing the pet when entering a no-pet instance should now be bulletproof, even if you get a 30-seconds loading screen;
+        - likely also eliminates (some of) the occasional restore glitches immediately after login/reload/instance-change;
+        - allows for a shorter delay after entering walk-in instances (a minimum delay is still required for `GetInstanceInfo`).
+- Update readme / CF description, add the new things.
+- Some minor cleanup.
+- Remove old compatibility flags from toc.
 
 #### 3.0.1 (2026-09-17)
 
