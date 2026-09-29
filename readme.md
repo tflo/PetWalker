@@ -9,6 +9,8 @@ The addon helps you to always have a companion pet out (summoned). You can choos
 - __Auto Restore only:__ Whenever your pet is lost – for whatever reason –, it will be restored. This works across logouts and characters.
 - __Random Summon:__ Automatically summons a random pet (from a configurable pool) every n minutes, or via keybind or slash command. This pet will be auto-restored whenever it is lost, until a new one is summoned.
 
+*Please post feedback, suggestions, and issues at [PetWalker’s issue tracker](https://github.com/tflo/PetWalker/issues) on GitHub.*
+
 ## Features
 
 - New September 2026 (v3.1): Different instance modes (restrictions). See `/pw i` in the Settings section.

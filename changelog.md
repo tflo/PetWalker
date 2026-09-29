@@ -4,6 +4,15 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 3.1.1 (2026-09-29)
+
+- toc: add Forever compatibility flag (16001).
+    - This is experimental, as I haven’t purchased beta access.
+    - If you notice minor glitches in Forever (for example, the occasional Lua error when doing a specific thing), please report them at the [Issue tracker](https://github.com/tflo/PetWalker/issues).
+    - If you experience major issues (for example, Lua errors immediately upon login), please disable PetWalker and report them to the [Issue tracker](https://github.com/tflo/PetWalker/issues).
+    - Yes, I’m encouraging you to do the beta testing for me 🙄. But every reported issue will help have PetWalker fully ready by November 4th.
+- ReadMe: minor update.
+
 #### 3.1.0 (2026-09-17)
 
 - **Changes to pet handling in instances** (inspired by [@neonvid’s PR](https://github.com/tflo/PetWalker/pull/30)):
