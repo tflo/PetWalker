@@ -113,11 +113,11 @@ This is a relatively new feature, introduced in version 3.0, July 2026:
 
 You’ll find five bindable commands in the Keybindings section of the Blizz Options panel:
 
-- Toggle automatic summoning of pets; same as `/pw a`.
-- Dismiss current pet and disable auto-summoning; same as `/pw d`.
-- Summon new pet; same as `/pw n`.
-- Cycle through previous pets; same as `/pw p`.
-- Summon same pet as target; same as `/pw t`.
+- Toggle automatic summoning of pets (the same as */pw a*).
+- Dismiss current pet and disable auto-summoning (the same as */pw d*).
+- Summon new pet (the same as */pw n*).
+- Cycle through previous pets (the same as */pw p*).
+- Summon same pet as target (the same as */pw t*).
 
 ### GUI elements
 
@@ -162,7 +162,7 @@ Pets that have been auto-summoned by the game mechanics because they are slotted
 
 ### Which events does PetWalker listen to?
 
-The main event that causes PetWalker to check for the pet and summon it if necessary is `PLAYER_STARTED_MOVING`.  
+The main event that causes PetWalker to check for the pet and summon it if necessary is *PLAYER_STARTED_MOVING*.  
 This is a fairly common event. I have experimented with several other events, but overall I have found that this one gives the best results. (After all, the aim of PetWalker is to ensure that your pet is _always_ out, not that it’s out from time to time).
 
 On rare occasions, a summoning action can interfere with other casts (GCD conflict), for example Druids who shape-shift immediately after they start moving. But since PetWalker does nothing in combat (and other sensitive situations), it should be pretty safe.
