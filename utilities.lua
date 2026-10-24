@@ -76,7 +76,7 @@ end
 function ns.id_to_species(id)
 	if not id then return "<¡id_to_species() didn't receive a pet GUID!>" end
 	local spec = C_PetJournal_GetPetInfoByPetID(id)
-	return tostring(spec) or '¿petspecies?'
+	return tonumber(spec)
 end
 
 function ns.id_to_link(id)

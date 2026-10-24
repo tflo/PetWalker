@@ -277,7 +277,7 @@ local ERROR_TEXT_WRONG_PET_FACTION = 'You are not the right faction for this com
 local function is_pet_summonable(guid)
 	local is_summonable, error_num, error_text
 	local species_id = ns.id_to_species(guid)
-	if unsummonable_species[species_id] then
+	if species_id and unsummonable_species[species_id] then
 		is_summonable, error_num, error_text = false, EnumPetJournalError.InvalidFaction, ERROR_TEXT_WRONG_PET_FACTION
 	else
 		is_summonable, error_num, error_text = C_PetJournal_GetPetSummonInfo(guid)

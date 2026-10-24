@@ -4,6 +4,10 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 3.1.2 (2026-10-25)
+
+- Fix a wrong return type that invalidated any test against a species ID (e.g. pet exceptions). Thanks @Ammako! ([issue 34](https://github.com/tflo/PetWalker/issues/34))
+
 #### 3.1.1 (2026-09-29)
 
 - toc: add Forever compatibility flag (16001).
