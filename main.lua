@@ -482,9 +482,13 @@ function ns.previous_pet()
 	if stop_manual_summon() then return end
 	local db = ns.dbc.charFavsEnabled and ns.db.favsOnly and ns.dbc or ns.db
 	if #db.recentPets > 1 then
-		-- Rotate: move current (1) to end
-		local current = table.remove(db.recentPets, 1)
-		table.insert(db.recentPets, current)
+		-- Rotate: move current (1) to end; don't do if current is excluded, as it isn't in the table.
+		-- Also if no pet is out for whatever reason, we want idx1, not idx2.
+		local current = C_PetJournal_GetSummonedPetGUID()
+		if current and not is_excluded_by_species(ns.id_to_species(current)) then
+			local idx1 = table.remove(db.recentPets, 1)
+			table.insert(db.recentPets, idx1)
+		end
 		ns.set_sum_msg_to_previouspet(db.recentPets[1])
 		ns:summon_pet(db.recentPets[1], true)
 	else
