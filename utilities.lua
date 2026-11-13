@@ -118,25 +118,34 @@ function ns.debug_display()
 local lines = {
 	{ '%s Debug:', MYSHORTNAME },
 	{
-		'DB current pet|r: %s [%s]',
+		'DB current pet [1]|r: %s [%s]',
 		ns.id_to_name(ns.db.recentPets[1]),
 		tostring(ns.db.recentPets[1]),
 	},
 	{
-		'DB previous pet|r: %s [%s]',
+		'DB previous pet [2]|r: %s [%s]',
 		ns.id_to_name(ns.db.recentPets[2]),
 		tostring(ns.db.recentPets[2]),
 	},
 	{
-		'Char DB current pet|r: %s [%s]',
+		'DB previous pet [3]|r: %s [%s]',
+		ns.id_to_name(ns.db.recentPets[3]),
+		tostring(ns.db.recentPets[3]),
+	},
+	{
+		'Char DB current pet [1]|r: %s [%s]',
 		ns.id_to_name(ns.dbc.recentPets[1]),
 		tostring(ns.dbc.recentPets[1]),
 	},
 	{
-		'Char DB previous pet|r: %s [%s]',
-
+		'Char DB previous pet [2]|r: %s [%s]',
 		ns.id_to_name(ns.dbc.recentPets[2]),
 		tostring(ns.dbc.recentPets[2]),
+	},
+	{
+		'Char DB previous pet [3]|r: %s [%s]',
+		ns.id_to_name(ns.dbc.recentPets[3]),
+		tostring(ns.dbc.recentPets[3]),
 	},
 	{ '‹pet_verified›|r: %s', tostring(ns.pet_verified) },
 	{ 'Currently summoned pet|r: %s [%s]', ns.id_to_name(actpet), tostring(actpet) },
