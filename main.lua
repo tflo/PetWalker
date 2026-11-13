@@ -68,23 +68,26 @@ local throttle = 0 --  throttle_min * 2
 local bypass_throttle = false
 local savedpet_is_summonable = true
 local excluded_species = {
--- Pet is vendor and goes on CD when summoned
+-- Pet is vendor and the vendor ability goes on CD when summoned;
+-- never summon these, as the user might need it later in an instance to sell junk.
 	280, -- Guild Page, Alliance
 	281, -- Guild Page, Horde
 	282, -- Guild Herald, Alliance
 	283, -- Guild Herald, Horde
--- Pet is vendor/bank/mail, if the char has the Pony Bridle achievement (ID 3736).
--- But it should be safe, bc CD starts only after activating the ability via dialog.
+-- Pet is vendor/bank/mail, if the char has the Pony Bridle achievement (ID 3736);
+-- but it should be safe, because the CD starts only after activating the ability via gossip.
 -- 	214, -- Argent Squire (Alliance)
 -- 	216, -- Argent Gruntling (Horde)
--- Self-despawns outside of Winter Veil event. Makes no sense to summon these.
+-- Self-despawns outside Winter Veil event; makes no sense to summon these.
+-- Checking for Winter Veil all the time would be an ugly overhead for the little gain.
 	1349, -- Rotten Little Helper
 	117, -- Tiny Snowman
 	119, -- Father Winter's Helper
 	120, -- Winter's Little Helper
--- Pocopoc is special: he cannot be summoned in Zereth Mortis (1970)).
+-- Pocopoc is special: he cannot be summoned in Zereth Mortis (1970).
 -- See the extra checks in is_excluded_by_species() and transitioncheck().
 	3247, -- Pocopoc
+
 -- Dummy ID for debugging. Keep this commented out!
 -- 	2403, -- Abyssal Eel
 }

@@ -4,6 +4,14 @@ To see all commits, including all alpha changes, [***go here***](https://github.
 
 ## Releases
 
+#### 3.1.3 (2026-11-13)
+
+- Fix a logic flaw in Summon Previous Pet (`/pw p`):
+    - If you summoned your Guild Herald or Guild Page vendor pet (e.g. for selling junk in an instance), and then pressed your Previous Pet keybind (or used the slash command), PW summoned the pre-previous pet instead of the previous one.
+    - This happened because the above vendor pets are on the Ignore list, and as such never make it into the Recents list, so the summoned pet from position 2 was actually the one before the previous pet (and not the one before the current pet).
+    - Now you should correctly get your previous pet also if the current pet is an ignored pet.
+    - Also added a double-check if a pet is summoned at all in the very moment when you call Previous Pet. This should eliminate a rare glitch where you also got the pre-previous pet instead of the previous one without obvious reason.
+
 #### 3.1.2 (2026-10-25)
 
 - Fix a wrong return type that invalidated any test against a species ID (e.g. pet exceptions). Thanks @Ammako! ([issue 34](https://github.com/tflo/PetWalker/issues/34))
