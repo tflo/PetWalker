@@ -67,6 +67,12 @@ ns.multiprint = multiprint
 	Helpers
 ===========================================================================]]--
 
+-- NOTE:
+-- GetPetInfoByPetID errors out if the arg doesn't begin with "BattlePet-" or isn't a string;
+-- otherwise it returns nil if the ID doesn't exist.
+
+-- TODO: Get rid of these string returns, as they are only useful for a couple of debug prints.
+
 function ns.id_to_name(id)
 	if not id then return "<¡id_to_name() didn't receive a pet GUID!>" end
 	local name = select(8, C_PetJournal_GetPetInfoByPetID(id))
@@ -85,6 +91,8 @@ function ns.id_to_link(id)
 	return tostring(link) or '¿petlink?'
 end
 
+-- TODO: We could also use C_PetJournal.DismissSummonedPet(id),
+-- which is very likely a wrapper for the same.
 function ns.dismiss_pet()
 	local p = C_PetJournal_GetSummonedPetGUID()
 	if p then
